@@ -1,0 +1,62 @@
+{
+  "register": {
+    "help": "Registers your Guild Wars 2 account with your Discord account by using a Guild Wars 2 API key.",
+    "short-help": "Registers your Guild Wars 2 account by using an API key",
+    "param-key": "Guild Wars 2 account API key",
+    "response-info": "Registering your Guild Wars 2 API key with your Discord account is very easy. Please follow these steps:\n\n",
+    "response-reregister": "You've already registered the following API key: `{{key}}`. Continuing will replace your existing API key:\n\n",
+    "response-register-steps": " 1. Go to https://account.arena.net/applications\n 2. Click the button \"New Key\"\n 3. Think of a good API key name, and be sure to include the following text in it: **{{code}}**\n 4. Only the *account* permission is required; every other permission is optional, but it's useful to enable them if you want to use more bot features\n 5. Click the button \"Create API key\"\n 6. Find your newly created API key and copy it\n 7. Reply to me with `{{register}} <key>` where `<key>` is your key\n 8. If anything went wrong, I'll be sure to let you know\n\nYou have **$t(minutes, {'count': {{time}} })** before the code **{{code}}** expires. Executing the command `{{register}}` again will invalidate this code and generate a new one.",
+    "response-generation-failed": "An error occured while generating an API key code.",
+    "response-no-code": "You tried registering an API key without running `{{register}}` first, or the code has expired. Please run the command `{{register}}` again before adding an API key to obtain a unique code.",
+    "response-registered": "Welcome {{account_name}}! Your API key **{{key_name}}** has been successfully registered. Please note that this API key should **not** be deleted. In case you ever want to update your API key with different permissions, you can register a new one by doing the same process.",
+    "response-wrong-name": "Your API key **{{name}}** doesn't include the text **{{code}}** in the name. Please create a new key and include it in the name.",
+    "response-api-error": "An API error occured: {{error}}.",
+    "response-api-error-unknown": "An unknown API error occured."
+  },
+  "force-register": {
+    "help": "Force-registers a Guild Wars 2 account with a specified Discord account id by using a Guild Wars 2 API key, bypassing the ownership check.",
+    "short-help": "Force-registers a Guild Wars 2 account to a Discord account by using an API key",
+    "param-id": "The Discord account id (can be obtained by enabling developer mode, right clicking on a Discord account and clicking *Copy ID*)",
+    "param-key": "Guild Wars 2 account API key",
+    "response-registered": "Successfully registered {{account_name}}.",
+    "response-api-error": "An API error occured: {{error}}.",
+    "response-api-error-unknown": "An unknown API error occured."
+  },
+  "wiki": {
+    "help": "Searches the Guild Wars 2 Wiki for an article and returns a summary and the article link if found.",
+    "short-help": "Searches the Guild Wars 2 Wiki for an article",
+    "param-terms": "Search terms",
+    "response-title-only": "{{title}}: {{- url}}",
+    "response-with-intro": "{{text}}\n\nMore: {{- url}}",
+    "response-not-found": "Your request did not come up with any results. Try using different search terms.",
+    "response-no-title": "Please provide a wiki article title or search terms."
+  },
+  "build": {
+    "help": "Shows the live Guild Wars 2 build and returns a link to the last known patch notes.",
+    "short-help": "Shows the live Guild Wars 2 build and the last known patch notes"
+  },
+  "release-checker": {
+    "build-update-title": "Guild Wars 2 Update",
+    "build-update-description": "Guild Wars 2 has been updated to build {{build}}."
+  },
+  "guild-log-checker": {
+    "motd-title": "Message of the Day",
+    "motd-description": "{{motd}}",
+    "motd-footer": "Updated by {{user}}",
+    "roster-title": "Guild Roster",
+    "invited-description": "● {{user}} has been invited by {{invited_by}}",
+    "joined-description": "● {{user}} has joined",
+    "kicked-description": "● {{user}} has been kicked by {{kicked_by}}",
+    "left-description": "● {{user}} has left",
+    "rank-changed-description": "● {{user}}'s rank has been changed from {{old_rank}} to {{new_rank}} by {{changed_by}}",
+    "stash-title": "Guild Stash",
+    "stash-item-deposit-description": "● {{user}} has deposited {{count}}x {{item}}",
+    "stash-item-withdraw-description": "● {{user}} has withdrawn {{count}}x {{item}}",
+    "stash-coins-deposit-description": "● {{user}} has deposited {{coins}}",
+    "stash-coins-withdraw-description": "● {{user}} has withdrawn {{coins}}",
+    "treasury-title": "Guild Treasury",
+    "treasury-description": "● {{user}} has deposited {{count}}x {{item}}",
+    "upgrade-title": "Guild Upgrades",
+    "upgrade-description": "● {{user}} has added {{count}}x {{upgrade}}"
+  }
+}

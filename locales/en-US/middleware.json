@@ -1,0 +1,21 @@
+{
+  "restrict-permissions": {
+    "access-denied": "You don't have permission to access that command."
+  },
+  "reply-with-mentions": {
+    "response-dm": "{{message}}",
+    "response-public": "{{mentions}}, {{message, lcfirst}}"
+  },
+  "mentions-only": {
+    "no-mentions": "For that command to work, you have to `@mention` people."
+  },
+  "reply-to-mentioned-users": {
+    "no-mentions": "For that command to work, you have to `@mention` people."
+  },
+  "restrict-channels": {
+    "channels-only": "That command only works in the following channels: {{- channels}}.",
+    "channels-and-dm-only": "That command only works in DM and the following channels: {{- channels}}.",
+    "dm-only": "That command only works in DM.",
+    "wrong-channel": "That command does not work here."
+  }
+}

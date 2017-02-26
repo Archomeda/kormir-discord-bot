@@ -1,0 +1,9 @@
+{
+  "export-ids": {
+    "help": "Assembles all the available ids of this bot into a file.",
+    "export-roles": "Roles:",
+    "export-text-channels": "Text channels:",
+    "export-voice-channels": "Voice channels:",
+    "export-members": "Members:"
+  }
+}

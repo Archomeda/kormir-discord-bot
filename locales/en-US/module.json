@@ -1,0 +1,7 @@
+{
+  "command-error": "An unexpected error has occured: code {{code}}.",
+  "command-mismatched-parameter-count": "The amount of given parameters does not match the amount of required parameters.",
+  "database-model": {
+    "response-no-permission": "You have no permission to execute this."
+  }
+}

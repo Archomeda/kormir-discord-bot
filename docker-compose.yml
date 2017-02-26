@@ -1,0 +1,36 @@
+version: '2.1'
+services:
+  db:
+    image: mongo:3.4
+    volumes:
+      - ./storage/configdb:/data/configdb
+      - ./storage/db:/data/db
+  redis:
+    image: redis:3.2
+    volumes:
+      - ./storage/cache:/data
+  bot:
+    build: .
+    command: npm start
+    restart: on-failure
+    volumes:
+      - ./config:/bot/config
+    links:
+      - db
+      - redis
+    environment:
+      NODE_CONFIG: >
+        {
+          "database": {
+            "provider": "mongodb",
+            "mongodb": {
+              "uri": "mongodb://db/kormir-discord-bot"
+            }
+          },
+          "cache": {
+            "provider": "redis",
+            "redis": {
+              "host": "redis"
+            }
+          }
+        }
