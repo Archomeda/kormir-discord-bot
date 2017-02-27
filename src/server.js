@@ -62,8 +62,38 @@ i18next.use(Backend).init({
 i18next.on('failedLoading', (lng, ns, msg) => console.warn(`Failed to load i18n namespace '${ns}' for ${lng}: ${msg}`));
 i18next.on('missingKey', (lng, ns, key, res) => console.warn(`Missing translation key '${key}' in namespace '${ns}' for ${lng}`));
 
-cache.connect();
-database.connect().then(() => {
+
+let cacheTries = 0;
+let databaseTries = 0;
+
+function connectCache() {
+    cacheTries++;
+    console.log(`Connecting to cache, try ${cacheTries}...`);
+    return Promise.resolve(cache.connect()).catch(function (err) {
+        console.error(`${err.name}: ${err.message}`);
+        if (cacheTries < 10) {
+            return Promise.delay(5000).then(connectCache);
+        }
+        process.exit(10);
+    });
+}
+
+function connectDatabase() {
+    databaseTries++;
+    console.log(`Connecting to database, try ${databaseTries}...`);
+    return Promise.resolve(database.connect()).catch(function (err) {
+        console.error(`${err.name}: ${err.message}`);
+        if (databaseTries < 10) {
+            return Promise.delay(5000).then(connectDatabase);
+        }
+        process.exit(11);
+    });
+}
+
+Promise.all([
+    connectCache().then(() => console.log('Connected to cache')),
+    connectDatabase().then(() => console.log('Connected to database'))
+]).then(() => {
     Promise.map(Object.keys(moduleConfigs), m => {
         if (!moduleConfigs[m]) return;
         return new Promise(resolve => {
@@ -107,9 +137,7 @@ database.connect().then(() => {
 
         console.log('Connecting to Discord...');
         client.login(config.get('discord.token'))
-            .then(() => console.log('Connected'))
+            .then(() => console.log('Connected to Discord'))
             .catch(err => console.error(`Could not connect to Discord: ${err.message}`));
     });
-}).catch(err => {
-    console.error(`${err.name}: ${err.message}`);
 });
