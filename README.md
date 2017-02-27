@@ -35,6 +35,7 @@ The bot requires a reboot after every configuration change.
  - Have [Docker](https://docs.docker.com/engine/installation/) and [Docker Compose](https://github.com/docker/compose/releases) installed
  - Clone or download the zip of a specific version (or master if that isn't available)
  - Run:
+   
    ```bash
    cd kormir-discord-bot
    docker-compose build
