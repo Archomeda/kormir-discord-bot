@@ -15,9 +15,12 @@ mongoose.Promise = Promise;
 const uri = config.get('database.mongodb.uri');
 
 class MongoProvider extends Provider {
-    connect() {
+    constructor() {
+        super();
         mongoose.connection.on('error', err => console.error('MongoDB connection error: ${err}'));
         mongoose.connection.on('open', () => console.log('Connected to MongoDB'));
+    }
+    connect() {
         const conn = mongoose.connect(uri, { server: { reconnectTries: Number.MAX_VALUE } });
         this._gw2Account = mongoose.model('Gw2Account', Gw2AccountSchema);
         this._event = mongoose.model('Event', EventSchema);
