@@ -2,17 +2,19 @@ version: '2.1'
 services:
   db:
     image: mongo:3.4
+    restart: unless-stopped
     volumes:
       - ./storage/configdb:/data/configdb
       - ./storage/db:/data/db
   redis:
     image: redis:3.2
+    restart: unless-stopped
     volumes:
       - ./storage/cache:/data
   bot:
     build: .
     command: npm start
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - ./config:/bot/config
     links:
