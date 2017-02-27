@@ -187,9 +187,11 @@ class GuildLogChecker extends BackgroundWorker {
     }
 
 
-    checkLog(guildId, apiKey) {
+    checkLog(guildId, apiKey, sinceLogId) {
         return this.gw2Api.authenticate(apiKey).guild(guildId).log().get().then(log => {
             this.debug(`Got guild log of ${guildId}`);
+            log = log.filter(entry => entry.id > sinceLogId);
+            this.debug(`Number of new guild log entries: ${log.length}`);
             return log;
         });
     }
