@@ -46,7 +46,7 @@ class CommandExportIds extends Command {
             }
             result.push('\n');
         }
-        response.message.author.sendFile(Buffer.from(result.join('\n')), 'ids.txt');
+        response.request.message.author.sendFile(Buffer.from(result.join('\n')), 'ids.txt');
     }
 }
 
