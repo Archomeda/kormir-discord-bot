@@ -4,6 +4,9 @@
 config/local*
 storage/*/*
 
+# Ignore tests
+test/
+
 ###
 ### Node.gitignore from https://github.com/github/gitignore #
 ###
