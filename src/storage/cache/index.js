@@ -1,18 +1,17 @@
 'use strict';
 
-const config = require('config');
-
-
-let provider;
-switch (config.get('cache.provider')) {
-    case 'node':
-        provider = require('./NodeProvider');
-        break;
-    case 'redis':
-        provider = require('./RedisProvider');
-        break;
-    default:
-        throw new Error('No compatible cache provider selected');
+function getCacheProvider(provider) {
+    switch (provider) {
+        case 'node':
+            provider = require('./NodeProvider');
+            break;
+        case 'redis':
+            provider = require('./RedisProvider');
+            break;
+        default:
+            throw new TypeError('No compatible cache provider selected');
+    }
+    return provider;
 }
 
-module.exports = provider;
+module.exports = getCacheProvider;

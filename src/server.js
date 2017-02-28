@@ -16,8 +16,8 @@ const gw2Api = require('gw2api-client').default();
 const gw2ApiCache = require('gw2api-client/build/cache/memory').default;
 
 const ModuleBase = require('./modules/Module');
-const CacheProvider = require('./storage/cache');
-const DatabaseProvider = require('./storage/database');
+const CacheProvider = require('./storage/cache')(config.get('cache.provider'));
+const DatabaseProvider = require('./storage/database')(config.get('database.provider'));
 
 
 console.log('Starting bot...');
