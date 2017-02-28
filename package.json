@@ -44,6 +44,9 @@
     "xo": "^0.17.1"
   },
   "xo": {
+    "ignores": [
+      "test/**/*"
+    ],
     "space": 4,
     "rules": {
       "camelcase": "warn",
