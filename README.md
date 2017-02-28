@@ -7,8 +7,9 @@ The bot can do various tasks that helps the guild on the Discord server.
  - **Guild Wars 2**
    - Accounts
      - Link Discord accounts with Guild Wars 2 accounts by registering API keys
+     - Automatically manage roles of world members
    - Guilds
-     - Automatically assign roles to guild members (and remove them once they left the guild)
+     - Automatically manage roles of guild members
      - Post various guild logs
    - Other
      - Post new builds and release notes
