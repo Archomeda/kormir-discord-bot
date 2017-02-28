@@ -1,7 +1,7 @@
 'use strict';
 
-const
-    snakeCase = require('change-case').snakeCase;
+const snakeCase = require('change-case').snakeCase;
+
 
 class DiscordHook {
     constructor(module) {

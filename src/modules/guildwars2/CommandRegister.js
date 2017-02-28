@@ -1,15 +1,15 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
-    random = require('random-js')(),
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
+const random = require('random-js')();
 
-    Command = require('../Command'),
-    CommandParam = require('../CommandParam'),
-    CommandError = require('../../errors/CommandError'),
+const Command = require('../Command');
+const CommandParam = require('../CommandParam');
+const CommandError = require('../../errors/CommandError');
 
-    RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
+const RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
+
 
 class CommandRegister extends Command {
     constructor(module) {
@@ -43,14 +43,11 @@ class CommandRegister extends Command {
 
                 return cache.set(table, discordId, time * 60, code).then(result => {
                     if (result) {
-                        if (!account) {
-                            return `${i18next.t('guildwars2:register.response-info')}${i18next.t('guildwars2:register.response-register-steps', { code, register, time })}`;
-                        } else {
-                            return `${i18next.t('guildwars2:register.response-reregister', { key: account.apiKey })}${i18next.t('guildwars2:register.response-register-steps', { code, register, time })}`
-                        }
-                    } else {
-                        throw new CommandError(i18next.t('guildwars2:register.response-generation-failed'));
+                        return account ?
+                            `${i18next.t('guildwars2:register.response-reregister', { key: account.apiKey })}${i18next.t('guildwars2:register.response-register-steps', { code, register, time })}` :
+                            `${i18next.t('guildwars2:register.response-info')}${i18next.t('guildwars2:register.response-register-steps', { code, register, time })}`;
                     }
+                    throw new CommandError(i18next.t('guildwars2:register.response-generation-failed'));
                 });
             } else {
                 return cache.get(table, discordId).then(code => {

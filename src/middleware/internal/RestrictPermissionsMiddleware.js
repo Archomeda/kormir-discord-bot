@@ -1,12 +1,12 @@
 'use strict';
 
-const
-    _ = require('lodash'),
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const _ = require('lodash');
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    Middleware = require('../Middleware'),
-    PermissionError = require('../../errors/PermissionError');
+const Middleware = require('../Middleware');
+const PermissionError = require('../../errors/PermissionError');
+
 
 class RestrictPermissionsMiddleware extends Middleware {
     constructor(options) {

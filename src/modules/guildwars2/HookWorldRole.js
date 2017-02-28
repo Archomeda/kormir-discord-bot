@@ -1,7 +1,7 @@
 'use strict';
 
-const
-    DiscordHook = require('../DiscordHook');
+const DiscordHook = require('../DiscordHook');
+
 
 class HookWorldRole extends DiscordHook {
     constructor(module) {

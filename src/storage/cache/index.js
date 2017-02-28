@@ -2,8 +2,9 @@
 
 const config = require('config');
 
+
 let provider;
-switch(config.get('cache.provider')) {
+switch (config.get('cache.provider')) {
     case 'node':
         provider = require('./NodeProvider');
         break;
@@ -12,7 +13,6 @@ switch(config.get('cache.provider')) {
         break;
     default:
         throw new Error('No compatible cache provider selected');
-        break;
 }
 
 module.exports = provider;

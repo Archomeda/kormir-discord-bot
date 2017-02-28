@@ -1,11 +1,11 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    Feedparser = require('feedparser'),
-    request = require('request'),
+const Promise = require('bluebird');
+const Feedparser = require('feedparser');
+const request = require('request');
 
-    BackgroundWorker = require('../../BackgroundWorker');
+const BackgroundWorker = require('../../BackgroundWorker');
+
 
 const forumRss = 'https://forum-en.guildwars2.com/forum/info/updates.rss';
 
@@ -22,13 +22,13 @@ class ReleaseChecker extends BackgroundWorker {
         ]).then(([oldBuild, oldReleaseNotes, build, releaseNotes]) => {
             // Process the stored/live build and release notes
 
-            const getPostId = url => url ? parseInt(url.match(/(\d+)$/)[1]) : undefined;
+            const getPostId = url => url ? parseInt(url.match(/(\d+)$/)[1], 10) : undefined;
             const lastReleaseNotesId = getPostId(oldReleaseNotes) || 0;
             let newReleaseNotes = releaseNotes ? releaseNotes.filter(notes => (getPostId(notes.link) || 0) > lastReleaseNotesId) : [];
 
             const exec = [];
             if (build && build !== oldBuild) {
-                exec.push(this.setLatestBuild(build))
+                exec.push(this.setLatestBuild(build));
             }
             if (newReleaseNotes.length > 0 && newReleaseNotes[0].link !== oldReleaseNotes) {
                 // First element has the last new post, last element has the first new post
@@ -72,7 +72,7 @@ class ReleaseChecker extends BackgroundWorker {
             }).then(reader => {
                 const allNotes = [];
                 let notes;
-                while (notes = reader.read()) {
+                while ((notes = reader.read())) {
                     allNotes.push(notes);
                 }
 
@@ -89,7 +89,7 @@ class ReleaseChecker extends BackgroundWorker {
             const r = request(url);
             const feed = new Feedparser();
             r.on('error', reject);
-            r.on('response', function(res) {
+            r.on('response', function (res) {
                 debug(`Got RSS feed request response: ${res.statusCode}`);
                 if (res.statusCode >= 200 && res.statusCode <= 299) {
                     this.pipe(feed);
@@ -99,12 +99,12 @@ class ReleaseChecker extends BackgroundWorker {
             });
             feed.on('error', reject);
             let read = false;
-            feed.on('readable', function() {
+            feed.on('readable', function () {
                 if (!read) {
                     resolve(this);
                     read = true;
                 }
-            })
+            });
         });
     }
 

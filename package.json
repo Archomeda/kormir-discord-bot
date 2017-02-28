@@ -46,9 +46,18 @@
   "xo": {
     "space": 4,
     "rules": {
+      "camelcase": "warn",
       "linebreak-style": "off",
       "no-div-regex": "off",
+      "no-else-return": "warn",
+      "no-multiple-empty-lines": [
+        "error",
+        { "max": 2 }
+      ],
       "no-negated-condition": "off",
+      "no-prototype-builtins": "off",
+      "no-unused-vars": "warn",
+      "no-use-extend-native/no-use-extend-native": "off",
       "object-curly-spacing": [
         "error",
         "always"

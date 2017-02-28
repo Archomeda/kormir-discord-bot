@@ -1,10 +1,10 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    NodeCache = require('node-cache'),
+const Promise = require('bluebird');
+const NodeCache = require('node-cache');
 
-    Provider = require('./Provider');
+const Provider = require('./Provider');
+
 
 class NodeProvider extends Provider {
     connect() {

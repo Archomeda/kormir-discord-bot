@@ -8,7 +8,9 @@ class Provider {
      * Constructs the cache provider.
      */
     constructor() {
-        if (new.target === Provider) throw new TypeError('Cannot construct Provider instances directly');
+        if (new.target === Provider) {
+            throw new TypeError('Cannot construct Provider instances directly');
+        }
     }
 
     /**
@@ -68,7 +70,9 @@ class Provider {
     cache(table, id, ttl, renewer) {
         return this.get(table, id)
             .then(value => {
-                if (value) return value;
+                if (value) {
+                    return value;
+                }
                 return this.set(table, id, ttl, renewer());
             });
     }

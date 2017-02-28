@@ -1,9 +1,9 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
+const Promise = require('bluebird');
 
-    BackgroundWorker = require('../../BackgroundWorker');
+const BackgroundWorker = require('../../BackgroundWorker');
+
 
 /**
  * A worker for checking for Guild Wars 2 guild logs.
@@ -73,18 +73,18 @@ class GuildLogChecker extends BackgroundWorker {
                                 item = parsedLog.stash.get(key);
                                 let count = entry.operation === 'deposit' ? entry.count : entry.operation === 'withdraw' ? -entry.count : 0;
                                 if (item) {
-                                    parsedLog.stash.set(key, { type: `stash-item`, user: entry.user, item_id: entry.item_id, count: item.count + count, time: entry.time });
+                                    parsedLog.stash.set(key, { type: 'stash-item', user: entry.user, item_id: entry.item_id, count: item.count + count, time: entry.time });
                                 } else {
-                                    parsedLog.stash.set(key, { type:`stash-item`, user: entry.user, item_id: entry.item_id, count: count, time: entry.time });
+                                    parsedLog.stash.set(key, { type: 'stash-item', user: entry.user, item_id: entry.item_id, count: count, time: entry.time });
                                 }
                             } else if (entry.coins && entry.operation) {
                                 key = `${entry.user}-coins`;
                                 item = parsedLog.stash.get(key);
                                 let count = entry.operation === 'deposit' ? entry.coins : entry.operation === 'withdraw' ? -entry.coins : 0;
                                 if (item) {
-                                    parsedLog.stash.set(key, { type: `stash-coins`, user: entry.user, coins: item.coins + count, time: entry.time });
+                                    parsedLog.stash.set(key, { type: 'stash-coins', user: entry.user, coins: item.coins + count, time: entry.time });
                                 } else {
-                                    parsedLog.stash.set(key, { type: `stash-coins`, user: entry.user, coins: count, time: entry.time });
+                                    parsedLog.stash.set(key, { type: 'stash-coins', user: entry.user, coins: count, time: entry.time });
                                 }
                             }
                             break;
@@ -98,6 +98,8 @@ class GuildLogChecker extends BackgroundWorker {
                                     parsedLog.upgrade.set(key, { type: 'upgrade', user: entry.user, upgrade_id: entry.upgrade_id, count: entry.count, time: entry.time });
                                 }
                             }
+                            break;
+                        default:
                             break;
                     }
                 }

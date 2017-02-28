@@ -1,8 +1,8 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    EventEmitter = require('events');
+const EventEmitter = require('events');
+const Promise = require('bluebird');
+
 
 /**
  * Represents a continuous background worker.

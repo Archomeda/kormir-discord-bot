@@ -1,8 +1,8 @@
 'use strict';
 
-const
-    Middleware = require('./Middleware'),
-    ensureArray = require('../utils/array').ensureArray;
+const ensureArray = require('../utils/array').ensureArray;
+const Middleware = require('./Middleware');
+
 
 class AutoRemoveMessageMiddleware extends Middleware {
     constructor(options) {

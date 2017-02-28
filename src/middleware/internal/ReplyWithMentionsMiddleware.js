@@ -1,10 +1,10 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    Middleware = require('../Middleware');
+const Middleware = require('../Middleware');
+
 
 class ReplyWithMentionsMiddleware extends Middleware {
     constructor(options) {
@@ -24,7 +24,7 @@ class ReplyWithMentionsMiddleware extends Middleware {
         } else {
             response.replyText = i18next.t('middleware:reply-with-mentions.response-public', { mentions, message: response.replyText });
         }
-        
+
         return response;
     }
 }

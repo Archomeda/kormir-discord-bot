@@ -1,12 +1,12 @@
 'use strict';
 
-const
-    _ = require('lodash'),
-    config = require('config'),
-    camelCase = require('change-case').camelCase,
-    snakeCase = require('change-case').snakeCase,
+const _ = require('lodash');
+const config = require('config');
+const camelCase = require('change-case').camelCase;
+const snakeCase = require('change-case').snakeCase;
 
-    ensureArray = require('../utils/array').ensureArray;
+const ensureArray = require('../utils/array').ensureArray;
+
 
 class Command {
     constructor(module) {

@@ -1,8 +1,10 @@
-const
-    toMarkdown = require('to-markdown');
+'use strict';
+
+const toMarkdown = require('to-markdown');
+
 
 const converters = {
-    'wiki': [
+    wiki: [
         {
             // Convert various stuff to plain-text
             filter: ['a', 'small', 'span'],
@@ -14,7 +16,7 @@ const converters = {
             replacement: () => ''
         }
     ],
-    'feed': [
+    feed: [
 
     ]
 };
@@ -25,7 +27,7 @@ const converters = {
  * @param {string} [converter=wiki] - The converter to use (wiki or feed).
  */
 function convertHtmlToMarkdown(html, converter = 'wiki') {
-    return toMarkdown(html, { converters: converters[converter] })
+    return toMarkdown(html, { converters: converters[converter] });
 }
 
 module.exports = {

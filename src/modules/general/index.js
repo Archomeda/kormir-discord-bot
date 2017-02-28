@@ -1,9 +1,9 @@
 'use strict';
 
-const
-    Module = require('../Module'),
-    CommandHelp = require('./CommandHelp'),
-    CommandSource = require('./CommandSource');
+const Module = require('../Module');
+const CommandHelp = require('./CommandHelp');
+const CommandSource = require('./CommandSource');
+
 
 class ModuleGeneral extends Module {
     constructor(bot, moduleConfig) {

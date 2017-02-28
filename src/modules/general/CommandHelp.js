@@ -1,15 +1,15 @@
 'use strict';
 
-const
-    config = require('config'),
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const config = require('config');
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    Command = require('../Command'),
-    CommandParam = require('../CommandParam'),
-    CommandError = require('../../errors/CommandError'),
-    CacheMiddleware = require('../../middleware/CacheMiddleware'),
-    AutoRemoveMessageMiddleware = require('../../middleware/AutoRemoveMessageMiddleware');
+const Command = require('../Command');
+const CommandParam = require('../CommandParam');
+const CommandError = require('../../errors/CommandError');
+const CacheMiddleware = require('../../middleware/CacheMiddleware');
+const AutoRemoveMessageMiddleware = require('../../middleware/AutoRemoveMessageMiddleware');
+
 
 class CommandHelp extends Command {
     constructor(module) {
@@ -35,7 +35,7 @@ class CommandHelp extends Command {
             // Reply with help for a specific command
             const commandTrigger = request.params.command.replace(new RegExp(`^${commandPrefix}?(.*)$`), '$1');
             let command;
-            for (module of modules) {
+            for (let module of modules) {
                 const foundCommand = module.commands.find(command => command.trigger === commandTrigger);
                 if (foundCommand) {
                     command = foundCommand;
@@ -47,17 +47,17 @@ class CommandHelp extends Command {
                 throw new CommandError(i18next.t('general:help.response-command-not-recognized', { command: commandTrigger, help: this.toString() }));
             }
             return i18next.t('general:help.response-single-help', { help: this.formatCommandHelp(request.message, command) });
-        } else {
-            // Reply with general help
-            const help = [];
-            modules.forEach(module => {
-                const moduleHelp = this.formatModuleHelp(request.message, module);
-                if (moduleHelp) {
-                    help.push(moduleHelp);
-                }
-            });
-            return i18next.t('general:help.response-all-help', { help: help.join('\n\n') });
         }
+
+        // Reply with general help
+        const help = [];
+        modules.forEach(module => {
+            const moduleHelp = this.formatModuleHelp(request.message, module);
+            if (moduleHelp) {
+                help.push(moduleHelp);
+            }
+        });
+        return i18next.t('general:help.response-all-help', { help: help.join('\n\n') });
     }
 
     formatCommandChannelFilter(command) {
@@ -77,6 +77,8 @@ class CommandHelp extends Command {
                         } else {
                             text.push(i18next.t('general:help.command-restriction-channels'));
                         }
+                        break;
+                    default:
                         break;
                 }
             }

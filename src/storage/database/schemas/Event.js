@@ -3,7 +3,8 @@
 const Schema = require('mongoose').Schema;
 const AutoIncrement = require('mongoose-sequence');
 
-const Event = Schema({
+
+const Event = new Schema({
     owner: String,
     title: String,
     start: Date,
@@ -13,6 +14,6 @@ const Event = Schema({
     channels: Array,
     mentions: Object
 });
-Event.plugin(AutoIncrement, {inc_field: 'id'});
+Event.plugin(AutoIncrement, { inc_field: 'id' });
 
 module.exports = Event;

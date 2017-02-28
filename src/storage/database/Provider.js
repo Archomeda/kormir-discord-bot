@@ -8,7 +8,9 @@ class Provider {
      * Constructs the cache provider.
      */
     constructor() {
-        if (new.target === Provider) throw new TypeError('Cannot construct Provider instances directly');
+        if (new.target === Provider) {
+            throw new TypeError('Cannot construct Provider instances directly');
+        }
     }
 
     /**

@@ -1,7 +1,7 @@
 'use strict';
 
-const
-    Middleware = require('./Middleware');
+const Middleware = require('./Middleware');
+
 
 class CacheMiddleware extends Middleware {
     constructor(options) {

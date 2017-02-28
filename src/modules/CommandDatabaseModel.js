@@ -1,11 +1,11 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    Command = require('./Command'),
-    CommandError = require('../errors/CommandError');
+const CommandError = require('../errors/CommandError');
+const Command = require('./Command');
+
 
 /**
  * An abstract command that can map itself 1:1 to a database model.
@@ -14,13 +14,13 @@ class CommandDatabaseModel extends Command {
     /**
      * Constructs a new CommandDatabaseModel.
      * @param {Module} module - The module.
-     * @param {Model} model - The database model.
+     * @param {Model} Model - The database model.
      * @param {string} type - The command type.
      */
-    constructor(module, model, type) {
+    constructor(module, Model, type) {
         super(module);
 
-        this.model = model;
+        this.Model = Model;
         if (!['list', 'view', 'add', 'edit', 'delete'].includes(type)) {
             throw new TypeError('type is not a valid type (should be one of: list, view, add, edit, delete)');
         }
@@ -62,8 +62,9 @@ class CommandDatabaseModel extends Command {
                     return this.canDeleteOwn(response, item);
                 }
                 return this.canDeleteOther(response, item);
+            default:
+                return false;
         }
-        return false;
     }
 
     /**
@@ -139,73 +140,75 @@ class CommandDatabaseModel extends Command {
 
     /**
      * Gets the respective item.
-     * @param {Model} model - The database model.
+     * @param {Model} Model - The database model.
      * @param {Object.<string, *>} props - The model properties.
      * @return {Promise} The promise with the item.
      */
-    getExecute(model, props) {
+    getExecute(Model, props) {
         switch (this.type) {
             case 'list':
-                return this.getList(model, props);
+                return this.getList(Model, props);
             case 'view':
-                return this.getView(model, props);
+                return this.getView(Model, props);
             case 'add':
-                return this.getAdd(model, props);
+                return this.getAdd(Model, props);
             case 'edit':
-                return this.getEdit(model, props);
+                return this.getEdit(Model, props);
             case 'delete':
-                return this.getDelete(model, props);
+                return this.getDelete(Model, props);
+            default:
+                return undefined;
         }
     }
 
     /**
      * Gets the items.
-     * @param {Model} model - The database model.
+     * @param {Model} Model - The database model.
      * @param {Object.<string, *>} props - The model properties.
      * @return {Promise} The promise with the item.
      */
-    getList(model, props) {
-        return model.find({});
+    getList(Model, props) {
+        return Model.find({});
     }
 
     /**
      * Gets an individual item.
-     * @param {Model} model - The database model.
+     * @param {Model} Model - The database model.
      * @param {Object.<string, *>} props - The model properties.
      * @return {Promise} The promise with the item.
      */
-    getView(model, props) {
-        return model.findOne({ id: props.id });
+    getView(Model, props) {
+        return Model.findOne({ id: props.id });
     }
 
     /**
      * Gets a new item to add.
-     * @param {Model} model - The database model.
+     * @param {Model} Model - The database model.
      * @param {Object.<string, *>} props - The model properties.
      * @return {Promise} The promise with the item.
      */
-    getAdd(model, props) {
-        return Promise.resolve(new model(props));
+    getAdd(Model, props) {
+        return Promise.resolve(new Model(props));
     }
 
     /**
      * Gets an item to edit.
-     * @param {Model} model - The database model.
+     * @param {Model} Model - The database model.
      * @param {Object.<string, *>} props - The model properties.
      * @return {Promise} The promise with the item.
      */
-    getEdit(model, props) {
-        return model.findOne({ id: props.id });
+    getEdit(Model, props) {
+        return Model.findOne({ id: props.id });
     }
 
     /**
      * Gets an item to delete.
-     * @param {Model} model - The database model.
+     * @param {Model} Model - The database model.
      * @param {Object.<string, *>} props - The model properties.
      * @return {Promise} The promise with the item.
      */
-    getDelete(model, props) {
-        return model.findOne({ id: props.id });
+    getDelete(Model, props) {
+        return Model.findOne({ id: props.id });
     }
 
 
@@ -259,7 +262,7 @@ class CommandDatabaseModel extends Command {
 
     onCommand(response) {
         const props = this.convertParamsToProps(response);
-        return this.getExecute(this.model, props).then(item => {
+        return this.getExecute(this.Model, props).then(item => {
             if (!this.canExecute(response, item)) {
                 throw new CommandError(i18next.t('module:database-model.response-no-permission'));
             }
@@ -281,6 +284,8 @@ class CommandDatabaseModel extends Command {
                     return item.set(props).save().then(item => this.formatResult(response, item));
                 case 'delete':
                     return item.remove().then(result => this.formatResult(response, result));
+                default:
+                    return undefined;
             }
         });
     }

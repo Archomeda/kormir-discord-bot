@@ -1,17 +1,16 @@
 'use strict';
 
-const
-    config = require('config'),
-    camelCase = require('change-case').camelCase,
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
-    random = require('random-js')(),
+const config = require('config');
+const camelCase = require('change-case').camelCase;
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
+const random = require('random-js')();
 
-    CommandRequest = require('./CommandRequest'),
-    CommandError = require('../errors/CommandError'),
-    RestrictChannelsMiddleware = require('../middleware/RestrictChannelsMiddleware'),
-    RestrictPermissionsMiddleware = require('../middleware/internal/RestrictPermissionsMiddleware'),
-    ReplyWithMentionsMiddleware = require('../middleware/internal/ReplyWithMentionsMiddleware');
+const RestrictChannelsMiddleware = require('../middleware/RestrictChannelsMiddleware');
+const RestrictPermissionsMiddleware = require('../middleware/internal/RestrictPermissionsMiddleware');
+const ReplyWithMentionsMiddleware = require('../middleware/internal/ReplyWithMentionsMiddleware');
+const CommandRequest = require('./CommandRequest');
+
 
 class Module {
     constructor(bot, moduleConfig) {
@@ -57,8 +56,9 @@ class Module {
         for (let name in configMiddleware) {
             if (configMiddleware.hasOwnProperty(name)) {
                 const options = configMiddleware[name];
-                const middlewareClass = require(`../middleware/${name}`);
-                defaultMiddleware.push(new middlewareClass(options));
+                // eslint-disable-next-line import/no-dynamic-require
+                const MiddlewareClass = require(`../middleware/${name}`);
+                defaultMiddleware.push(new MiddlewareClass(options));
             }
         }
 
@@ -100,7 +100,9 @@ class Module {
         let request = new CommandRequest(this, message);
         let response = request.createResponse();
 
-        return Promise.try(() => request.parseCommandString()).catch(err => response.error = err).then(() => {
+        return Promise.try(() => request.parseCommandString()).catch(err => {
+            response.error = err;
+        }).then(() => {
             // Check validity of the command
             if (!request.isValid()) {
                 return;
@@ -125,10 +127,11 @@ class Module {
 
                     // Clear the promises, if any
                     if (response.replyText && response.replyText.then) {
-                        return Promise
-                            .resolve(response.replyText.then(text => response.replyText = text))
-                            .catch(err => response.error = err)
-                            .return(response);
+                        return Promise.resolve(response.replyText.then(text => {
+                            response.replyText = text;
+                        })).catch(err => {
+                            response.error = err;
+                        }).return(response);
                     }
                 }
             });
@@ -149,11 +152,12 @@ class Module {
                     case 'ThrottleError':
                         // Not something that's worth notifying people
                         break;
-                    default:
+                    default: {
                         const code = random.hex(6).toUpperCase();
                         console.warn(`Unexpected error: ${response.error.message} (error identifier: ${code})`);
                         console.warn(response.error.stack);
                         response.replyText = i18next.t('module:command-error', { code });
+                    }
                 }
             }
 

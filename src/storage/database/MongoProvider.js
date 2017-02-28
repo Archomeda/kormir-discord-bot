@@ -1,14 +1,12 @@
 'use strict';
 
-const
-    config = require('config'),
-    Promise = require('bluebird'),
-    mongoose = require('mongoose'),
+const config = require('config');
+const Promise = require('bluebird');
+const mongoose = require('mongoose');
+const Provider = require('./Provider');
+const Gw2AccountSchema = require('./schemas/Gw2Account');
+const EventSchema = require('./schemas/Event');
 
-    Provider = require('./Provider'),
-
-    Gw2AccountSchema = require('./schemas/Gw2Account'),
-    EventSchema = require('./schemas/Event');
 
 mongoose.Promise = Promise;
 
@@ -17,7 +15,7 @@ const uri = config.get('database.mongodb.uri');
 class MongoProvider extends Provider {
     constructor() {
         super();
-        mongoose.connection.on('error', err => console.error('MongoDB connection error: ${err}'));
+        mongoose.connection.on('error', err => console.error(`MongoDB connection error: ${err}`));
         mongoose.connection.on('open', () => console.log('Connected to MongoDB'));
     }
     connect() {

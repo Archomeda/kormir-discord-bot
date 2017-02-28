@@ -1,12 +1,11 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
-    moment = require('moment'),
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
+const moment = require('moment');
 
-    CommandDatabaseModel = require('../CommandDatabaseModel'),
-    CommandParam = require('../CommandParam');
+const CommandDatabaseModel = require('../CommandDatabaseModel');
+
 
 class CommandDatabaseSchedule extends CommandDatabaseModel {
     constructor(module, type) {
@@ -20,8 +19,8 @@ class CommandDatabaseSchedule extends CommandDatabaseModel {
         };
     }
 
-    getList(model, props) {
-        return model.find({ start: { $gte: new Date() } }, null, { sort: { start: 1 } });
+    getList(Model, props) {
+        return Model.find({ start: { $gte: new Date() } }, null, { sort: { start: 1 } });
     }
 
     transformParam(response, paramName, paramValue) {
@@ -31,7 +30,7 @@ class CommandDatabaseSchedule extends CommandDatabaseModel {
                 paramValue = moment(paramValue);
                 break;
             case 'reminders':
-                paramValue = paramValue ? paramValue.split(/\s*,\s*/).map(i => parseInt(i)).filter(i => !isNaN(i)) : [];
+                paramValue = paramValue ? paramValue.split(/\s*,\s*/).map(i => parseInt(i, 10)).filter(i => !isNaN(i)) : [];
                 break;
             case 'channels':
                 paramValue = paramValue ? paramValue
@@ -47,18 +46,34 @@ class CommandDatabaseSchedule extends CommandDatabaseModel {
                     };
                 }
                 break;
+            default:
+                break;
         }
         return paramValue;
     }
 
     validateProps(response, props) {
-        if (props.title.length > 100) return i18next.t('schedule:common.response-title-too-long');
-        if (!props.start.isValid()) return i18next.t('schedule:common.response-invalid-start-date');
-        if (!props.end.isValid()) return i18next.t('schedule:common.response-invalid-end-date');
-        if (props.start.isBefore()) return i18next.t('schedule:common.response-invalid-start-date');
-        if (props.end.isBefore(props.start)) return i18next.t('schedule:common.response-invalid-end-date');
-        if (props.reminders.length === 0) return i18next.t('schedule:common.response-missing-reminders');
-        if (props.channels.length === 0) return i18next.t('schedule:common.response-invalid-channels');
+        if (props.title.length > 100) {
+            return i18next.t('schedule:common.response-title-too-long');
+        }
+        if (!props.start.isValid()) {
+            return i18next.t('schedule:common.response-invalid-start-date');
+        }
+        if (!props.end.isValid()) {
+            return i18next.t('schedule:common.response-invalid-end-date');
+        }
+        if (props.start.isBefore()) {
+            return i18next.t('schedule:common.response-invalid-start-date');
+        }
+        if (props.end.isBefore(props.start)) {
+            return i18next.t('schedule:common.response-invalid-end-date');
+        }
+        if (props.reminders.length === 0) {
+            return i18next.t('schedule:common.response-missing-reminders');
+        }
+        if (props.channels.length === 0) {
+            return i18next.t('schedule:common.response-invalid-channels');
+        }
         return true;
     }
 }

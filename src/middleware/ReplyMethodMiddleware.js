@@ -1,13 +1,13 @@
 'use strict';
 
-const
-    Middleware = require('./Middleware');
+const Middleware = require('./Middleware');
+
 
 class ReplyMethodMiddleware extends Middleware {
     constructor(options) {
         super(options);
         const defaultOptions = {
-            method: undefined,
+            method: undefined
         };
         this.options = Object.assign({}, defaultOptions, options);
     }

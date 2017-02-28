@@ -1,18 +1,18 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
-    MWBot = require('mwbot'),
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
+const MWBot = require('mwbot');
 
-    convertHtmlToMarkdown = require('../../utils/text').convertHtmlToMarkdown,
+const convertHtmlToMarkdown = require('../../utils/text').convertHtmlToMarkdown;
 
-    Command = require('../Command'),
-    CommandParam = require('../CommandParam'),
-    CommandError = require('../../errors/CommandError'),
-    CacheMiddleware = require('../../middleware/CacheMiddleware'),
-    ReplyToMentionsMiddleware = require('../../middleware/ReplyToMentionsMiddleware'),
-    RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
+const Command = require('../Command');
+const CommandParam = require('../CommandParam');
+const CommandError = require('../../errors/CommandError');
+const CacheMiddleware = require('../../middleware/CacheMiddleware');
+const ReplyToMentionsMiddleware = require('../../middleware/ReplyToMentionsMiddleware');
+const RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
+
 
 const wiki = new MWBot({
     apiUrl: 'https://wiki.guildwars2.com/api.php'

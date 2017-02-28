@@ -1,29 +1,29 @@
 'use strict';
 
-const
-    _ = require('lodash'),
-    config = require('config'),
-    Discord = require('discord.js'),
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const _ = require('lodash');
+const config = require('config');
+const Discord = require('discord.js');
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    convertHtmlToMarkdown = require('../../utils/text').convertHtmlToMarkdown,
+const convertHtmlToMarkdown = require('../../utils/text').convertHtmlToMarkdown;
+const groupByNumberOfCharacters = require('../../utils/array').groupByNumberOfCharacters;
 
-    Module = require('../Module'),
-    CommandRegister = require('./CommandRegister'),
-    CommandForceRegister = require('./CommandForceRegister'),
-    CommandWiki = require('./CommandWiki'),
-    HookMemberRole = require('./HookMemberRole'),
-    HookWorldRole = require('./HookWorldRole'),
+const Module = require('../Module');
+const CommandRegister = require('./CommandRegister');
+const CommandForceRegister = require('./CommandForceRegister');
+const CommandWiki = require('./CommandWiki');
+const HookMemberRole = require('./HookMemberRole');
+const HookWorldRole = require('./HookWorldRole');
 
-    ReleaseChecker = require('./workers/ReleaseChecker'),
-    GuildLogChecker = require('./workers/GuildLogChecker'),
-    groupByNumberOfCharacters = require('../../utils/array').groupByNumberOfCharacters;
+const ReleaseChecker = require('./workers/ReleaseChecker');
+const GuildLogChecker = require('./workers/GuildLogChecker');
+
 
 const emojis = {
     copperConfig: config.get('discord.emojis.copper'),
     silverConfig: config.get('discord.emojis.silver'),
-    goldConfig: config.get('discord.emojis.gold'),
+    goldConfig: config.get('discord.emojis.gold')
 };
 
 class ModuleGuildWars2 extends Module {
@@ -92,24 +92,17 @@ class ModuleGuildWars2 extends Module {
 
         const doEnsure = account => gw2Api.authenticate(key).guild(guildId).members().get().then(members => {
             const member = _.find(members, ['name', account.accountName]);
-            if (member) {
-                // The user is a member of the guild
-                return this.addToGuildRole(user);
-            } else {
-                // The user is not a member of the guild
-                return this.removeFromGuildRole(user);
-            }
+            return member ? this.addToGuildRole(user) : this.removeFromGuildRole(user);
         });
 
-        if (gw2Account) {
-            return doEnsure(gw2Account);
-        } else {
+        if (!gw2Account) {
             return Gw2Account.findOne({ discordId: user.id }).then(account => {
                 if (account) {
                     return doEnsure(account);
                 }
             });
         }
+        return doEnsure(gw2Account);
     }
 
     addToGuildRole(user) {
@@ -138,15 +131,14 @@ class ModuleGuildWars2 extends Module {
         const doEnsure = account => gw2Api.authenticate(account.apiKey).account().get()
             .then(accountInfo => this.applyWorldRoles(user, accountInfo.world));
 
-        if (gw2Account) {
-            return doEnsure(gw2Account);
-        } else {
+        if (!gw2Account) {
             return Gw2Account.findOne({ discordId: user.id }).then(account => {
                 if (account) {
                     return doEnsure(account);
                 }
             });
         }
+        return doEnsure(gw2Account);
     }
 
     applyWorldRoles(user, world) {
@@ -157,7 +149,7 @@ class ModuleGuildWars2 extends Module {
             exec.push(user.addRole(worldRoles[world]));
         }
         const excluded = Object.values(_.pickBy(worldRoles, (roleId, worldId) => {
-            worldId = parseInt(worldId);
+            worldId = parseInt(worldId, 10);
             return worldId !== world && user.roles.has(worldRoles[worldId]);
         }));
         if (excluded.length > 0) {

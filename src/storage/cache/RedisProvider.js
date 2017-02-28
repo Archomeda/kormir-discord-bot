@@ -1,11 +1,11 @@
 'use strict';
 
-const
-    config = require('config'),
-    Promise = require('bluebird'),
-    redis = Promise.promisifyAll(require('redis')),
+const config = require('config');
+const Promise = require('bluebird');
+const redis = Promise.promisifyAll(require('redis'));
 
-    Provider = require('./Provider');
+const Provider = require('./Provider');
+
 
 const prefix = config.get('cache.redis.prefix');
 const password = config.get('cache.redis.password');
@@ -17,11 +17,21 @@ const port = config.get('cache.redis.port');
 class RedisProvider extends Provider {
     connect() {
         const options = {};
-        if (password) { options.password = password; }
-        if (db) { options.db = db; }
-        if (path) { options.path = path; }
-        if (host) { options.host = host; }
-        if (port) { options.port = port; }
+        if (password) {
+            options.password = password;
+        }
+        if (db) {
+            options.db = db;
+        }
+        if (path) {
+            options.path = path;
+        }
+        if (host) {
+            options.host = host;
+        }
+        if (port) {
+            options.port = port;
+        }
 
         this.client = redis.createClient(options);
     }
@@ -35,11 +45,9 @@ class RedisProvider extends Provider {
     }
 
     set(table, id, ttl, value) {
-        if (ttl) {
-            return this.client.setexAsync(`${prefix}${table}:${id}`, ttl, JSON.stringify(value));
-        } else {
-            return this.client.setAsync(`${prefix}${table}:${id}`, JSON.stringify(value));
-        }
+        return ttl ?
+            this.client.setexAsync(`${prefix}${table}:${id}`, ttl, JSON.stringify(value)) :
+            this.client.setAsync(`${prefix}${table}:${id}`, JSON.stringify(value));
     }
 
     remove(table, id) {
