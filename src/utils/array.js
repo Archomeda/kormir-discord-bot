@@ -24,16 +24,15 @@ function ensureArray(value) {
  */
 function groupByNumberOfCharacters(array, numChars, delimiter) {
     const newArray = [];
-    let chars = 0;
     let i = 0;
     for (let line of array) {
-        const innerNumChars = Array.isArray(numChars) ? numChars.length > i ? numChars[i] : numChars[numChars.length - 1] : numChars;
-        if (chars + line.length + delimiter.length >= innerNumChars) {
-            i++;
-            chars = 0;
+        if (newArray[i]) {
+            const innerNumChars = Array.isArray(numChars) ? numChars.length > i ? numChars[i] : numChars[numChars.length - 1] : numChars;
+            if (newArray[i].length + delimiter.length + line.length >= innerNumChars) {
+                i++;
+            }
         }
         newArray[i] = (newArray[i] ? `${newArray[i]}${delimiter}${line}` : line);
-        chars += line.length + delimiter.length;
     }
     return newArray;
 }

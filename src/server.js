@@ -3,7 +3,7 @@
 
 /* eslint-disable import/no-unassigned-import */
 require('babel-polyfill');
-require('./utils/prototypes');
+require('./utils/discord.prototype');
 /* eslint-enable import/no-unassigned-import */
 
 const config = require('config');
