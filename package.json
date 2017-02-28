@@ -8,7 +8,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "xo",
+    "test": "mocha test/**/*.spec.js",
+    "cover": "node_modules/istanbul/lib/cli cover node_modules/mocha/bin/_mocha -- test/**/*.spec.js"
   },
   "dependencies": {
     "babel-polyfill": "^6.23.0",
@@ -34,5 +36,24 @@
     "request": "^2.79.0",
     "request-promise": "^4.1.1",
     "to-markdown": "^3.0.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "xo": "^0.17.1"
+  },
+  "xo": {
+    "space": 4,
+    "rules": {
+      "linebreak-style": "off",
+      "no-div-regex": "off",
+      "no-negated-condition": "off",
+      "object-curly-spacing": [
+        "error",
+        "always"
+      ],
+      "unicorn/filename-case": "off"
+    }
   }
 }
