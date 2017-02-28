@@ -14,6 +14,7 @@ const
     CommandForceRegister = require('./CommandForceRegister'),
     CommandWiki = require('./CommandWiki'),
     HookMemberRole = require('./HookMemberRole'),
+    HookWorldRole = require('./HookWorldRole'),
 
     ReleaseChecker = require('./workers/ReleaseChecker'),
     GuildLogChecker = require('./workers/GuildLogChecker'),
@@ -36,6 +37,7 @@ class ModuleGuildWars2 extends Module {
         this.registerCommand(new CommandForceRegister(this));
         this.registerCommand(new CommandWiki(this));
         this.registerHook(new HookMemberRole(this));
+        this.registerHook(new HookWorldRole(this));
 
         if (this.config.release_checker.enabled) {
             this.bot.client.once('ready', () => {
@@ -76,6 +78,7 @@ class ModuleGuildWars2 extends Module {
         }
     }
 
+
     ensureGuildMembership(user, gw2Account) {
         const role = this.config.guild_member_role;
         if (!role) {
@@ -101,9 +104,9 @@ class ModuleGuildWars2 extends Module {
         if (gw2Account) {
             return doEnsure(gw2Account);
         } else {
-            return Gw2Account.find({ discordId: user.id }).then(accounts => {
-                if (accounts.length > 0) {
-                    return doEnsure(accounts[0]);
+            return Gw2Account.findOne({ discordId: user.id }).then(account => {
+                if (account) {
+                    return doEnsure(account);
                 }
             });
         }
@@ -121,6 +124,47 @@ class ModuleGuildWars2 extends Module {
         if (role && user.roles.has(role)) {
             return user.removeRole(role);
         }
+    }
+
+    ensureWorldMembership(user, gw2Account) {
+        const roles = this.config.world_member_roles;
+        if (!roles || roles.length === 0) {
+            return;
+        }
+
+        const gw2Api = this.bot.gw2Api;
+        const Gw2Account = this.bot.database.Gw2Account;
+
+        const doEnsure = account => gw2Api.authenticate(account.apiKey).account().get()
+            .then(accountInfo => this.applyWorldRoles(user, accountInfo.world));
+
+        if (gw2Account) {
+            return doEnsure(gw2Account);
+        } else {
+            return Gw2Account.findOne({ discordId: user.id }).then(account => {
+                if (account) {
+                    return doEnsure(account);
+                }
+            });
+        }
+    }
+
+    applyWorldRoles(user, world) {
+        const worldRoles = this.config.world_member_roles;
+        const exec = [];
+        if (worldRoles[world] && !user.roles.has(worldRoles[world])) {
+            console.log(`Adding role ${worldRoles[world]}`);
+            exec.push(user.addRole(worldRoles[world]));
+        }
+        const excluded = Object.values(_.pickBy(worldRoles, (roleId, worldId) => {
+            worldId = parseInt(worldId);
+            return worldId !== world && user.roles.has(worldRoles[worldId]);
+        }));
+        if (excluded.length > 0) {
+            console.log(`Removing roles ${excluded}`);
+            exec.push(user.removeRoles(excluded));
+        }
+        return Promise.all(exec);
     }
 
 

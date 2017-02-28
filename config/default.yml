@@ -125,7 +125,9 @@ modules:
 
     hooks:
       member_role:
-        enabled: true
+        enabled: false
+      world_role:
+        enabled: false
 
     release_checker:
       enabled: false
@@ -159,6 +161,11 @@ modules:
     guild_id: guild-id
     # The role id where guild members should be part of
     guild_member_role: role-id
+    # The role ids where various world (or server) members should be part of, example:
+    # world_member_roles:
+    #   1001: anvil-rock-role-id
+    #   1002: borlis-pass-role-id
+    world_member_roles: []
 
 
 #####

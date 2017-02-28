@@ -3,7 +3,7 @@
 const
     DiscordHook = require('../DiscordHook');
 
-class HookMemberRole extends DiscordHook {
+class HookWorldRole extends DiscordHook {
     constructor(module) {
         super(module);
         this._hooks = {
@@ -13,12 +13,12 @@ class HookMemberRole extends DiscordHook {
     }
 
     onGuildMemberUpdate(oldMember, newMember) {
-        this.module.ensureGuildMembership(newMember);
+        this.module.ensureWorldMembership(newMember);
     }
 
     onPresenceUpdate(oldMember, newMember) {
-        this.module.ensureGuildMembership(newMember);
+        this.module.ensureWorldMembership(newMember);
     }
 }
 
-module.exports = HookMemberRole;
+module.exports = HookWorldRole;
