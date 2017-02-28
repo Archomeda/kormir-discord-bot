@@ -1,8 +1,8 @@
 'use strict';
 
-const
-    Middleware = require('./Middleware'),
-    ThrottleError = require('../errors/ThrottleError');
+const ThrottleError = require('../errors/ThrottleError');
+const Middleware = require('./Middleware');
+
 
 class UserThrottleMiddleware extends Middleware {
     constructor(options) {

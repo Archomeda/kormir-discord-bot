@@ -1,7 +1,6 @@
 'use strict';
 
-const
-    MiddlewareError = require('./MiddlewareError');
+const MiddlewareError = require('./MiddlewareError');
 
 class PermissionError extends MiddlewareError {
     constructor(message, logger, userMessage) {

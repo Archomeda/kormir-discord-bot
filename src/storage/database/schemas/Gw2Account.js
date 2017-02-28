@@ -2,7 +2,8 @@
 
 const Schema = require('mongoose').Schema;
 
-const Gw2Account = Schema({
+
+const Gw2Account = new Schema({
     discordId: String,
     accountName: String,
     apiKey: String

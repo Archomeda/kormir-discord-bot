@@ -1,13 +1,13 @@
 'use strict';
 
-const
-    _ = require('lodash'),
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const _ = require('lodash');
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    Middleware = require('./Middleware'),
-    PermissionError = require('../errors/PermissionError'),
-    ensureArray = require('../utils/array').ensureArray;
+const PermissionError = require('../errors/PermissionError');
+const ensureArray = require('../utils/array').ensureArray;
+const Middleware = require('./Middleware');
+
 
 class RestrictChannelsMiddleware extends Middleware {
     constructor(options) {
@@ -40,6 +40,7 @@ class RestrictChannelsMiddleware extends Middleware {
                     if (channel) {
                         return channel.toString();
                     }
+                    return null;
                 }).filter(c => c);
 
                 if (this.options.types.includes('dm')) {
@@ -48,10 +49,8 @@ class RestrictChannelsMiddleware extends Middleware {
                     } else if (this.options.types.includes('dm')) {
                         userMessage = i18next.t('middleware:restrict-channels.dm-only');
                     }
-                } else {
-                    if (targetChannels.length > 0) {
-                        userMessage = i18next.t('middleware:restrict-channels.channels-only', { channels: targetChannels.join(' ') });
-                    }
+                } else if (targetChannels.length > 0) {
+                    userMessage = i18next.t('middleware:restrict-channels.channels-only', { channels: targetChannels.join(' ') });
                 }
             }
             if (!userMessage) {

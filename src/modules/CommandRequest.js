@@ -1,12 +1,12 @@
 'use strict';
 
-const
-    config = require('config'),
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const config = require('config');
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    CommandResponse = require('./CommandResponse'),
-    CommandError = require('../errors/CommandError');
+const CommandError = require('../errors/CommandError');
+const CommandResponse = require('./CommandResponse');
+
 
 /**
  * Represents a command request.

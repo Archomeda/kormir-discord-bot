@@ -1,22 +1,24 @@
 #!/usr/bin/env node
 'use strict';
 
+/* eslint-disable import/no-unassigned-import */
 require('babel-polyfill');
 require('./utils/prototypes');
+/* eslint-enable import/no-unassigned-import */
 
-const
-    config = require('config'),
-    Backend = require('i18next-node-fs-backend'),
-    Discord = require('discord.js'),
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
-    moment = require('moment-timezone'),
-    gw2Api = require('gw2api-client').default(),
-    gw2ApiCache = require('gw2api-client/build/cache/memory').default,
+const config = require('config');
+const Backend = require('i18next-node-fs-backend');
+const Discord = require('discord.js');
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
+const moment = require('moment-timezone');
+const gw2Api = require('gw2api-client').default();
+const gw2ApiCache = require('gw2api-client/build/cache/memory').default;
 
-    ModuleBase = require('./modules/Module'),
-    CacheProvider = require('./storage/cache'),
-    DatabaseProvider = require('./storage/database');
+const ModuleBase = require('./modules/Module');
+const CacheProvider = require('./storage/cache');
+const DatabaseProvider = require('./storage/database');
+
 
 console.log('Starting bot...');
 
@@ -29,11 +31,21 @@ const database = new DatabaseProvider();
 const timezone = config.get('timezone');
 
 const bot = {
-    get client() { return client; },
-    get modules() { return modules; },
-    get cache() { return cache; },
-    get database() { return database; },
-    get gw2Api() { return gw2Api; }
+    get client() {
+        return client;
+    },
+    get modules() {
+        return modules;
+    },
+    get cache() {
+        return cache;
+    },
+    get database() {
+        return database;
+    },
+    get gw2Api() {
+        return gw2Api;
+    }
 };
 
 i18next.use(Backend).init({
@@ -43,7 +55,7 @@ i18next.use(Backend).init({
     defaultNS: 'common',
     load: 'currentOnly',
     backend: {
-        loadPath: './locales/{{lng}}/{{ns}}.json',
+        loadPath: './locales/{{lng}}/{{ns}}.json'
     },
     interpolation: {
         format: (value, format, lng) => {
@@ -95,9 +107,13 @@ Promise.all([
     connectDatabase().then(() => console.log('Connected to database'))
 ]).then(() => {
     Promise.map(Object.keys(moduleConfigs), m => {
-        if (!moduleConfigs[m]) return;
+        if (!moduleConfigs[m]) {
+            return;
+        }
+
         return new Promise(resolve => {
             try {
+                // eslint-disable-next-line import/no-dynamic-require
                 const Module = require(`./modules/${m}`);
                 if (Module.prototype instanceof ModuleBase) {
                     modules.push(new Module(bot, moduleConfigs[m]));
@@ -105,12 +121,12 @@ Promise.all([
                 } else {
                     console.warn(`Module '${m}' does not export a class that extends ModuleBase, skipping`);
                 }
-            } catch(err) {
+            } catch (err) {
                 console.warn(`Module '${m}' could not be loaded: ${err.message}`);
                 console.warn(err.stack);
             }
             resolve();
-        })
+        });
     }).then(() => {
         client.on('ready', () => {
             const guilds = client.guilds.array().map(g => g.name);

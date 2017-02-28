@@ -1,11 +1,11 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    Command = require('../Command'),
-    ReplyToMentionsMiddleware = require('../../middleware/ReplyToMentionsMiddleware');
+const Command = require('../Command');
+const ReplyToMentionsMiddleware = require('../../middleware/ReplyToMentionsMiddleware');
+
 
 class CommandSource extends Command {
     constructor(module) {

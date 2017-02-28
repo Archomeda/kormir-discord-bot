@@ -1,10 +1,7 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    random = require('random-js')(),
+const Promise = require('bluebird');
 
-    CommandError = require('../errors/CommandError');
 
 /**
  * Represents a command response.
@@ -79,7 +76,7 @@ class CommandResponse {
         }
 
         for (let middleware of this.request.command.allMiddleware) {
-            responsePromise = responsePromise.then(response => Promise.try(() => middleware[funcName].call(middleware, response, ...params)).catch(err => {
+            responsePromise = responsePromise.then(response => Promise.try(() => middleware[funcName](response, ...params)).catch(err => {
                 // Capture error
                 if (!response.error) {
                     response.error = err;

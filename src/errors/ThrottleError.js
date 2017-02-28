@@ -1,7 +1,6 @@
 'use strict';
 
-const
-    MiddlewareError = require('./MiddlewareError');
+const MiddlewareError = require('./MiddlewareError');
 
 class ThrottleError extends MiddlewareError {
     constructor(message, logger) {

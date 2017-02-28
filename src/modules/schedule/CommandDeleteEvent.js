@@ -1,12 +1,12 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    CommandDatabaseSchedule = require('./CommandDatabaseSchedule'),
-    CommandParam = require('../CommandParam'),
-    RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
+const CommandParam = require('../CommandParam');
+const RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
+const CommandDatabaseSchedule = require('./CommandDatabaseSchedule');
+
 
 class CommandDeleteEvent extends CommandDatabaseSchedule {
     constructor(module) {

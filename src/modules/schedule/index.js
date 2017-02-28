@@ -1,19 +1,18 @@
 'use strict';
 
-const
-    config = require('config'),
-    Discord = require('discord.js'),
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
-    moment = require('moment'),
-    scheduler = require('node-schedule'),
+const Discord = require('discord.js');
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
+const moment = require('moment');
+const scheduler = require('node-schedule');
 
-    Module = require('../Module'),
-    CommandEvents = require('./CommandEvents'),
-    CommandEvent = require('./CommandEvent'),
-    CommandAddEvent = require('./CommandAddEvent'),
-    CommandEditEvent = require('./CommandEditEvent'),
-    CommandDeleteEvent = require('./CommandDeleteEvent');
+const Module = require('../Module');
+const CommandEvents = require('./CommandEvents');
+const CommandEvent = require('./CommandEvent');
+const CommandAddEvent = require('./CommandAddEvent');
+const CommandEditEvent = require('./CommandEditEvent');
+const CommandDeleteEvent = require('./CommandDeleteEvent');
+
 
 class ModuleSchedule extends Module {
     constructor(bot, moduleConfig) {
@@ -54,7 +53,9 @@ class ModuleSchedule extends Module {
             remindDate.setMinutes(remindDate.getMinutes() - remindTime);
             remindSchedule.push(scheduler.scheduleJob(remindDate, this.postEventReminder.bind(this, event)));
         }
-        remindSchedule.push(scheduler.scheduleJob(event.start, function (id) { this.schedule.delete(id); }.bind(this, event.id)));
+        remindSchedule.push(scheduler.scheduleJob(event.start, function (id) {
+            this.schedule.delete(id);
+        }.bind(this, event.id)));
         this.schedule.set(event.id, remindSchedule);
     }
 

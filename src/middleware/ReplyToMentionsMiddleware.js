@@ -1,11 +1,11 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    Middleware = require('./Middleware'),
-    MiddlewareError = require('../errors/MiddlewareError');
+const MiddlewareError = require('../errors/MiddlewareError');
+const Middleware = require('./Middleware');
+
 
 class ReplyToMentionsMiddleware extends Middleware {
     constructor(options) {

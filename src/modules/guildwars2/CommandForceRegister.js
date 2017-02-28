@@ -1,14 +1,14 @@
 'use strict';
 
-const
-    Promise = require('bluebird'),
-    i18next = Promise.promisifyAll(require('i18next')),
+const Promise = require('bluebird');
+const i18next = Promise.promisifyAll(require('i18next'));
 
-    Command = require('../Command'),
-    CommandParam = require('../CommandParam'),
-    CommandError = require('../../errors/CommandError'),
+const Command = require('../Command');
+const CommandParam = require('../CommandParam');
+const CommandError = require('../../errors/CommandError');
 
-    RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
+const RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
+
 
 class CommandForceRegister extends Command {
     constructor(module) {
