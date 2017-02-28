@@ -20,11 +20,12 @@
     "post": "The event *{{title}}* is about to start **{{time}}**.\n\n{{description}}"
   },
   "events": {
-    "help": "Shows a list of all the scheduled events",
-    "short-help": "Shows all the scheduled events",
+    "help": "Shows a list of all the upcoming events",
+    "short-help": "Shows all the upcoming events",
     "missing-title": "(missing title)",
     "response-item": "💠 {{start, ddd D MMM YYYY, H:mm z}} - Event {{id}}: {{title}}",
-    "response-list": "The following events have been scheduled:\n\n{{events}}"
+    "response-list": "The following upcoming events have been scheduled:\n\n{{events}}",
+    "response=empty": "There are currently no upcoming events scheduled."
   },
   "event": {
     "help": "Shows a specific scheduled event.",
