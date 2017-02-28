@@ -10,7 +10,7 @@
     "start": "node src/server.js",
     "lint": "xo",
     "test": "mocha test/**/*.spec.js",
-    "cover": "node_modules/istanbul/lib/cli cover node_modules/mocha/bin/_mocha -- test/**/*.spec.js"
+    "cover": "istanbul cover node_modules/mocha/bin/_mocha -- test/**/*.spec.js"
   },
   "dependencies": {
     "babel-polyfill": "^6.23.0",
