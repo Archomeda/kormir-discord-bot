@@ -3,13 +3,13 @@
 /**
  * The base provider for caching.
  */
-class Provider {
+class CacheProvider {
     /**
      * Constructs the cache provider.
      */
     constructor() {
-        if (new.target === Provider) {
-            throw new TypeError('Cannot construct Provider instances directly');
+        if (new.target === CacheProvider) {
+            throw new TypeError('Cannot construct CacheProvider instances directly');
         }
     }
 
@@ -78,4 +78,4 @@ class Provider {
     }
 }
 
-module.exports = Provider;
+module.exports = CacheProvider;

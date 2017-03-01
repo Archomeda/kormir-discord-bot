@@ -5,11 +5,12 @@ const i18next = Promise.promisifyAll(require('i18next'));
 const moment = require('moment');
 
 const CommandDatabaseModel = require('../CommandDatabaseModel');
+const bot = require('../../bot');
 
 
 class CommandDatabaseSchedule extends CommandDatabaseModel {
-    constructor(module, type) {
-        super(module, module.bot.database.Event, type);
+    constructor(module, type, options) {
+        super(module, bot.database.Event, type, options);
     }
 
     get paramsMap() {

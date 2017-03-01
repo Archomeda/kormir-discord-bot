@@ -1,34 +1,47 @@
 'use strict';
 
 const _ = require('lodash');
-const config = require('config');
-const camelCase = require('change-case').camelCase;
 const snakeCase = require('change-case').snakeCase;
 
 const ensureArray = require('../utils/array').ensureArray;
+const bot = require('../bot');
 
 
+/**
+ * Represents a base command for the bot.
+ */
 class Command {
-    constructor(module) {
+    /**
+     * Constructs a new base command.
+     * @param {Module} module - The module that owns this command.
+     * @param {Object} [options] - Extra options to set for the module, only name, id and defaultTrigger are supported.
+     */
+    constructor(module, options) {
         if (new.target === Command) {
-            throw new TypeError('cannot construct Command instances directly');
+            throw new TypeError('Cannot construct Command instances directly');
         }
 
-        this._module = module;
+        this.name = (options && options.name) || new.target.name.replace(/(.*?)(Command)?/, '$1');
+        this.id = (options && options.id) || snakeCase(this.name);
 
-        this.id = camelCase(new.target.name.replace(/(.*?)(Command)?/, '$1'));
-        this.trigger = null;
-        this._config = this.module.config.commands[snakeCase(this.id)];
-        this.helpText = null;
-        this.shortHelpText = null;
+        this._config = module.config.get(`commands.${this.id}`);
+        this._module = module;
         this._params = [];
 
         this._defaultMiddleware = [];
         this._middleware = [];
+
+        this.trigger = this.config.has('trigger') ? this.config.get('trigger') : options && options.defaultTrigger;
+        this.helpText = null;
+        this.shortHelpText = null;
+
+        if (!this.trigger) {
+            throw new TypeError('The trigger property cannot be undefined or null');
+        }
     }
 
     toString() {
-        return `${config.get('discord.command_prefix')}${this.trigger}`;
+        return `${bot.config.get('discord.command_prefix')}${this.trigger}`;
     }
 
     onCommand(response) {
@@ -44,7 +57,7 @@ class Command {
     }
 
     get permissionId() {
-        return `${snakeCase(this.module.id)}.${snakeCase(this.id)}`;
+        return `${this.module.id}.${this.id}`;
     }
 
     get params() {
@@ -104,7 +117,7 @@ class Command {
      * @private
      */
     _getUserPermissionGroups(user) {
-        const permissions = config.get('permissions');
+        const permissions = bot.config.get('permissions');
         const groups = [];
 
         for (let name in permissions) {
@@ -126,7 +139,7 @@ class Command {
      * @private
      */
     _getPermissionsList() {
-        const permissions = config.get('permissions');
+        const permissions = bot.config.get('permissions');
         const groups = {};
 
         for (let name in permissions) {

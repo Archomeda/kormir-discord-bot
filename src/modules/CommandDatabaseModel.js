@@ -16,9 +16,10 @@ class CommandDatabaseModel extends Command {
      * @param {Module} module - The module.
      * @param {Model} Model - The database model.
      * @param {string} type - The command type.
+     * @param {Object} [options] - Extra options to set for the module, only name, id and defaultTrigger are supported.
      */
-    constructor(module, Model, type) {
-        super(module);
+    constructor(module, Model, type, options) {
+        super(module, options);
 
         this.Model = Model;
         if (!['list', 'view', 'add', 'edit', 'delete'].includes(type)) {

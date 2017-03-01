@@ -11,7 +11,9 @@ const CommandDatabaseSchedule = require('./CommandDatabaseSchedule');
 
 class CommandEvent extends CommandDatabaseSchedule {
     constructor(module) {
-        super(module, 'view');
+        super(module, 'view', {
+            defaultTrigger: 'event'
+        });
 
         i18next.loadNamespacesAsync('schedule').then(() => {
             this.helpText = i18next.t('schedule:event.help');

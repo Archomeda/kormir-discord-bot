@@ -1,36 +1,39 @@
 'use strict';
 
-const config = require('config');
-const camelCase = require('change-case').camelCase;
+const snakeCase = require('change-case').snakeCase;
 const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
 const random = require('random-js')();
 
+const bot = require('../bot');
 const RestrictChannelsMiddleware = require('../middleware/RestrictChannelsMiddleware');
 const RestrictPermissionsMiddleware = require('../middleware/internal/RestrictPermissionsMiddleware');
 const ReplyWithMentionsMiddleware = require('../middleware/internal/ReplyWithMentionsMiddleware');
 const CommandRequest = require('./CommandRequest');
 
 
+/**
+ * Represents a base module for the bot.
+ */
 class Module {
-    constructor(bot, moduleConfig) {
+    /**
+     * Constructs a new base module.
+     * @param {Object} [options] - Extra options to set for the module, only name and id are supported.
+     */
+    constructor(options) {
         if (new.target === Module) {
-            throw new TypeError('cannot construct Module instances directly');
+            throw new TypeError('Cannot construct Module instances directly');
         }
         i18next.loadNamespaces('module');
 
-        this.name = new.target.name.replace(/(.*?)(Module)?/, '$1');
-        this.id = camelCase(this.name);
-        this._bot = bot;
-        this._config = moduleConfig;
+        this.name = (options && options.name) || new.target.name.replace(/(.*?)(Module)?/, '$1');
+        this.id = (options && options.id) || snakeCase(this.name);
+
+        this._config = bot.config.get(`modules.${this.id}`);
         this._commands = [];
         this._hooks = [];
 
-        this.bot.client.on('message', this.onMessage.bind(this));
-    }
-
-    get bot() {
-        return this._bot;
+        bot.client.on('message', this.onMessage.bind(this));
     }
 
     get config() {
@@ -45,6 +48,7 @@ class Module {
         return this._hooks;
     }
 
+
     registerCommand(command) {
         if (!command.config.enabled) {
             return;
@@ -52,7 +56,7 @@ class Module {
         command.trigger = command.config.trigger;
 
         const defaultMiddleware = [];
-        const configMiddleware = config.get('discord.command_middleware');
+        const configMiddleware = bot.config.get('discord.command_middleware');
         for (let name in configMiddleware) {
             if (configMiddleware.hasOwnProperty(name)) {
                 const options = configMiddleware[name];
@@ -62,7 +66,7 @@ class Module {
             }
         }
 
-        const permissions = config.get('permissions');
+        const permissions = bot.config.get('permissions');
         defaultMiddleware.push(new RestrictPermissionsMiddleware({ permissions }));
         defaultMiddleware.push(new ReplyWithMentionsMiddleware());
         command.defaultMiddleware = defaultMiddleware;
@@ -86,10 +90,9 @@ class Module {
         if (!hook.config.enabled) {
             return;
         }
-        const client = this.bot.client;
         for (let hookName in hook.hooks) {
             if (hook.hooks.hasOwnProperty(hookName)) {
-                client.on(hookName, hook.hooks[hookName].bind(hook));
+                bot.client.on(hookName, hook.hooks[hookName].bind(hook));
             }
         }
         this._hooks.push(hook);
@@ -150,7 +153,8 @@ class Module {
                         response.replyText = response.error.message;
                         break;
                     case 'ThrottleError':
-                        // Not something that's worth notifying people
+                        // Not something that's worth notifying people, wipe the replyText
+                        response.replyText = undefined;
                         break;
                     default: {
                         const code = random.hex(6).toUpperCase();

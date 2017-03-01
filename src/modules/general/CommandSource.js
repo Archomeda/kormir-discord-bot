@@ -9,7 +9,10 @@ const ReplyToMentionsMiddleware = require('../../middleware/ReplyToMentionsMiddl
 
 class CommandSource extends Command {
     constructor(module) {
-        super(module);
+        super(module, {
+            defaultTrigger: 'source'
+        });
+
         i18next.loadNamespacesAsync('general').then(() => {
             this.helpText = i18next.t('general:source.help');
             this.shortHelpText = i18next.t('general:source.short-help');

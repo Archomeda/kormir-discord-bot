@@ -6,6 +6,7 @@ const i18next = Promise.promisifyAll(require('i18next'));
 const moment = require('moment');
 const scheduler = require('node-schedule');
 
+const bot = require('../../bot');
 const Module = require('../Module');
 const CommandEvents = require('./CommandEvents');
 const CommandEvent = require('./CommandEvent');
@@ -15,8 +16,8 @@ const CommandDeleteEvent = require('./CommandDeleteEvent');
 
 
 class ModuleSchedule extends Module {
-    constructor(bot, moduleConfig) {
-        super(bot, moduleConfig);
+    constructor() {
+        super();
         i18next.loadNamespacesAsync('schedule');
 
         this.registerCommand(new CommandEvents(this));
@@ -37,7 +38,7 @@ class ModuleSchedule extends Module {
         }
         this.schedule = new Map();
 
-        return this.bot.database.Event.find({ start: { $gte: new Date() } }).then(events => {
+        return bot.database.Event.find({ start: { $gte: new Date() } }).then(events => {
             for (let event of events) {
                 this.scheduleEventReminders(event);
             }

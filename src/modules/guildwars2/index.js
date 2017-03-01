@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const config = require('config');
 const Discord = require('discord.js');
 const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
@@ -9,6 +8,7 @@ const i18next = Promise.promisifyAll(require('i18next'));
 const convertHtmlToMarkdown = require('../../utils/text').convertHtmlToMarkdown;
 const groupByNumberOfCharacters = require('../../utils/array').groupByNumberOfCharacters;
 
+const bot = require('../../bot');
 const Module = require('../Module');
 const CommandRegister = require('./CommandRegister');
 const CommandForceRegister = require('./CommandForceRegister');
@@ -21,28 +21,29 @@ const GuildLogChecker = require('./workers/GuildLogChecker');
 
 
 const emojis = {
-    copperConfig: config.get('discord.emojis.copper'),
-    silverConfig: config.get('discord.emojis.silver'),
-    goldConfig: config.get('discord.emojis.gold')
+    copperConfig: bot.config.get('discord.emojis.copper'),
+    silverConfig: bot.config.get('discord.emojis.silver'),
+    goldConfig: bot.config.get('discord.emojis.gold')
 };
 
 class ModuleGuildWars2 extends Module {
-    constructor(bot, moduleConfig) {
-        super(bot, moduleConfig);
+    constructor() {
+        super({
+            name: 'Guild Wars 2',
+            id: 'guildwars2'
+        });
         i18next.loadNamespacesAsync('guildwars2');
 
-        this.id = 'guildwars2';
-        this.name = 'Guild Wars 2';
         this.registerCommand(new CommandRegister(this));
         this.registerCommand(new CommandForceRegister(this));
         this.registerCommand(new CommandWiki(this));
         this.registerHook(new HookMemberRole(this));
         this.registerHook(new HookWorldRole(this));
 
-        if (this.config.release_checker.enabled) {
-            this.bot.client.once('ready', () => {
-                const timeout = (this.config.release_checker.timeout || 5) * 60 * 1000;
-                ReleaseChecker.start(timeout, 5000, { cache: this.bot.cache, gw2Api: this.bot.gw2Api });
+        if (this.config.has('release_checker.enabled') && this.config.get('release_checker.enabled')) {
+            bot.client.once('ready', () => {
+                const timeout = ((this.config.has('release_checker.timeout') && this.config.get('release_checker.timeout')) || 5) * 60 * 1000;
+                ReleaseChecker.start(timeout, 5000, { cache: bot.cache, gw2Api: bot.gw2Api });
 
                 ReleaseChecker.on('debug', message => console.log(message));
                 ReleaseChecker.on('error', err => {
@@ -53,15 +54,15 @@ class ModuleGuildWars2 extends Module {
                 ReleaseChecker.on('new release notes', this.onNewReleaseNotes.bind(this));
             });
         }
-        if (this.config.guild_log_checker.enabled) {
-            this.bot.client.once('ready', () => {
-                const timeout = (this.config.guild_log_checker.timeout || 10) * 60 * 1000;
+        if (this.config.has('guild_log_checker.enabled') && this.config.get('guild_log_checker.enabled')) {
+            bot.client.once('ready', () => {
+                const timeout = ((this.config.has('guild_log_checker.timeout') && this.config.get('guild_log_checker.timeout')) || 10) * 60 * 1000;
                 GuildLogChecker.start(timeout, 5000, {
-                    cache: this.bot.cache,
-                    gw2Api: this.bot.gw2Api,
-                    guildId: this.config.guild_id,
-                    apiKey: this.config.guild_leader_api_key,
-                    types: this.config.guild_log_checker.types
+                    cache: bot.cache,
+                    gw2Api: bot.gw2Api,
+                    guildId: this.config.get('guild_id'),
+                    apiKey: this.config.get('guild_leader_api_key'),
+                    types: this.config.get('guild_log_checker.types')
                 });
 
                 GuildLogChecker.on('debug', message => console.log(message));
@@ -80,17 +81,16 @@ class ModuleGuildWars2 extends Module {
 
 
     ensureGuildMembership(user, gw2Account) {
-        const role = this.config.guild_member_role;
+        const role = this.config.get('guild_member_role');
         if (!role) {
             return;
         }
 
-        const gw2Api = this.bot.gw2Api;
-        const key = this.config.guild_leader_api_key;
+        const key = this.config.get('guild_leader_api_key');
         const guildId = this.config.guild_id;
-        const Gw2Account = this.bot.database.Gw2Account;
+        const Gw2Account = bot.database.Gw2Account;
 
-        const doEnsure = account => gw2Api.authenticate(key).guild(guildId).members().get().then(members => {
+        const doEnsure = account => bot.gw2Api.authenticate(key).guild(guildId).members().get().then(members => {
             const member = _.find(members, ['name', account.accountName]);
             return member ? this.addToGuildRole(user) : this.removeFromGuildRole(user);
         });
@@ -106,29 +106,28 @@ class ModuleGuildWars2 extends Module {
     }
 
     addToGuildRole(user) {
-        const role = this.config.guild_member_role;
+        const role = this.config.has('guild_member_role') && this.config.get('guild_member_role');
         if (role && !user.roles.has(role)) {
             return user.addRole(role);
         }
     }
 
     removeFromGuildRole(user) {
-        const role = this.config.guild_member_role;
+        const role = this.config.has('guild_member_role') && this.config.get('guild_member_role');
         if (role && user.roles.has(role)) {
             return user.removeRole(role);
         }
     }
 
     ensureWorldMembership(user, gw2Account) {
-        const roles = this.config.world_member_roles;
+        const roles = this.config.has('world_member_roles') && this.config.get('world_member_roles');
         if (!roles || roles.length === 0) {
             return;
         }
 
-        const gw2Api = this.bot.gw2Api;
-        const Gw2Account = this.bot.database.Gw2Account;
+        const Gw2Account = bot.database.Gw2Account;
 
-        const doEnsure = account => gw2Api.authenticate(account.apiKey).account().get()
+        const doEnsure = account => bot.gw2Api.authenticate(account.apiKey).account().get()
             .then(accountInfo => this.applyWorldRoles(user, accountInfo.world));
 
         if (!gw2Account) {
@@ -142,7 +141,11 @@ class ModuleGuildWars2 extends Module {
     }
 
     applyWorldRoles(user, world) {
-        const worldRoles = this.config.world_member_roles;
+        if (!this.config.has('world_member_roles')) {
+            return;
+        }
+
+        const worldRoles = this.config.get('world_member_roles');
         const exec = [];
         if (worldRoles[world] && !user.roles.has(worldRoles[world])) {
             console.log(`Adding role ${worldRoles[world]}`);
@@ -161,9 +164,9 @@ class ModuleGuildWars2 extends Module {
 
 
     onNewBuild(build, date) {
-        const channelId = this.config.release_checker.target_channel;
+        const channelId = this.config.has('release_checker.target_channel') && this.config.get('release_checker.target_channel');
         let channel;
-        if ((channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
             channel.sendEmbed(new Discord.RichEmbed()
                 .setColor([0, 200, 0])
                 .setThumbnail('https://dviw3bl0enbyw.cloudfront.net/sprites/0000/0041/Frm_ICON_Announcements.jpg')
@@ -175,9 +178,9 @@ class ModuleGuildWars2 extends Module {
     }
 
     onNewReleaseNotes(releaseNotes, date) {
-        const channelId = this.config.release_checker.target_channel;
+        const channelId = this.config.has('release_checker.target_channel') && this.config.get('release_checker.target_channel');
         let channel;
-        if ((channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
             let text = convertHtmlToMarkdown(releaseNotes.description, 'feed');
             text = text.replace(/^([a-zA-Z0-9 ]+.\d{4})[^:]+: /, '');
             channel.sendEmbed(new Discord.RichEmbed()
@@ -193,9 +196,9 @@ class ModuleGuildWars2 extends Module {
 
 
     onUpdateMotd(motd, date) {
-        const channelId = this.config.guild_log_checker.target_channel;
+        const channelId = this.config.has('guild_log_checker.target_channel') && this.config.get('guild_log_checker.target_channel');
         let channel;
-        if ((channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
             // Try replacing the author's GW2 account name with their known Discord account
             const Gw2Account = this.bot.database.Gw2Account;
             Gw2Account.findOne({ accountName: motd.user }).then(account => {
@@ -217,9 +220,9 @@ class ModuleGuildWars2 extends Module {
     }
 
     onUpdateStash(stash, date) {
-        const channelId = this.config.guild_log_checker.target_channel;
+        const channelId = this.config.has('guild_log_checker.target_channel') && this.config.get('guild_log_checker.target_channel');
         let channel;
-        if ((channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
             for (let i = 0; i < stash.length; i++) {
                 if (stash[i].coins) {
                     stash[i].coins = this.convertCoinsToText(channel.guild, stash[i].coins);
@@ -238,9 +241,9 @@ class ModuleGuildWars2 extends Module {
     }
 
     sendGuildLogMessage(type, items, date) {
-        const channelId = this.config.guild_log_checker.target_channel;
+        const channelId = this.config.has('guild_log_checker.target_channel') && this.config.get('guild_log_checker.target_channel');
         let channel;
-        if ((channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
             // Get all GW2 account names
             const Gw2Account = this.bot.database.Gw2Account;
             const users = new Set();
@@ -288,7 +291,7 @@ class ModuleGuildWars2 extends Module {
             if (j === 0) {
                 embed.setDescription(messages[j]);
             } else {
-                embed.addField('\u200B', messages[j], true);
+                embed.addField('\u200B', messages[j]);
             }
         }
         return embed;

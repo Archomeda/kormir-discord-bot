@@ -3,7 +3,7 @@
 class Middleware {
     constructor() {
         if (new.target === Middleware) {
-            throw new TypeError('cannot construct Middleware instances directly');
+            throw new TypeError('Cannot construct Middleware instances directly');
         }
         this.name = this.constructor.name;
         this.order = 0;

@@ -1,6 +1,7 @@
 'use strict';
 
 const ThrottleError = require('../errors/ThrottleError');
+const bot = require('../bot');
 const Middleware = require('./Middleware');
 
 
@@ -15,11 +16,11 @@ class UserThrottleMiddleware extends Middleware {
 
     onCommand(response) {
         const request = response.request;
-        return request.module.bot.cache.get('throttle', request.message.author.id).then(cache => {
+        return bot.cache.get('throttle', request.message.author.id).then(cache => {
             if (cache) {
                 throw new ThrottleError(`User has been throttled (user ${request.message.author.fullUsername}, command: ${request.command.trigger})`, 'log');
             }
-            return request.module.bot.cache.set('throttle', request.message.author.id, this.options.duration, {}).return(response);
+            return bot.cache.set('throttle', request.message.author.id, this.options.duration, {}).return(response);
         });
     }
 }

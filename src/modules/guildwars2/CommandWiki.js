@@ -20,7 +20,10 @@ const wiki = new MWBot({
 
 class CommandWiki extends Command {
     constructor(module) {
-        super(module);
+        super(module, {
+            defaultTrigger: 'wiki'
+        });
+
         i18next.loadNamespacesAsync('guildwars2').then(() => {
             this.helpText = i18next.t('guildwars2:wiki.help');
             this.shortHelpText = i18next.t('guildwars2:wiki.short-help');

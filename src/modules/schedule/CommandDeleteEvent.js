@@ -10,7 +10,9 @@ const CommandDatabaseSchedule = require('./CommandDatabaseSchedule');
 
 class CommandDeleteEvent extends CommandDatabaseSchedule {
     constructor(module) {
-        super(module, 'delete');
+        super(module, 'delete', {
+            defaultTrigger: 'deleteevent'
+        });
 
         i18next.loadNamespacesAsync('schedule').then(() => {
             this.helpText = i18next.t('schedule:delete-event.help');

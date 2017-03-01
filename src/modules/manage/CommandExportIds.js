@@ -5,11 +5,14 @@ const i18next = Promise.promisifyAll(require('i18next'));
 
 const Command = require('../Command');
 const ReplyMethodMiddleware = require('../../middleware/ReplyMethodMiddleware');
+const bot = require('../../bot');
 
 
 class CommandExportIds extends Command {
     constructor(module) {
-        super(module);
+        super(module, {
+            defaultTrigger: 'exportids'
+        });
 
         i18next.loadNamespacesAsync('manage').then(() => {
             this.helpText = i18next.t('manage:export-ids.help');
@@ -19,9 +22,8 @@ class CommandExportIds extends Command {
     }
 
     onCommand(response) {
-        const client = this.module.bot.client;
         let result = [];
-        for (let server of client.guilds.array()) {
+        for (let server of bot.client.guilds.array()) {
             result.push(`=== ${server.name}: ${server.id} ===`);
             result.push(i18next.t('manage:export-ids.export-roles'));
             for (let role of server.roles.array().sort((a, b) => b.position - a.position)) {

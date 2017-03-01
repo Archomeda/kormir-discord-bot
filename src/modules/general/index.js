@@ -6,8 +6,8 @@ const CommandSource = require('./CommandSource');
 
 
 class ModuleGeneral extends Module {
-    constructor(bot, moduleConfig) {
-        super(bot, moduleConfig);
+    constructor() {
+        super();
 
         this.registerCommand(new CommandHelp(this));
         this.registerCommand(new CommandSource(this));

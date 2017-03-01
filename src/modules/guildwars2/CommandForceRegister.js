@@ -8,11 +8,15 @@ const CommandParam = require('../CommandParam');
 const CommandError = require('../../errors/CommandError');
 
 const RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
+const bot = require('../../bot');
 
 
 class CommandForceRegister extends Command {
     constructor(module) {
-        super(module);
+        super(module, {
+            defaultTrigger: 'forceregister'
+        });
+
         i18next.loadNamespacesAsync('guildwars2').then(() => {
             this.helpText = i18next.t('guildwars2:force-register.help');
             this.shortHelpText = i18next.t('guildwars2:force-register.short-help');
@@ -29,15 +33,14 @@ class CommandForceRegister extends Command {
         const discordId = response.request.params.id;
         const key = response.request.params.key;
 
-        const gw2Api = this.module.bot.gw2Api;
-        const Gw2Account = this.module.bot.database.Gw2Account;
+        const Gw2Account = bot.database.Gw2Account;
 
         return Gw2Account.find({ discordId }).then(accounts => {
             let account = accounts.length > 0 ? accounts[0] : undefined;
 
             return Promise.all([
-                gw2Api.authenticate(key).tokeninfo().get(),
-                gw2Api.authenticate(key).account().get()
+                bot.gw2Api.authenticate(key).tokeninfo().get(),
+                bot.gw2Api.authenticate(key).account().get()
             ]).then(([tokeninfo, accountinfo]) => {
                 // This doesn't check optional permissions since we don't need to, change this once it's required
                 if (!account) {

@@ -5,8 +5,8 @@ const CommandExportIds = require('./CommandExportIds');
 
 
 class ModuleManage extends Module {
-    constructor(bot, moduleConfig) {
-        super(bot, moduleConfig);
+    constructor() {
+        super();
 
         this.registerCommand(new CommandExportIds(this));
     }

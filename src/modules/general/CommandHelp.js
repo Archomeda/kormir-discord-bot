@@ -1,6 +1,5 @@
 'use strict';
 
-const config = require('config');
 const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
 
@@ -9,11 +8,15 @@ const CommandParam = require('../CommandParam');
 const CommandError = require('../../errors/CommandError');
 const CacheMiddleware = require('../../middleware/CacheMiddleware');
 const AutoRemoveMessageMiddleware = require('../../middleware/AutoRemoveMessageMiddleware');
+const bot = require('../../bot');
 
 
 class CommandHelp extends Command {
     constructor(module) {
-        super(module);
+        super(module, {
+            defaultTrigger: 'help'
+        });
+
         i18next.loadNamespacesAsync('general').then(() => {
             this.helpText = i18next.t('general:help.help');
             this.shortHelpText = i18next.t('general:help.short-help');
@@ -27,9 +30,9 @@ class CommandHelp extends Command {
     }
 
     onCommand(response) {
-        const modules = this.module.bot.modules;
+        const modules = bot.modules;
         const request = response.request;
-        const commandPrefix = config.get('discord.command_prefix');
+        const commandPrefix = bot.config.get('discord.command_prefix');
 
         if (request.params.command) {
             // Reply with help for a specific command
