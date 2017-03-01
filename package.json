@@ -39,8 +39,11 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "chai-sinon": "^2.8.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
+    "sinon": "^1.17.7",
+    "sinon-chai-in-order": "^0.1.0",
     "xo": "^0.17.1"
   },
   "xo": {
@@ -55,7 +58,9 @@
       "no-else-return": "warn",
       "no-multiple-empty-lines": [
         "error",
-        { "max": 2 }
+        {
+          "max": 2
+        }
       ],
       "no-negated-condition": "off",
       "no-prototype-builtins": "off",

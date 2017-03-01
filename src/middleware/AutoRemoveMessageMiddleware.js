@@ -51,13 +51,13 @@ class AutoRemoveMessageMiddleware extends Middleware {
 
         if (message.deletable) {
             if (response.error) {
-                if (this.isDisallowedError(response.error) && this.options.disallowed_request !== false) {
-                    message.delete(this.options.disallowed_request * 1000);
-                } else if (this.options.errored_request !== false) {
-                    message.delete(this.options.errored_request * 1000);
+                if (this.isDisallowedError(response.error) && this.options.disallowed_response !== false) {
+                    message.delete(this.options.disallowed_response * 1000);
+                } else if (this.options.errored_response !== false) {
+                    message.delete(this.options.errored_response * 1000);
                 }
-            } else if (this.options.request !== false) {
-                message.delete(this.options.request * 1000);
+            } else if (this.options.response !== false) {
+                message.delete(this.options.response * 1000);
             }
         }
 
