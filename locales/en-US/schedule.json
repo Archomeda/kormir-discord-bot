@@ -25,7 +25,7 @@
     "missing-title": "(missing title)",
     "response-item": "💠 {{start, ddd D MMM YYYY, H:mm z}} - Event {{id}}: {{title}}",
     "response-list": "The following upcoming events have been scheduled:\n\n{{events}}",
-    "response=empty": "There are currently no upcoming events scheduled."
+    "response-empty": "There are currently no upcoming events scheduled."
   },
   "event": {
     "help": "Shows a specific scheduled event.",
