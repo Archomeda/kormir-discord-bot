@@ -1,0 +1,13 @@
+{
+  "roll": {
+    "help": "Rolls one or more dice and gives the result.",
+    "short-help": "Rolls one or more dice",
+    "param-die": "The die you want to use (d2 - d100)",
+    "param-rolls": "The number of rolls (1 - 10)",
+
+    "response": "{{- user}} has rolled {{result}}.",
+    "response-die-out-of-range": "The die has to be between d2 and d100.",
+    "response-rolls-out-of-range": "You can only roll between 1 and 10 times.",
+    "response-rolling": "{{- user}} is rolling {{symbols}}"
+  }
+}
