@@ -13,6 +13,7 @@ const Module = require('../Module');
 const CommandRegister = require('./CommandRegister');
 const CommandForceRegister = require('./CommandForceRegister');
 const CommandWiki = require('./CommandWiki');
+const CommandQuaggan = require('./CommandQuaggan');
 const CommandCats = require('./CommandCats');
 const HookMemberRole = require('./HookMemberRole');
 const HookWorldRole = require('./HookWorldRole');
@@ -38,6 +39,7 @@ class ModuleGuildWars2 extends Module {
         this.registerCommand(new CommandRegister(this));
         this.registerCommand(new CommandForceRegister(this));
         this.registerCommand(new CommandWiki(this));
+        this.registerCommand(new CommandQuaggan(this));
         this.registerCommand(new CommandCats(this));
         this.registerHook(new HookMemberRole(this));
         this.registerHook(new HookWorldRole(this));

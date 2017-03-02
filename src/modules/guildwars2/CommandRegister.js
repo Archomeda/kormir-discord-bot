@@ -7,7 +7,6 @@ const random = require('random-js')();
 const Command = require('../Command');
 const CommandParam = require('../CommandParam');
 const CommandError = require('../../errors/CommandError');
-
 const RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
 const bot = require('../../bot');
 

@@ -123,6 +123,11 @@ modules:
         trigger: wiki
         enabled: true
 
+      # Get a random quaggan
+      quaggan:
+        trigger: quaggan
+        enabled: true
+
       # Everyone wants a cat! Or two, or three...
       cats:
         trigger: cats

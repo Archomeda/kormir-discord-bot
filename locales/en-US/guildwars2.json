@@ -31,6 +31,10 @@
     "response-not-found": "Your request did not come up with any results. Try using different search terms.",
     "response-no-title": "Please provide a wiki article title or search terms."
   },
+  "quaggan": {
+    "help": "Show a random quaggan.",
+    "short-help": "Show a random quaggan"
+  },
   "cats": {
     "help": "Show all the cats you own.",
     "short-help": "Show all the cats you own",

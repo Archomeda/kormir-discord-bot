@@ -127,7 +127,7 @@ class Module {
 
                     // Call actual command
                     response.replyText = response.callCommand();
-                    
+
                     // Catch empty responses to stop typing
                     if (!response.replyText && response.targetChannel.stopTyping && typing) {
                         response.targetChannel.stopTyping();
@@ -185,7 +185,7 @@ class Module {
                 // Send reply
                 if (typeof response.replyText === 'string') {
                     return response.targetChannel.sendMessage(response.replyText);
-                } else if (response.replyText.content && response.replyText.options) {
+                } else if (response.replyText.content || response.replyText.options) {
                     return response.targetChannel.send(response.replyText.content, response.replyText.options);
                 }
             }).then(message => {

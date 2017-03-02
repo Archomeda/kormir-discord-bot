@@ -8,7 +8,6 @@ const i18next = Promise.promisifyAll(require('i18next'));
 const Command = require('../Command');
 const CommandParam = require('../CommandParam');
 const CommandError = require('../../errors/CommandError');
-
 const bot = require('../../bot');
 
 
