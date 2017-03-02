@@ -11,9 +11,9 @@ const CommandError = require('../../errors/CommandError');
 
 const bot = require('../../bot');
 
+
 // Hardcoded cats, lye pls
 const availableCats = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 32];
-
 
 class CommandCats extends Command {
     constructor(module) {
@@ -39,11 +39,11 @@ class CommandCats extends Command {
                 return;
             }
 
-            return bot.gw2Api.account(account.apiKey).home().cats().get().then(cats => {
+            return bot.gw2Api.authenticate(account.apiKey).account().home().cats().get().then(cats => {
                 const user = (request.message.member && request.message.member.nickname) || request.message.author.username;
                 const toNames = cats => cats.map(cat => i18next.t([`guildwars2:cats.cat-${cat.id}`, 'guildwars2:cats.cat-unknown'], { hint: cat.hint }));
                 const ownedCats = toNames(cats);
-                const missingCats = toNames(_.differenceWith(availableCats, cats, (a, b) => a === b.id).map(cat => ({ id: cat.id, hint: 'no hint' })));
+                const missingCats = toNames(_.differenceWith(availableCats, cats, (a, b) => a === b.id).map(cat => ({ id: cat, hint: 'no hint' })));
 
                 if (ownedCats.length === 0) {
                     return i18next.t('guildwars2:cats.response-no-cats');
@@ -65,6 +65,7 @@ class CommandCats extends Command {
                     message.addField(i18next.t('guildwars2:cats.missing-cats'), missingCats.join(', '));
                 }
 
+                message.addField('\u200B', i18next.t('guildwars2:cats.response-more-information'));
                 return {
                     content: request.message.author.toString(),
                     options: {
