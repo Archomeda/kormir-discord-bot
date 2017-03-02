@@ -176,9 +176,19 @@ class Module {
             }
 
             // Call the middleware onResponse
-            return response.callMiddlewareOnResponse()
-                .then(() => response.targetChannel.sendMessage(response.replyText)) // Send reply
-                .then(message => response.callMiddlewareOnReply(message)); // Call the middleware onReply
+            return response.callMiddlewareOnResponse().then(() => {
+                // Send reply
+                if (typeof response.replyText === 'string') {
+                    return response.targetChannel.sendMessage(response.replyText);
+                } else if (response.replyText.content && response.replyText.options) {
+                    return response.targetChannel.send(response.replyText.content, response.replyText.options);
+                }
+            }).then(message => {
+                if (message) {
+                    // Call the middleware onReply
+                    return response.callMiddlewareOnReply(message);
+                }
+            });
         });
     }
 }
