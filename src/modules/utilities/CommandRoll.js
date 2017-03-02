@@ -25,8 +25,9 @@ class CommandRoll extends Command {
 
     onCommand(response) {
         const request = response.request;
-        let die = (request.params.die && parseInt(request.params.die, 10)) || 6;
-        let rolls = (request.params.rolls && parseInt(request.params.rolls, 10)) || 1;
+        const dieMatch = request.params.die && request.params.die.match(/d(\d+)/);
+        const die = (dieMatch && parseInt(dieMatch[1], 10)) || 6;
+        const rolls = (request.params.rolls && parseInt(request.params.rolls, 10)) || 1;
 
         if (!die || die < 2 || die > this.config.roll_max_die) {
             throw new CommandError(i18next.t('utilities:roll.response-die-out-of-range'));
@@ -47,7 +48,8 @@ class CommandRoll extends Command {
             );
         };
 
-        return request.message.channel.sendMessage(i18next.t('utilities:roll.response-rolling', {
+        // TODO: Need to find a better way of doing this
+        request.message.channel.sendMessage(i18next.t('utilities:roll.response-rolling', {
             user: request.message.author.toString(),
             symbols: generateSymbols(0)
         })).then(messageEdit => {

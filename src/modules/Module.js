@@ -127,6 +127,11 @@ class Module {
 
                     // Call actual command
                     response.replyText = response.callCommand();
+                    
+                    // Catch empty responses to stop typing
+                    if (!response.replyText && response.targetChannel.stopTyping && typing) {
+                        response.targetChannel.stopTyping();
+                    }
 
                     // Clear the promises, if any
                     if (response.replyText && response.replyText.then) {
