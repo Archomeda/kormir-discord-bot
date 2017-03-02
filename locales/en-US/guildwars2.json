@@ -31,6 +31,47 @@
     "response-not-found": "Your request did not come up with any results. Try using different search terms.",
     "response-no-title": "Please provide a wiki article title or search terms."
   },
+  "cats": {
+    "help": "Show all the cats you own.",
+    "short-help": "Show all the cats you own",
+    "cat-1": "Beetletun cat",
+    "cat-2": "Lion's Shadow Inn cat",
+    "cat-3": "Lion's Arch cooking station cat",
+    "cat-4": "Hawkgates cooking station cat",
+    "cat-5": "Divinity's Reach cooking station cat",
+    "cat-6": "Dry Top Entry cat",
+    "cat-7": "Prosperity cat",
+    "cat-8": "Camp Resolve cat",
+    "cat-9": "Vinewrath Tangle cat",
+    "cat-10": "The Grove day cat",
+    "cat-11": "The Grove night cat",
+    "cat-12": "Warrior cat",
+    "cat-13": "Mesmer cat",
+    "cat-14": "Ranger cat",
+    "cat-15": "Guardian cat",
+    "cat-16": "Elementalist cat",
+    "cat-17": "Engineer cat",
+    "cat-18": "Revenant cat",
+    "cat-19": "Thief cat",
+    "cat-20": "Necromancer cat",
+    "cat-21": "Ember Bay skritt cat",
+    "cat-22": "Ember Bay circus cat",
+    "cat-23": "Feline Familiar",
+    "cat-24": "Bitterfrost Frontier snow leopard cub",
+    "cat-25": "Black Citadel soup cat",
+    "cat-26": "Hoelbrak Snow soup cat",
+    "cat-27": "Rata Sum soup cat",
+    "cat-28": "The Grove soup cat",
+    "cat-29": "Lady Wisteria Whiskington",
+    "cat-32": "Ghost cat",
+    "cat-unknown": "Unknown cat ({{hint}})",
+    "owned-cats": "Owned",
+    "missing-cats": "Missing",
+    "response-title": "{{user}}'s cats",
+    "response-no-cats": "You currently don't own any of the cats 😿",
+    "response-all-cats": "You own all the cats 😻",
+    "response-number-cats": "You own {{count}} out of {{total}} cats 😺"
+  },
   "build": {
     "help": "Shows the live Guild Wars 2 build and returns a link to the last known patch notes.",
     "short-help": "Shows the live Guild Wars 2 build and the last known patch notes"
@@ -58,5 +99,8 @@
     "treasury-description": "● {{user}} has deposited {{count}}x {{item}}",
     "upgrade-title": "Guild Upgrades",
     "upgrade-description": "● {{user}} has added {{count}}x {{upgrade}}"
+  },
+  "api": {
+    "response-error": "The API responded with the following error: {{error}}"
   }
 }
