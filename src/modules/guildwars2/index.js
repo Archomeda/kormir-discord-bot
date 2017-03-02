@@ -170,7 +170,7 @@ class ModuleGuildWars2 extends Module {
     onNewBuild(build, date) {
         const channelId = this.config.has('release_checker.target_channel') && this.config.get('release_checker.target_channel');
         let channel;
-        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = bot.client.channels.get(channelId)) && channel.type === 'text') {
             channel.sendEmbed(new Discord.RichEmbed()
                 .setColor([0, 200, 0])
                 .setThumbnail('https://dviw3bl0enbyw.cloudfront.net/sprites/0000/0041/Frm_ICON_Announcements.jpg')
@@ -184,7 +184,7 @@ class ModuleGuildWars2 extends Module {
     onNewReleaseNotes(releaseNotes, date) {
         const channelId = this.config.has('release_checker.target_channel') && this.config.get('release_checker.target_channel');
         let channel;
-        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = bot.client.channels.get(channelId)) && channel.type === 'text') {
             let text = convertHtmlToMarkdown(releaseNotes.description, 'feed');
             text = text.replace(/^([a-zA-Z0-9 ]+.\d{4})[^:]+: /, '');
             channel.sendEmbed(new Discord.RichEmbed()
@@ -202,9 +202,9 @@ class ModuleGuildWars2 extends Module {
     onUpdateMotd(motd, date) {
         const channelId = this.config.has('guild_log_checker.target_channel') && this.config.get('guild_log_checker.target_channel');
         let channel;
-        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = bot.client.channels.get(channelId)) && channel.type === 'text') {
             // Try replacing the author's GW2 account name with their known Discord account
-            const Gw2Account = this.bot.database.Gw2Account;
+            const Gw2Account = bot.database.Gw2Account;
             Gw2Account.findOne({ accountName: motd.user }).then(account => {
                 let discordUser = account ? channel.guild.members.get(account.discordId) : undefined;
 
@@ -226,7 +226,7 @@ class ModuleGuildWars2 extends Module {
     onUpdateStash(stash, date) {
         const channelId = this.config.has('guild_log_checker.target_channel') && this.config.get('guild_log_checker.target_channel');
         let channel;
-        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = bot.client.channels.get(channelId)) && channel.type === 'text') {
             for (let i = 0; i < stash.length; i++) {
                 if (stash[i].coins) {
                     stash[i].coins = this.convertCoinsToText(channel.guild, stash[i].coins);
@@ -247,9 +247,9 @@ class ModuleGuildWars2 extends Module {
     sendGuildLogMessage(type, items, date) {
         const channelId = this.config.has('guild_log_checker.target_channel') && this.config.get('guild_log_checker.target_channel');
         let channel;
-        if (channelId && (channel = this.bot.client.channels.get(channelId)) && channel.type === 'text') {
+        if (channelId && (channel = bot.client.channels.get(channelId)) && channel.type === 'text') {
             // Get all GW2 account names
-            const Gw2Account = this.bot.database.Gw2Account;
+            const Gw2Account = bot.database.Gw2Account;
             const users = new Set();
             for (let i = 0; i < items.length; i++) {
                 for (let userType of ['user', 'invited_by', 'kicked_by', 'changed_by']) {

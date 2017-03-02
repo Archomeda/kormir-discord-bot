@@ -71,7 +71,7 @@ class ModuleSchedule extends Module {
     postEventReminder(event) {
         const timeToEvent = moment().to(event.start);
         for (let channelId of event.channels) {
-            const channel = this.bot.client.channels.get(channelId);
+            const channel = bot.client.channels.get(channelId);
             if (channel && channel.type === 'text') {
                 try {
                     let message;
