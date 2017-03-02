@@ -1,1 +1,1 @@
---timeout 10000
+--require babel-polyfill --timeout 10000
