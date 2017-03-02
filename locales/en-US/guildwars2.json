@@ -70,7 +70,8 @@
     "response-title": "{{user}}'s cats",
     "response-no-cats": "You currently don't own any of the cats 😿",
     "response-all-cats": "You own all the cats 😻",
-    "response-number-cats": "You own {{count}} out of {{total}} cats 😺"
+    "response-number-cats": "You own {{count}} out of {{total}} cats 😺",
+    "response-more-information": "For more information, [go to the wiki](https://wiki.guildwars2.com/wiki/Hungry_cat_scavenger_hunt)."
   },
   "build": {
     "help": "Shows the live Guild Wars 2 build and returns a link to the last known patch notes.",
