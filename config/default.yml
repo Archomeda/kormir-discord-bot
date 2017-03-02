@@ -123,6 +123,11 @@ modules:
         trigger: wiki
         enabled: true
 
+      # Everyone wants a cat! Or two, or three...
+      cats:
+        trigger: cats
+        enabled: true
+
     hooks:
       member_role:
         enabled: false
