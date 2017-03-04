@@ -12,7 +12,7 @@ chai.use(chaiSinon);
 chai.use(sinonChaiInOrder);
 
 describe('AutoRemoveMessageMiddleware class', () => {
-    it('it constructs an AutoRemoveMessageMiddleware object properly with defaults', () => {
+    it('it constructs the object properly with defaults', () => {
         let middleware;
         expect(() => {
             middleware = new AutoRemoveMessageMiddleware();
@@ -27,7 +27,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
         expect(middleware.options.types).to.deep.equal(['text']);
     });
 
-    it('it constructs an AutoRemoveMessageMiddleware object properly with non-defaults', () => {
+    it('it constructs the object properly with non-defaults', () => {
         let middleware;
         expect(() => {
             middleware = new AutoRemoveMessageMiddleware({
@@ -48,6 +48,21 @@ describe('AutoRemoveMessageMiddleware class', () => {
         expect(middleware.options.request).to.be.true;
         expect(middleware.options.response).to.be.true;
         expect(middleware.options.types).to.deep.equal(['dm']);
+    });
+
+    it(`returns the original parameter for non-used functions`, () => {
+        const middleware = new AutoRemoveMessageMiddleware();
+        const response = {
+            should: {
+                be: {
+                    the: {
+                        same: 'object'
+                    }
+                }
+            }
+        };
+
+        expect(middleware.onResponse(response)).to.deep.equal(response);
     });
 
     it('skips deleting the original message when the channel type does not match', () => {

@@ -10,7 +10,7 @@ const Command = require('../Command');
 const CommandParam = require('../CommandParam');
 const CommandError = require('../../errors/CommandError');
 const CacheMiddleware = require('../../middleware/CacheMiddleware');
-const ReplyToMentionsMiddleware = require('../../middleware/ReplyToMentionsMiddleware');
+const MentionableCommandMiddleware = require('../../middleware/MentionableCommandMiddleware');
 const RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
 
 
@@ -32,7 +32,7 @@ class CommandWiki extends Command {
 
         this.middleware = [
             new RestrictChannelsMiddleware({ types: 'text' }),
-            new ReplyToMentionsMiddleware(),
+            new MentionableCommandMiddleware(),
             new CacheMiddleware()
         ];
     }

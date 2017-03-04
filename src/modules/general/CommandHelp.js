@@ -87,7 +87,7 @@ class CommandHelp extends Command {
             }
         }
 
-        middleware = command.allMiddleware.find(m => m.name === 'ReplyToMentionsMiddleware');
+        middleware = command.allMiddleware.find(m => m.name === 'MentionableCommandMiddleware');
         if (middleware) {
             // Mentions are allowed
             if (middleware.options.strict) {

@@ -4,7 +4,7 @@ const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
 
 const Command = require('../Command');
-const ReplyToMentionsMiddleware = require('../../middleware/ReplyToMentionsMiddleware');
+const MentionableCommandMiddleware = require('../../middleware/MentionableCommandMiddleware');
 
 
 class CommandSource extends Command {
@@ -18,7 +18,7 @@ class CommandSource extends Command {
             this.shortHelpText = i18next.t('general:source.short-help');
         });
 
-        this.middleware = new ReplyToMentionsMiddleware();
+        this.middleware = new MentionableCommandMiddleware();
     }
 
     onCommand(response) {

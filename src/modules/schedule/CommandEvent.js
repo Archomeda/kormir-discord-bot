@@ -4,7 +4,7 @@ const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
 
 const CommandParam = require('../CommandParam');
-const ReplyToMentionsMiddleware = require('../../middleware/ReplyToMentionsMiddleware');
+const MentionableCommandMiddleware = require('../../middleware/MentionableCommandMiddleware');
 const RestrictChannelsMiddleware = require('../../middleware/RestrictChannelsMiddleware');
 const CommandDatabaseSchedule = require('./CommandDatabaseSchedule');
 
@@ -23,7 +23,7 @@ class CommandEvent extends CommandDatabaseSchedule {
 
         this.middleware = [
             new RestrictChannelsMiddleware({ types: 'text' }),
-            new ReplyToMentionsMiddleware()
+            new MentionableCommandMiddleware()
         ];
     }
 

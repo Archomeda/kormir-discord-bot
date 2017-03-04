@@ -4,7 +4,6 @@ const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
 
 const Command = require('../Command');
-const ReplyMethodMiddleware = require('../../middleware/ReplyMethodMiddleware');
 const bot = require('../../bot');
 
 
@@ -17,8 +16,6 @@ class CommandExportIds extends Command {
         i18next.loadNamespacesAsync('manage').then(() => {
             this.helpText = i18next.t('manage:export-ids.help');
         });
-
-        this.middleware = new ReplyMethodMiddleware({ method: 'dm' });
     }
 
     onCommand(response) {

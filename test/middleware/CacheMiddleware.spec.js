@@ -14,7 +14,7 @@ chai.use(chaiSinon);
 chai.use(sinonChaiInOrder);
 
 describe('CacheMiddleware class', () => {
-    it('it constructs an CacheMiddleware object properly with defaults', () => {
+    it('it constructs the object properly with defaults', () => {
         let middleware;
         expect(() => {
             middleware = new CacheMiddleware();
@@ -23,7 +23,7 @@ describe('CacheMiddleware class', () => {
         expect(middleware.options.duration).to.equal(5 * 60);
     });
 
-    it('it constructs an CacheMiddleware object properly with non-defaults', () => {
+    it('it constructs the object properly with non-defaults', () => {
         let middleware;
         expect(() => {
             middleware = new CacheMiddleware({
@@ -32,6 +32,21 @@ describe('CacheMiddleware class', () => {
         }).to.not.throw(TypeError);
 
         expect(middleware.options.duration).to.equal(10);
+    });
+
+    it(`returns the original parameter for non-used functions`, () => {
+        const middleware = new CacheMiddleware();
+        const response = {
+            should: {
+                be: {
+                    the: {
+                        same: 'object'
+                    }
+                }
+            }
+        };
+
+        expect(middleware.onReply(response)).to.deep.equal(response);
     });
 
     it('returns the original object when nothing has been cached', () => {

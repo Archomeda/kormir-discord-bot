@@ -3,30 +3,27 @@
 const Middleware = require('./Middleware');
 
 
-class ReplyMethodMiddleware extends Middleware {
+class ReplyChannelMiddleware extends Middleware {
     constructor(options) {
         super(options);
         const defaultOptions = {
-            method: undefined
+            channel: undefined
         };
         this.options = Object.assign({}, defaultOptions, options);
     }
 
     onCommand(response) {
         const request = response.request;
-        switch (this.options.method) {
+        switch (this.options.channel) {
             case 'dm':
                 response.targetChannel = request.message.author.dmChannel;
                 break;
             default:
-                if (this.options.method) {
-                    // Assume we have a channel id instead
-                    response.targetChannel = request.message.guild.channels.get(this.options.channel);
-                }
+                response.targetChannel = request.message.guild.channels.get(this.options.channel);
                 break;
         }
         return response;
     }
 }
 
-module.exports = ReplyMethodMiddleware;
+module.exports = ReplyChannelMiddleware;
