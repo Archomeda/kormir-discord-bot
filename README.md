@@ -5,20 +5,24 @@ While this bot is technically designed for their Discord server, you can adapt i
 ## Features
 The bot can do various tasks that helps the guild on the Discord server.
  - **Guild Wars 2**
+   - Discord Synchronization
+     - Link Discord and Guild Wars 2 accounts with API keys
+     - Automatically manage roles of world and/or guild members
    - Accounts
-     - Link Discord accounts with Guild Wars 2 accounts by registering API keys
-     - Automatically manage roles of world members
+     - Home instance cats progression
    - Guilds
-     - Automatically manage roles of guild members
-     - Post various guild logs
+     - Post various guild logs automatically
    - Other
-     - Post new builds and release notes
-     - Querying the Guild Wars 2 wiki for something
+     - Post new builds and release notes automatically
+     - Query the Guild Wars 2 wiki for something
+     - Post random quaggans
  - **Event scheduling**
    - Add, edit and remove events with a title, description, associated channels and people/roles
    - Automatically post reminders about an event
- - **Other**
-   - Exporting the list of role, channel and account ids to help configuring the bot *(restricted by permissions by default)*
+ - **Management**
+   - Exporting the list of role, channel and account ids to help configuring the bot (restricted by permissions by default)
+ - **Utilities**
+   - Rolling dice
 
 ### Available commands
 You can type `!help` in any text channel to receive the list of available commands.
