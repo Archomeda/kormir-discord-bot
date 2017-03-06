@@ -17,7 +17,7 @@ class CommandRoll extends Command {
             this.helpText = i18next.t('utilities:roll.help');
             this.shortHelpText = i18next.t('utilities:roll.short-help');
             this.params = [
-                new CommandParam('input', i18next.t('utilities:roll.param-input', { max_dice: this.config.get('max_dice'), max_faces: this.config.get('max_faces') }), true, undefined, true),
+                new CommandParam('input', i18next.t('utilities:roll.param-input', { max_dice: this.config.get('max_dice'), max_faces: this.config.get('max_faces') }), true, undefined, true)
             ];
         });
     }
@@ -84,7 +84,7 @@ class CommandRoll extends Command {
                         text = i18next.t('utilities:roll.response-transformation', {
                             user: receiver.toString(),
                             rolls,
-                            transformation: `${result.transformation > 0 ? `+${result.transformation}` : result.transformation} = **${total + result.transformation}**`,
+                            transformation: `${result.transformation > 0 ? `+${result.transformation}` : result.transformation} = **${total + result.transformation}**`
                         });
                     }
                     message.edit(text);
