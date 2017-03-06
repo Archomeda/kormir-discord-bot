@@ -2,12 +2,12 @@
   "roll": {
     "help": "Rolls one or more dice and gives the result.",
     "short-help": "Rolls one or more dice",
-    "param-die": "The die you want to use (d2 - d100)",
-    "param-rolls": "The number of rolls (1 - 10)",
-
-    "response": "{{- user}} has rolled {{result}}.",
-    "response-die-out-of-range": "The die has to be between d2 and d100.",
-    "response-rolls-out-of-range": "You can only roll between 1 and 10 times.",
+    "param-input": "The input in format AdB+C or AdB-C, where A is the number of dice, B the number of faces and C the transformation. A has to be between 1 and {{max_dice}} (if A is not given, A is assumed 1). B has to be between 2 and {{max_faces}} (if B is not given, B is assumed 6). If C is not given, no transformation is applied.",
+    "response-normal": "{{- user}} has rolled {{rolls}}.",
+    "response-transformation": "{{- user}} has rolled {{rolls}}. {{transformation}}.",
+    "response-invalid-input": "The input is invalid.",
+    "response-dice-out-of-range": "You can only roll between 1 and {{max}} times.",
+    "response-faces-out-of-range": "The die has to have between 2 and {{max}} faces.",
     "response-rolling": "{{- user}} is rolling {{symbols}}"
   }
 }

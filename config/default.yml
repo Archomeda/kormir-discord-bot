@@ -183,6 +183,8 @@ modules:
       roll:
         trigger: roll
         enabled: true
+        max_dice: 10
+        max_faces: 100
 
 
 #####

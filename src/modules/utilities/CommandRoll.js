@@ -17,26 +17,35 @@ class CommandRoll extends Command {
             this.helpText = i18next.t('utilities:roll.help');
             this.shortHelpText = i18next.t('utilities:roll.short-help');
             this.params = [
-                new CommandParam('die', i18next.t('utilities:roll.param-die'), true),
-                new CommandParam('rolls', i18next.t('utilities:roll.param-rolls'), true)
+                new CommandParam('input', i18next.t('utilities:roll.param-input', { max_dice: this.config.get('max_dice'), max_faces: this.config.get('max_faces') }), true, undefined, true),
             ];
         });
     }
 
     onCommand(response) {
         const request = response.request;
-        const dieMatch = request.params.die && request.params.die.match(/d(\d+)/);
-        const die = (dieMatch && parseInt(dieMatch[1], 10)) || 6;
-        const rolls = (request.params.rolls && parseInt(request.params.rolls, 10)) || 1;
-
-        if (!die || die < 2 || die > this.config.roll_max_die) {
-            throw new CommandError(i18next.t('utilities:roll.response-die-out-of-range'));
-        }
-        if (!rolls || rolls < 1 || rolls > this.config.roll_max_rolls) {
-            throw new CommandError(i18next.t('utilities:roll.response-rolls-out-of-range'));
+        const dieMatch = request.params.input ? request.params.input.match(/^(\d*)d(\d*)(?:([+-]\d+))?$/) : [];
+        if (!dieMatch) {
+            throw new CommandError(i18next.t('utilities:roll.response-invalid-input'));
         }
 
-        const result = random.dice(die, rolls);
+        const dice = dieMatch[1] || 1;
+        const faces = dieMatch[2] || 6;
+        const transformation = dieMatch[3] ? parseInt(dieMatch[3], 10) : 0;
+
+        const max_dice = this.config.get('max_dice');
+        const max_faces = this.config.get('max_faces');
+        if (dice < 1 || dice > max_dice) {
+            throw new CommandError(i18next.t('utilities:roll.response-dice-out-of-range', { max: max_dice }));
+        }
+        if (faces < 2 || faces > max_faces) {
+            throw new CommandError(i18next.t('utilities:roll.response-faces-out-of-range', { max: max_faces }));
+        }
+
+        const result = {
+            rolls: random.dice(faces, dice),
+            transformation
+        };
 
         const generateSymbols = index => {
             const black = '◾';
@@ -62,10 +71,23 @@ class CommandRoll extends Command {
                     setTimeout(update, 600);
                     i++;
                 } else {
-                    message.edit(i18next.t('utilities:roll.response', {
-                        user: receiver.toString(),
-                        result: result.join(', ')
-                    }));
+                    const total = result.rolls.reduce((a, b) => a + b, 0);
+                    const rolls = result.rolls.length === 1 ? `**${result.rolls[0]}**` : `${result.rolls.join(' + ')} = **${total}**`;
+
+                    let text;
+                    if (!result.transformation) {
+                        text = i18next.t('utilities:roll.response-normal', {
+                            user: receiver.toString(),
+                            rolls
+                        });
+                    } else {
+                        text = i18next.t('utilities:roll.response-transformation', {
+                            user: receiver.toString(),
+                            rolls,
+                            transformation: `${result.transformation > 0 ? `+${result.transformation}` : result.transformation} = **${total + result.transformation}**`,
+                        });
+                    }
+                    message.edit(text);
                 }
             })(messageEdit, result, request.message.author, 1);
             setTimeout(update, 600);

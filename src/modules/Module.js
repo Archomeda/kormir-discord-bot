@@ -126,7 +126,11 @@ class Module {
                     }
 
                     // Call actual command
-                    response.replyText = response.callCommand();
+                    try {
+                        response.replyText = response.callCommand();
+                    } catch (err) {
+                        response.error = err;
+                    }
 
                     // Catch empty responses to stop typing
                     if (!response.replyText && response.targetChannel.stopTyping && typing) {
