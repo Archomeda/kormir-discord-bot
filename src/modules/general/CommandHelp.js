@@ -90,11 +90,7 @@ class CommandHelp extends Command {
         middleware = command.allMiddleware.find(m => m.name === 'MentionableCommandMiddleware');
         if (middleware) {
             // Mentions are allowed
-            if (middleware.options.strict) {
-                text.push(i18next.t('general:help.command-restriction-mentions-only'));
-            } else {
-                text.push(i18next.t('general:help.command-restriction-mentions'));
-            }
+            text.push(i18next.t('general:help.command-restriction-mentions'));
         }
         return text.join(', ');
     }

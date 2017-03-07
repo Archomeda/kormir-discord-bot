@@ -1,7 +1,7 @@
 {
   "register": {
-    "help": "Registers your Guild Wars 2 account with your Discord account by using a Guild Wars 2 API key.",
-    "short-help": "Registers your Guild Wars 2 account by using an API key",
+    "help": "Registers your Guild Wars 2 account to your Discord account with a Guild Wars 2 API key.",
+    "short-help": "Registers your Guild Wars 2 account with an API key",
     "param-key": "Guild Wars 2 account API key",
     "response-info": "Registering your Guild Wars 2 API key with your Discord account is very easy. Please follow these steps:\n\n",
     "response-reregister": "You've already registered the following API key: `{{key}}`. Continuing will replace your existing API key:\n\n",
@@ -14,8 +14,8 @@
     "response-api-error-unknown": "An unknown API error occured."
   },
   "force-register": {
-    "help": "Force-registers a Guild Wars 2 account with a specified Discord account id by using a Guild Wars 2 API key, bypassing the ownership check.",
-    "short-help": "Force-registers a Guild Wars 2 account to a Discord account by using an API key",
+    "help": "Force-registers a Guild Wars 2 account to a specified Discord account id with a Guild Wars 2 API key, bypassing the ownership check.",
+    "short-help": "Force-registers a Guild Wars 2 account to a Discord account with an API key",
     "param-id": "The Discord account id (can be obtained by enabling developer mode, right clicking on a Discord account and clicking *Copy ID*)",
     "param-key": "Guild Wars 2 account API key",
     "response-registered": "Successfully registered {{account_name}}.",

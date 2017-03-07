@@ -6,7 +6,6 @@
     "command-restriction-dm": "DM only",
     "command-restriction-specific-channels": "specific server channels only",
     "command-restriction-channels": "server channels only",
-    "command-restriction-mentions-only": "strictly mentionable",
     "command-restriction-mentions": "mentionable",
     "command-restriction-permissions": "might be restricted by permissions",
     "command-param-restriction-optional": "optional",
