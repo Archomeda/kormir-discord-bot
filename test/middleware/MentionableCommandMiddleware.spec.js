@@ -54,6 +54,23 @@ describe('MentionableCommandMiddleware class', () => {
         expect(result.targetUsers).to.deep.equal([{ id: '1234' }]);
     });
 
+    it('doesn\'t overwrite the target users when there are no mentions', () => {
+        const middleware = new MentionableCommandMiddleware();
+        const response = {
+            request: {
+                message: {
+                    author: { id: '123' },
+                    mentions: {
+                        users: new Collection()
+                    }
+                }
+            }
+        };
+
+        const result = middleware.onCommand(response);
+        expect(result.targetUsers).to.be.undefined;
+    });
+
     it('filters the author', () => {
         const middleware = new MentionableCommandMiddleware();
         const response = {
