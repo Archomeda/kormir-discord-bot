@@ -27,7 +27,7 @@ class CommandEvents extends CommandDatabaseSchedule {
 
     formatResult(response, result) {
         const list = [];
-        if (list.length === 0) {
+        if (result.length === 0) {
             return i18next.t('schedule:events.response-empty');
         }
 
