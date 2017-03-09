@@ -32,12 +32,12 @@
     "response-no-title": "Please provide a wiki article title or search terms."
   },
   "quaggan": {
-    "help": "Show a random quaggan.",
-    "short-help": "Show a random quaggan"
+    "help": "Shows a random quaggan.",
+    "short-help": "Shows a random quaggan"
   },
   "cats": {
-    "help": "Show all the cats you own.",
-    "short-help": "Show all the cats you own",
+    "help": "Shows all the cats you own.",
+    "short-help": "Shows all the cats you own",
     "cat-1": "Beetletun cat",
     "cat-2": "Lion's Shadow Inn cat",
     "cat-3": "Lion's Arch cooking station cat",
@@ -76,6 +76,39 @@
     "response-all-cats": "You own all the cats 😻",
     "response-number-cats": "You own {{count}} out of {{total}} cats 😺",
     "response-more-information": "For more information, [go to the wiki](https://wiki.guildwars2.com/wiki/Hungry_cat_scavenger_hunt)."
+  },
+  "raids": {
+    "help": "Shows your raid progress of this week.",
+    "short-help": "Shows your raid progress",
+    "raid-forsaken_thicket": "Forsaken Ticket",
+    "wing-spirit_vale": "Spirit Vale",
+    "encounter-vale_guardian": "Vale Guardian",
+    "encounter-spirit_woods": "Spirit Woods",
+    "encounter-gorseval": "Gorseval",
+    "encounter-sabetha": "Sabetha",
+    "wing-salvation_pass": "Salvation Pass",
+    "encounter-slothasor": "Slothasor",
+    "encounter-bandit_trio": "Bandit Trio",
+    "encounter-matthias": "Matthias",
+    "wing-stronghold_of_the_faithful": "Stronghold of the Faithful",
+    "encounter-escort": "Escort",
+    "encounter-keep_construct": "Keep Construct",
+    "encounter-twisted_castle": "Twisted Castle",
+    "raid-bastion_of_the_penitent": "Bastion of the Penitent",
+    "wing-bastion_of_the_penitent": "Bastion of the Penitent",
+    "encounter-xera": "Xera",
+    "encounter-cairn": "Cairn the Indomitable",
+    "encounter-mursaat_overseer": "Mursaat Overseer",
+    "encounter-samarog": "Samarog",
+    "encounter-deimos": "Deimos",
+    "raid-unknown": "Raid {{id}}",
+    "wing-unknown": "Wing {{id}}",
+    "encounter-unknown": "Encounter {{id}}",
+    "response-title": "{{user}}'s weekly raid progress",
+    "response-raid-wing-field": "{{raid}}: {{wing}}",
+    "response-wing-field": "{{wing}}",
+    "response-encounter-done": "☑ {{encounter}}",
+    "response-encounter-not-done": "➖ {{encounter}}"
   },
   "build": {
     "help": "Shows the live Guild Wars 2 build and returns a link to the last known patch notes.",

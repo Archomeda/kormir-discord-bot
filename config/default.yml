@@ -123,14 +123,19 @@ modules:
         trigger: wiki
         enabled: true
 
-      # Get a random quaggan
-      quaggan:
-        trigger: quaggan
-        enabled: true
-
       # Everyone wants a cat! Or two, or three...
       cats:
         trigger: cats
+        enabled: true
+
+      # Weekly account progress for defeated raid wing encounters
+      raids:
+        trigger: raids
+        enabled: true
+
+      # Get a random quaggan
+      quaggan:
+        trigger: quaggan
         enabled: true
 
     hooks:
