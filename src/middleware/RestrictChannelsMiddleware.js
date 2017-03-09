@@ -13,15 +13,16 @@ class RestrictChannelsMiddleware extends Middleware {
     constructor(options) {
         super(options);
         this.order = -995;
-        const defaultOptions = {
+        this.options.types = ensureArray(this.options.types);
+        this.options.channels = ensureArray(this.options.channels);
+        i18next.loadNamespacesAsync('middleware');
+    }
+
+    get defaultOptions() {
+        return {
             types: ['text', 'dm'],
             channels: []
         };
-        this.options = Object.assign({}, defaultOptions, options);
-        this.options.types = ensureArray(this.options.types);
-        this.options.channels = ensureArray(this.options.channels);
-
-        i18next.loadNamespacesAsync('middleware');
     }
 
     onCommand(response) {

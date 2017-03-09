@@ -13,26 +13,6 @@ chai.use(chaiSinon);
 chai.use(sinonChaiInOrder);
 
 describe('ReplyChannelMiddleware class', () => {
-    it('it constructs the object properly with defaults', () => {
-        let middleware;
-        expect(() => {
-            middleware = new ReplyChannelMiddleware();
-        }).to.not.throw(TypeError);
-
-        expect(middleware.options.channel).to.be.undefined;
-    });
-
-    it('it constructs the object properly with non-defaults', () => {
-        let middleware;
-        expect(() => {
-            middleware = new ReplyChannelMiddleware({
-                channel: 'dm',
-            });
-        }).to.not.throw(TypeError);
-
-        expect(middleware.options.channel).to.equal('dm');
-    });
-
     it(`returns the original parameter for non-used functions`, () => {
         const middleware = new ReplyChannelMiddleware();
         const response = {
@@ -45,8 +25,8 @@ describe('ReplyChannelMiddleware class', () => {
             }
         };
 
-        expect(middleware.onResponse(response)).to.deep.equal(response);
-        expect(middleware.onReply(response)).to.deep.equal(response);
+        expect(middleware.onReplyConstructed(response)).to.deep.equal(response);
+        expect(middleware.onReplyPosted(response)).to.deep.equal(response);
     });
 
     it('sets the target channel to DM', () => {

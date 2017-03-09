@@ -6,12 +6,10 @@ const Middleware = require('./Middleware');
 
 
 class UserThrottleMiddleware extends Middleware {
-    constructor(options) {
-        super(options);
-        const defaultOptions = {
+    get defaultOptions() {
+        return {
             duration: 2
         };
-        this.options = Object.assign({}, defaultOptions, options);
     }
 
     onCommand(response) {

@@ -3,13 +3,14 @@
 const Middleware = require('./Middleware');
 
 
+/**
+ * A middleware that changes the target channel.
+ */
 class ReplyChannelMiddleware extends Middleware {
-    constructor(options) {
-        super(options);
-        const defaultOptions = {
+    get defaultOptions() {
+        return {
             channel: undefined
         };
-        this.options = Object.assign({}, defaultOptions, options);
     }
 
     onCommand(response) {

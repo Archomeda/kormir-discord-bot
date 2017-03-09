@@ -184,8 +184,8 @@ class Module {
                 response.targetChannel.stopTyping();
             }
 
-            // Call the middleware onResponse
-            return response.callMiddlewareOnResponse().then(() => {
+            // Call the middleware onReplyConstructed
+            return response.callMiddlewareOnReplyConstructed().then(() => {
                 // Send reply
                 if (typeof response.replyText === 'string') {
                     return response.targetChannel.sendMessage(response.replyText);
@@ -194,8 +194,8 @@ class Module {
                 }
             }).then(message => {
                 if (message) {
-                    // Call the middleware onReply
-                    return response.callMiddlewareOnReply(message);
+                    // Call the middleware onReplyPosted
+                    return response.callMiddlewareOnReplyPosted(message);
                 }
             });
         });

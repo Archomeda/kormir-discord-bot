@@ -4,29 +4,33 @@ const bot = require('../bot');
 const Middleware = require('./Middleware');
 
 
+/**
+ * A middleware that caches a command result for a period of time.
+ */
 class CacheMiddleware extends Middleware {
     constructor(options) {
         super(options);
         this.order = 990;
-        const defaultOptions = {
+    }
+
+    get defaultOptions() {
+        return {
             duration: 5 * 60
         };
-        this.options = Object.assign({}, defaultOptions, options);
     }
 
     onCommand(response) {
         const request = response.request;
         const id = this.getCacheIdFromParams(Object.values(request.params));
-        return bot.cache.get(`${request.command}-exec`, id)
-            .then(cachedObj => {
-                if (cachedObj) {
-                    response.replyText = cachedObj;
-                }
-                return response;
-            });
+        return bot.cache.get(`${request.command}-exec`, id).then(cachedObj => {
+            if (cachedObj) {
+                response.replyText = cachedObj;
+            }
+            return response;
+        });
     }
 
-    onResponse(response) {
+    onReplyConstructed(response) {
         const request = response.request;
         const id = this.getCacheIdFromParams(Object.values(request.params));
         return bot.cache.set(`${request.command}-exec`, id, this.options.duration, response.replyText).return(response);

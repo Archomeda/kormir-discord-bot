@@ -13,7 +13,7 @@ class ReplyWithMentionsMiddleware extends Middleware {
         i18next.loadNamespacesAsync('middleware');
     }
 
-    onResponse(response) {
+    onReplyConstructed(response) {
         if (!response.replyText) {
             return response;
         }

@@ -12,12 +12,13 @@ class RestrictPermissionsMiddleware extends Middleware {
     constructor(options) {
         super(options);
         this.order = -1000;
-        const defaultOptions = {
+        i18next.loadNamespacesAsync('middleware');
+    }
+
+    get defaultOptions() {
+        return {
             permissions: {}
         };
-        this.options = Object.assign({}, defaultOptions, options);
-
-        i18next.loadNamespacesAsync('middleware');
     }
 
     onCommand(response) {

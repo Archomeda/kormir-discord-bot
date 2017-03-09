@@ -14,13 +14,6 @@ chai.use(chaiSinon);
 chai.use(sinonChaiInOrder);
 
 describe('MentionableCommandMiddleware class', () => {
-    it('it constructs the object properly with defaults', () => {
-        let middleware;
-        expect(() => {
-            middleware = new MentionableCommandMiddleware();
-        }).to.not.throw(TypeError);
-    });
-
     it(`returns the original parameter for non-used functions`, () => {
         const middleware = new MentionableCommandMiddleware();
         const response = {
@@ -33,8 +26,8 @@ describe('MentionableCommandMiddleware class', () => {
             }
         };
 
-        expect(middleware.onResponse(response)).to.deep.equal(response);
-        expect(middleware.onReply(response)).to.deep.equal(response);
+        expect(middleware.onReplyConstructed(response)).to.deep.equal(response);
+        expect(middleware.onReplyPosted(response)).to.deep.equal(response);
     });
 
     it('sets the target users', () => {

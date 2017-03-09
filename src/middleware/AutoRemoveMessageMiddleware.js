@@ -4,11 +4,18 @@ const ensureArray = require('../utils/array').ensureArray;
 const Middleware = require('./Middleware');
 
 
+/**
+ * A middleware to automatically remove command messages after a period of time.
+ */
 class AutoRemoveMessageMiddleware extends Middleware {
     constructor(options) {
         super(options);
         this.order = 1000;
-        const defaultOptions = {
+        this.options.types = ensureArray(this.options.types);
+    }
+
+    get defaultOptions() {
+        return {
             disallowed_request: false,
             disallowed_response: false,
             errored_request: false,
@@ -17,8 +24,6 @@ class AutoRemoveMessageMiddleware extends Middleware {
             response: false,
             types: ['text']
         };
-        this.options = Object.assign({}, defaultOptions, options);
-        this.options.types = ensureArray(this.options.types);
     }
 
     onCommand(response) {
@@ -43,7 +48,7 @@ class AutoRemoveMessageMiddleware extends Middleware {
         return response;
     }
 
-    onReply(response, message) {
+    onReplyPosted(response, message) {
         if (!this.options.types.includes(response.request.message.channel.type)) {
             // Not correct channel type
             return response;

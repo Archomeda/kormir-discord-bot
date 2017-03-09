@@ -12,44 +12,6 @@ chai.use(chaiSinon);
 chai.use(sinonChaiInOrder);
 
 describe('AutoRemoveMessageMiddleware class', () => {
-    it('it constructs the object properly with defaults', () => {
-        let middleware;
-        expect(() => {
-            middleware = new AutoRemoveMessageMiddleware();
-        }).to.not.throw(TypeError);
-
-        expect(middleware.options.disallowed_request).to.be.false;
-        expect(middleware.options.disallowed_response).to.be.false;
-        expect(middleware.options.errored_request).to.be.false;
-        expect(middleware.options.errored_response).to.be.false;
-        expect(middleware.options.request).to.be.false;
-        expect(middleware.options.response).to.be.false;
-        expect(middleware.options.types).to.deep.equal(['text']);
-    });
-
-    it('it constructs the object properly with non-defaults', () => {
-        let middleware;
-        expect(() => {
-            middleware = new AutoRemoveMessageMiddleware({
-                disallowed_request: true,
-                disallowed_response: true,
-                errored_request: true,
-                errored_response: true,
-                request: true,
-                response: true,
-                types: 'dm',
-            });
-        }).to.not.throw(TypeError);
-
-        expect(middleware.options.disallowed_request).to.be.true;
-        expect(middleware.options.disallowed_response).to.be.true;
-        expect(middleware.options.errored_request).to.be.true;
-        expect(middleware.options.errored_response).to.be.true;
-        expect(middleware.options.request).to.be.true;
-        expect(middleware.options.response).to.be.true;
-        expect(middleware.options.types).to.deep.equal(['dm']);
-    });
-
     it(`returns the original parameter for non-used functions`, () => {
         const middleware = new AutoRemoveMessageMiddleware();
         const response = {
@@ -62,7 +24,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
             }
         };
 
-        expect(middleware.onResponse(response)).to.deep.equal(response);
+        expect(middleware.onReplyConstructed(response)).to.deep.equal(response);
     });
 
     it('skips deleting the original message when the channel type does not match', () => {
@@ -254,7 +216,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
             delete: deleteFunc
         };
 
-        const result = middleware.onReply(response, message);
+        const result = middleware.onReplyPosted(response, message);
         expect(result).to.deep.equal(response);
         expect(deleteFunc).to.have.not.been.called;
     });
@@ -276,7 +238,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
             delete: deleteFunc
         };
 
-        const result = middleware.onReply(response, message);
+        const result = middleware.onReplyPosted(response, message);
         expect(result).to.deep.equal(response);
         expect(deleteFunc).to.have.not.been.called;
     });
@@ -298,7 +260,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
             delete: deleteFunc
         };
 
-        const result = middleware.onReply(response, message);
+        const result = middleware.onReplyPosted(response, message);
         expect(result).to.deep.equal(response);
         expect(deleteFunc).to.have.not.been.called;
     });
@@ -322,7 +284,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
             delete: deleteFunc
         };
 
-        const result = middleware.onReply(response, message);
+        const result = middleware.onReplyPosted(response, message);
         expect(result).to.deep.equal(response);
         expect(deleteFunc).inOrder.to.have.been.calledWith(5000);
     });
@@ -347,7 +309,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
             delete: deleteFunc
         };
 
-        const result = middleware.onReply(response, message);
+        const result = middleware.onReplyPosted(response, message);
         expect(result).to.deep.equal(response);
         expect(deleteFunc).to.have.not.been.called;
     });
@@ -374,7 +336,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
             delete: deleteFunc
         };
 
-        const result = middleware.onReply(response, message);
+        const result = middleware.onReplyPosted(response, message);
         expect(result).to.deep.equal(response);
         expect(deleteFunc).inOrder.to.have.been.calledWith(5000);
     });
@@ -397,7 +359,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
             delete: deleteFunc
         };
 
-        const result = middleware.onReply(response, message);
+        const result = middleware.onReplyPosted(response, message);
         expect(result).to.deep.equal(response);
         expect(deleteFunc).to.have.not.been.called;
     });
@@ -422,7 +384,7 @@ describe('AutoRemoveMessageMiddleware class', () => {
             delete: deleteFunc
         };
 
-        const result = middleware.onReply(response, message);
+        const result = middleware.onReplyPosted(response, message);
         expect(result).to.deep.equal(response);
         expect(deleteFunc).inOrder.to.have.been.calledWith(5000);
     });

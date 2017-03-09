@@ -46,20 +46,20 @@ class CommandResponse {
     }
 
     /**
-     * Calls all middleware upon command response.
+     * Calls all middleware after the reply has been constructed.
      * @return {Promise.<CommandResponse>}
      */
-    callMiddlewareOnResponse() {
-        return this._callMiddleware('onResponse');
+    callMiddlewareOnReplyConstructed() {
+        return this._callMiddleware('onReplyConstructed');
     }
 
     /**
-     * Calls all middleware after sending the reply.
+     * Calls all middleware after the reply has been posted.
      * @param {Message} message - The reply message.
      * @return {Promise.<CommandResponse>}
      */
-    callMiddlewareOnReply(message) {
-        return this._callMiddleware('onReply', message);
+    callMiddlewareOnReplyPosted(message) {
+        return this._callMiddleware('onReplyPosted', message);
     }
 
     /**
