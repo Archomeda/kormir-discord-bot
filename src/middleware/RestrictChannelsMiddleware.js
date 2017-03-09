@@ -9,6 +9,9 @@ const ensureArray = require('../utils/array').ensureArray;
 const Middleware = require('./Middleware');
 
 
+/**
+ * A middleware that restricts commands to be sent to specific channels.
+ */
 class RestrictChannelsMiddleware extends Middleware {
     constructor(options) {
         super(options);
@@ -27,43 +30,29 @@ class RestrictChannelsMiddleware extends Middleware {
 
     onCommand(response) {
         const request = response.request;
-        let allowed = this.options.types.includes(request.message.channel.type);
-        let channels = _.flatten(
-            this.options.channels.map(c => typeof c === 'function' ? c(request.message, request.command, request.params) : c)
-        );
-        allowed = allowed && channels && (channels.length === 0 || channels.includes(request.message.channel.id));
+        const allowed = this.options.types.includes(request.message.channel.type) &&
+            (this.options.channels.length === 0 || this.options.channels.includes(request.message.channel.id));
 
         if (!allowed) {
-            let userMessage;
-            if (request.message.guild) {
-                const targetChannels = channels.map(c => {
+            let translationKey = ['middleware:restrict-channels.wrong-channel'];
+            if (request.message.channel.type === 'text') {
+                const targetChannels = this.options.channels.map(c => {
                     const channel = request.message.guild.channels.get(c);
-                    if (channel) {
-                        return channel.toString();
-                    }
-                    return null;
+                    return channel ? channel.toString() : undefined;
                 }).filter(c => c);
 
                 if (this.options.types.includes('dm')) {
                     if (targetChannels.length > 0) {
-                        userMessage = i18next.t('middleware:restrict-channels.channels-and-dm-only', { channels: targetChannels.join(' ') });
-                    } else if (this.options.types.includes('dm')) {
-                        userMessage = i18next.t('middleware:restrict-channels.dm-only');
+                        translationKey = ['middleware:restrict-channels.channels-and-dm-only', { channels: targetChannels.join(' ') }];
+                    } else {
+                        translationKey = ['middleware:restrict-channels.dm-only'];
                     }
                 } else if (targetChannels.length > 0) {
-                    userMessage = i18next.t('middleware:restrict-channels.channels-only', { channels: targetChannels.join(' ') });
+                    translationKey = ['middleware:restrict-channels.channels-only', { channels: targetChannels.join(' ') }];
                 }
             }
-            if (!userMessage) {
-                userMessage = i18next.t('middleware:restrict-channels.wrong-channel');
-            }
 
-            const channelName = request.message.channel.name || request.message.channel.type;
-            throw new PermissionError(
-                `Wrong channel for command (user ${request.message.author.fullUsername}, command: ${request.command.trigger}, channel: #${channelName})`,
-                'log',
-                userMessage
-            );
+            throw new PermissionError(undefined, undefined, i18next.t(...translationKey));
         }
         return response;
     }
