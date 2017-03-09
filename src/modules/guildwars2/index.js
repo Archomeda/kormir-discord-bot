@@ -98,7 +98,17 @@ class ModuleGuildWars2 extends Module {
 
         const doEnsure = account => bot.gw2Api.authenticate(key).guild(guildId).members().get().then(members => {
             const member = _.find(members, ['name', account.accountName]);
-            return member ? this.addToGuildRole(user) : this.removeFromGuildRole(user);
+            if (user.guild) {
+                // Guild member instance
+                return member ? this.addToGuildRole(user) : this.removeFromGuildRole(user);
+            } else {
+                // Just a generic user, convert it to all known guild users
+                const exec = bot.client.guilds
+                    .map(s => s.member(user))
+                    .filter(su => su)
+                    .map(su => member ? this.addToGuildRole(su) : this.removeFromGuildRole(su));
+                return Promise.all(exec);
+            }
         });
 
         if (!gw2Account) {
