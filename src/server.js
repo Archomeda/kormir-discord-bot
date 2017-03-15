@@ -53,6 +53,8 @@ i18next.use(Backend).init({
                         return moment.duration(value).humanize();
                     case 'filesize':
                         return filesize(value);
+                    default:
+                        break;
                 }
             }
             return value;

@@ -19,15 +19,14 @@ class ThrottleMiddleware extends Middleware {
     onCommand(response) {
         const request = response.request;
         let throttleId;
-        let throttleDescription;
         switch (this.options.type) {
             case 'user':
                 throttleId = `user-${request.message.author.id}`;
-                throttleDescription = 'User';
                 break;
             case 'command':
                 throttleId = `command-${request.command.id}`;
-                throttleDescription = 'Command';
+                break;
+            default:
                 break;
         }
 
