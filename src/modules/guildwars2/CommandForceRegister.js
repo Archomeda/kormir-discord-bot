@@ -26,7 +26,7 @@ class CommandForceRegister extends Command {
             ];
         });
 
-        this.middleware = new RestrictChannelsMiddleware({ types: 'dm' });
+        this.initializeMiddleware(new RestrictChannelsMiddleware({ types: 'dm' }));
     }
 
     onCommand(response) {

@@ -23,10 +23,10 @@ class CommandHelp extends Command {
             this.params = new CommandParam('command', i18next.t('general:help.param-command'), true);
         });
 
-        this.middleware = [
+        this.initializeMiddleware([
             new CacheMiddleware(),
             new AutoRemoveMessageMiddleware({ request: 300, response: 300 })
-        ];
+        ]);
     }
 
     onCommand(response) {
@@ -66,7 +66,7 @@ class CommandHelp extends Command {
     formatCommandChannelFilter(command) {
         let text = [];
 
-        let middleware = command.allMiddleware.find(m => m.name === 'RestrictChannelsMiddleware');
+        let middleware = command.middleware.find(m => m.name === 'RestrictChannelsMiddleware');
         if (middleware) {
             // Restricted channels is applied
             if (middleware.options.types.length === 1) {
@@ -87,7 +87,7 @@ class CommandHelp extends Command {
             }
         }
 
-        middleware = command.allMiddleware.find(m => m.name === 'MentionableCommandMiddleware');
+        middleware = command.middleware.find(m => m.name === 'MentionableCommandMiddleware');
         if (middleware) {
             // Mentions are allowed
             text.push(i18next.t('general:help.command-restriction-mentions'));

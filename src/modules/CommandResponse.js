@@ -71,11 +71,11 @@ class CommandResponse {
      */
     _callMiddleware(funcName, ...params) {
         let responsePromise = Promise.resolve(this);
-        if (this.request.command.allMiddleware.length === 0) {
+        if (this.request.command.middleware.length === 0) {
             return responsePromise;
         }
 
-        for (let middleware of this.request.command.allMiddleware) {
+        for (let middleware of this.request.command.middleware) {
             responsePromise = responsePromise.then(response => Promise.try(() => middleware[funcName](response, ...params)).catch(err => {
                 // Capture error
                 if (!response.error) {

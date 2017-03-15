@@ -22,6 +22,8 @@ class CommandRaids extends Command {
             this.shortHelpText = i18next.t('guildwars2:raids.short-help');
         });
 
+        this.initializeMiddleware();
+
         // TODO: Need to find a way to implement caching for non-text responses in the middleware and add it to this command
     }
 

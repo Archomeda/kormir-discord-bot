@@ -19,10 +19,10 @@ class CommandEvents extends CommandDatabaseSchedule {
             this.shortHelpText = i18next.t('schedule:events.short-help');
         });
 
-        this.middleware = [
+        this.initializeMiddleware([
             new RestrictChannelsMiddleware({ types: 'text' }),
             new MentionableCommandMiddleware()
-        ];
+        ]);
     }
 
     formatResult(response, result) {

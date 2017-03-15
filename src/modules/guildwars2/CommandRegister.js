@@ -23,7 +23,7 @@ class CommandRegister extends Command {
             this.params = new CommandParam('key', i18next.t('guildwars2:register.param-key'), true);
         });
 
-        this.middleware = new RestrictChannelsMiddleware({ types: 'dm' });
+        this.initializeMiddleware(new RestrictChannelsMiddleware({ types: 'dm' }));
     }
 
     onCommand(response) {

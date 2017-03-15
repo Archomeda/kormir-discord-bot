@@ -64,9 +64,10 @@ cache:
 
 
 #####
-# Every command in a module can be enabled and disabled separately.
-# The command to trigger on can be changed as well.
-# You can restrict the channels where a command can be used by adding the channel ids as shown in the help command.
+# Every command in a module can be enabled and disabled separately. The command to trigger on can be changed as well.
+# In order to assign custom middleware that isn't applied to all middleware (in contrast to the discord section above),
+# use the "command_middleware" property as shown in the help command.
+# All middleware can be found in the ./src/middleware folder.
 #####
 modules:
   # Provides general stuff that probably should stay enabled
@@ -75,9 +76,15 @@ modules:
       help:
         trigger: help
         enabled: true
-        #channels:
-        #  - first-channel-id
-        #  - second-channel-id
+        #middleware:
+        #  RestrictChannelsMiddleware:
+        #    types:
+        #      - text # For server text channels (remove to disallow this command being used in server text channels)
+        #      - dm # For DM channels (remove to disallow this command being used in DM channels)
+        #    # The list of server channels to restrict the command to (only used when the types property above contains "text")
+        #    channels:
+        #      - first-channel-id
+        #      - second-channel-id
       source:
         trigger: source
         enabled: true

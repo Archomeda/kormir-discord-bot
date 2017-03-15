@@ -3,7 +3,7 @@
 /**
  * Makes sure that the argument is returned as an array. If it's already an array, it's returned immediately.
  * @param {*} value - The value.
- * @return {*} The value as an array.
+ * @return {Array} The value as an array.
  */
 function ensureArray(value) {
     if (!value) {

@@ -36,65 +36,60 @@ class Module {
         bot.client.on('message', this.onMessage.bind(this));
     }
 
+    /**
+     * Gets the configuration of this module.
+     * @return {*} - The config instance for this module.
+     */
     get config() {
         return this._config;
     }
 
+    /**
+     * Gets the commands for this module.
+     * @return {Array} - The list of commands.
+     */
     get commands() {
         return this._commands;
     }
 
+    /**
+     * Gets the hooks for this module.
+     * @return {Array} - The list of hooks.
+     */
     get hooks() {
         return this._hooks;
     }
 
 
+    /**
+     * Registers a command in this module.
+     * @param {Command} command - The command to register.
+     */
     registerCommand(command) {
         if (!command.config.enabled) {
+            // Command is not enabled, don't register
             return;
         }
-        command.trigger = command.config.trigger;
-
-        const defaultMiddleware = [];
-        const configMiddleware = bot.config.get('discord.command_middleware');
-        for (let name in configMiddleware) {
-            if (configMiddleware.hasOwnProperty(name)) {
-                const options = configMiddleware[name];
-                // eslint-disable-next-line import/no-dynamic-require
-                const MiddlewareClass = require(`../middleware/${name}`);
-                defaultMiddleware.push(new MiddlewareClass(options));
-            }
-        }
-
-        const permissions = bot.config.get('permissions');
-        defaultMiddleware.push(new RestrictPermissionsMiddleware({ permissions }));
-        defaultMiddleware.push(new ReplyWithMentionsMiddleware());
-        command.defaultMiddleware = defaultMiddleware;
-
-        if (command.config.channels && command.config.channels.length > 0) {
-            const commandMiddleware = command.middleware;
-            const i = commandMiddleware.findIndex(m => m.name === 'RestrictChannelsMiddleware');
-            if (i > -1) {
-                commandMiddleware[i].options.channels =
-                    commandMiddleware[i].options.channels.concat(command.config.channels);
-            } else {
-                commandMiddleware.push(new RestrictChannelsMiddleware({ types: 'text', channels: command.config.channels }));
-            }
-            command.middleware = commandMiddleware;
-        }
-
         this._commands.push(command);
     }
 
+    /**
+     * Registers a Discord hook in this module.
+     * @param {DiscordHook} hook - The hook to register.
+     */
     registerHook(hook) {
         if (!hook.config.enabled) {
+            // Hook is not enabled, don't register
             return;
         }
+
+        // Hook the events
         for (let hookName in hook.hooks) {
             if (hook.hooks.hasOwnProperty(hookName)) {
                 bot.client.on(hookName, hook.hooks[hookName].bind(hook));
             }
         }
+
         this._hooks.push(hook);
     }
 

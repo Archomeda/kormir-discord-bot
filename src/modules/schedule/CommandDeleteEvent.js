@@ -20,7 +20,7 @@ class CommandDeleteEvent extends CommandDatabaseSchedule {
             this.params = new CommandParam('id', i18next.t('schedule:common.param-id'));
         });
 
-        this.middleware = new RestrictChannelsMiddleware({ types: 'text' });
+        this.initializeMiddleware(new RestrictChannelsMiddleware({ types: 'text' }));
     }
 
     formatResult(response, result) {

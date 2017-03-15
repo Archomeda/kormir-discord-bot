@@ -21,10 +21,10 @@ class CommandEvent extends CommandDatabaseSchedule {
             this.params = new CommandParam('id', i18next.t('schedule:common.param-id'));
         });
 
-        this.middleware = [
+        this.initializeMiddleware([
             new RestrictChannelsMiddleware({ types: 'text' }),
             new MentionableCommandMiddleware()
-        ];
+        ]);
     }
 
     formatResult(response, result) {

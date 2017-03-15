@@ -20,6 +20,8 @@ class CommandRoll extends Command {
                 new CommandParam('input', i18next.t('utilities:roll.param-input', { max_dice: this.config.get('max_dice'), max_faces: this.config.get('max_faces') }), true, undefined, true)
             ];
         });
+
+        this.initializeMiddleware();
     }
 
     onCommand(response) {

@@ -18,7 +18,7 @@ class CommandSource extends Command {
             this.shortHelpText = i18next.t('general:source.short-help');
         });
 
-        this.middleware = new MentionableCommandMiddleware();
+        this.initializeMiddleware(new MentionableCommandMiddleware());
     }
 
     onCommand(response) {

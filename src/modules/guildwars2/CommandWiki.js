@@ -30,11 +30,11 @@ class CommandWiki extends Command {
             this.params = new CommandParam('terms', i18next.t('guildwars2:wiki.param-terms'), true, undefined, true);
         });
 
-        this.middleware = [
+        this.initializeMiddleware([
             new RestrictChannelsMiddleware({ types: 'text' }),
             new MentionableCommandMiddleware(),
             new CacheMiddleware()
-        ];
+        ]);
     }
 
     onCommand(response) {

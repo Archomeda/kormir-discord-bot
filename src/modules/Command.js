@@ -3,8 +3,10 @@
 const _ = require('lodash');
 const snakeCase = require('change-case').snakeCase;
 
-const ensureArray = require('../utils/array').ensureArray;
 const bot = require('../bot');
+const RestrictPermissionsMiddleware = require('../middleware/internal/RestrictPermissionsMiddleware');
+const ReplyWithMentionsMiddleware = require('../middleware/internal/ReplyWithMentionsMiddleware');
+const ensureArray = require('../utils/array').ensureArray;
 
 
 /**
@@ -27,13 +29,11 @@ class Command {
         this._config = module.config.get(`commands.${this.id}`);
         this._module = module;
         this._params = [];
-
-        this._defaultMiddleware = [];
         this._middleware = [];
 
         this.trigger = this.config.has('trigger') ? this.config.get('trigger') : options && options.defaultTrigger;
-        this.helpText = null;
-        this.shortHelpText = null;
+        this.helpText = undefined;
+        this.shortHelpText = undefined;
 
         if (!this.trigger) {
             throw new TypeError('The trigger property cannot be undefined or null');
@@ -44,48 +44,59 @@ class Command {
         return `${bot.config.get('discord.command_prefix')}${this.trigger}`;
     }
 
+
     onCommand(response) {
         throw new TypeError('Derivative should implement onCommand');
     }
 
+
+    /**
+     * Gets the parent module.
+     * @return {Module} - The parent module.
+     */
     get module() {
         return this._module;
     }
 
+    /**
+     * Gets the config.
+     * @return {*} The config instance.
+     */
     get config() {
         return this._config;
     }
 
+    /**
+     * Gets the permission id associated with this command.
+     * @return {string} -he permission id.
+     */
     get permissionId() {
         return `${this.module.id}.${this.id}`;
     }
 
+    /**
+     * Gets the parameters for this command.
+     * @return {Array.<CommandParam>|CommandParam} The list of parameters.
+     */
     get params() {
         return this._params;
     }
+
+    /**
+     * Sets the parameters for this command.
+     * @param params {Array.<CommandParam>|CommandParam} - The parameters.
+     */
     set params(params) {
         params = ensureArray(params);
         this._params = params.filter(p => p.name);
     }
 
-    get allMiddleware() {
-        return this._allMiddleware;
-    }
-    get defaultMiddleware() {
-        return this._defaultMiddleware;
-    }
-    set defaultMiddleware(middleware) {
-        this._defaultMiddleware = ensureArray(middleware);
-        this._allMiddleware = this.defaultMiddleware.concat(this.middleware);
-        this._allMiddleware.sort((a, b) => a.order - b.order);
-    }
+    /**
+     * Gets the middleware for this command.
+     * @return {Middleware[]} The list of middleware.
+     */
     get middleware() {
         return this._middleware;
-    }
-    set middleware(middleware) {
-        this._middleware = ensureArray(middleware);
-        this._allMiddleware = this.defaultMiddleware.concat(this.middleware);
-        this._allMiddleware.sort((a, b) => a.order - b.order);
     }
 
 
@@ -158,6 +169,50 @@ class Command {
             }
         }
         return groups;
+    }
+
+
+    /**
+     * Initializes the middleware. Should only be called once upon object construction.
+     * @param {Middleware[]|Middleware} [extraMiddleware] - Extra middleware to use.
+     */
+    initializeMiddleware(extraMiddleware) {
+        extraMiddleware = ensureArray(extraMiddleware);
+        const permissions = bot.config.get('permissions');
+        const middlewareMap = new Map();
+
+        const addMiddlewareGroup = obj => {
+            for (let name in obj) {
+                if (obj.hasOwnProperty(name)) {
+                    const options = obj[name];
+                    // eslint-disable-next-line import/no-dynamic-require
+                    const MiddlewareClass = require(`../middleware/${name}`);
+                    middlewareMap.set(name, new MiddlewareClass(options));
+                }
+            }
+        };
+
+        // Internal middleware
+        middlewareMap.set('internal/RestrictPermissionsMiddleware', new RestrictPermissionsMiddleware({ permissions }));
+        middlewareMap.set('internal/ReplyWithMentionsMiddleware', new ReplyWithMentionsMiddleware());
+
+        // Extra middleware set by the command object itself
+        for (let middleware of extraMiddleware) {
+            middlewareMap.set(middleware.name, middleware);
+        }
+
+        // Global middleware set by config
+        addMiddlewareGroup(bot.config.get('discord.command_middleware'));
+
+        // Local middleware set by config
+        if (this.config.has('middleware')) {
+            addMiddlewareGroup(this.config.get('middleware'));
+        }
+
+        // Sort middleware and apply
+        const middleware = [...middlewareMap.values()];
+        middleware.sort((a, b) => a.order - b.order);
+        this._middleware = middleware;
     }
 }
 

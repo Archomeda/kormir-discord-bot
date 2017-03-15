@@ -16,6 +16,8 @@ class CommandExportIds extends Command {
         i18next.loadNamespacesAsync('manage').then(() => {
             this.helpText = i18next.t('manage:export-ids.help');
         });
+
+        this.initializeMiddleware();
     }
 
     onCommand(response) {
