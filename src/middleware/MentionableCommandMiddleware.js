@@ -13,8 +13,9 @@ class MentionableCommandMiddleware extends Middleware {
     onCommand(response) {
         // Only users are supported, extend this when needed
         const message = response.request.message;
-        if (message.mentions.users.size > 0) {
-            response.targetUsers = message.mentions.users.filterArray(u => u.id !== message.author.id && !u.bot);
+        const mentions = message.mentions.users.filterArray(u => u.id !== message.author.id && !u.bot);
+        if (mentions.length > 0) {
+            response.targetUsers = mentions;
         }
         return response;
     }

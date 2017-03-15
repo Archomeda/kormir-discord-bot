@@ -71,14 +71,14 @@ describe('MentionableCommandMiddleware class', () => {
                 message: {
                     author: { id: '1234' },
                     mentions: {
-                        users: new Collection([['1234', { id: '1234' }]])
+                        users: new Collection([['1234', { id: '1234' }], ['2345', { id: '2345' }]])
                     }
                 }
             }
         };
 
         const result = middleware.onCommand(response);
-        expect(result.targetUsers).to.deep.equal([]);
+        expect(result.targetUsers).to.deep.equal([{ id: '2345' }]);
     });
 
     it('filters bots', () => {
@@ -88,13 +88,13 @@ describe('MentionableCommandMiddleware class', () => {
                 message: {
                     author: { id: '123' },
                     mentions: {
-                        users: new Collection([['1234', { id: '1234', bot: true }]])
+                        users: new Collection([['1234', { id: '1234', bot: true }], ['2345', { id: '2345' }]])
                     }
                 }
             }
         };
 
         const result = middleware.onCommand(response);
-        expect(result.targetUsers).to.deep.equal([]);
+        expect(result.targetUsers).to.deep.equal([{ id: '2345' }]);
     });
 });
