@@ -20,15 +20,26 @@ class CommandQuaggan extends Command {
         i18next.loadNamespacesAsync('guildwars2').then(() => {
             this.helpText = i18next.t('guildwars2:quaggan.help');
             this.shortHelpText = i18next.t('guildwars2:quaggan.short-help');
+            this.params = new CommandParam('quaggan_id', i18next.t('guildwars2:quaggan.param-quaggan-id'), true);
         });
 
         this.initializeMiddleware();
     }
 
     onCommand(response) {
-        return bot.gw2Api.quaggans().all().then(quaggans => {
-            const quaggan = random.pick(quaggans);
-            return new CommandReplyMessage('', { file: quaggan.url });
+        const quaggan = response.request.params.quaggan_id;
+        let request = bot.gw2Api.quaggans();
+        if (quaggan) {
+            request = request.get(quaggan);
+        } else {
+            request = request.all();
+        }
+
+        return request.then(result => {
+            if (Array.isArray(result)) {
+                result = random.pick(result);
+            }
+            return new CommandReplyMessage('', { file: result.url });
         }).catch(err => {
             throw new CommandError(i18next.t('guildwars2:api.response-error', { error: err.content.text }));
         });

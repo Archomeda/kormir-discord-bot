@@ -33,7 +33,8 @@
   },
   "quaggan": {
     "help": "Shows a random quaggan.",
-    "short-help": "Shows a random quaggan"
+    "short-help": "Shows a random quaggan",
+    "param-quaggan-id": "The quaggan id for less randomness"
   },
   "cats": {
     "help": "Shows all the cats you own.",
