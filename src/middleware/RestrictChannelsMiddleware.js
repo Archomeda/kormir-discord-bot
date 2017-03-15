@@ -52,6 +52,7 @@ class RestrictChannelsMiddleware extends Middleware {
                 }
             }
 
+            // TODO: Improve logging texts in combination with tests
             throw new PermissionError(undefined, undefined, i18next.t(...translationKey));
         }
         return response;

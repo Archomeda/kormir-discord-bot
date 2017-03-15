@@ -25,7 +25,7 @@ discord:
   # The default middleware to use for every command (available middleware can be found in ./middleware)
   command_middleware:
     # Throttles the time to wait between every command execution for every user
-    UserThrottleMiddleware:
+    ThrottleMiddleware:
       duration: 2
     # Automatically removes messages
     AutoRemoveMessageMiddleware:
