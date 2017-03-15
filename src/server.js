@@ -11,6 +11,7 @@ const Backend = require('i18next-node-fs-backend');
 const Discord = require('discord.js');
 const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
+const filesize = require('filesize');
 const moment = require('moment-timezone');
 const gw2Api = require('gw2api-client').default();
 const gw2ApiCache = require('gw2api-client/build/cache/memory').default;
@@ -44,8 +45,15 @@ i18next.use(Backend).init({
         format: (value, format, lng) => {
             if (value instanceof Date) {
                 return moment(value).tz(timezone).format(format);
-            } else if (format === 'lcfirst') {
-                return value.charAt(0).toLowerCase() + value.slice(1);
+            } else if (format) {
+                switch (format) {
+                    case 'lcfirst':
+                        return value.charAt(0).toLowerCase() + value.slice(1);
+                    case 'duration':
+                        return moment.duration(value).humanize();
+                    case 'filesize':
+                        return filesize(value);
+                }
             }
             return value;
         },

@@ -21,9 +21,16 @@
     "response-single-help": "{{help}}",
     "response-all-help": "{{help}}\n\nCommands marked with an asterisk might be restricted."
   },
-  "source": {
-    "help": "Shows the link to the source code of this bot.",
-    "short-help": "Shows the link to the source code of this bot",
-    "response": "You can find the source code at {{- url}}."
+  "info": {
+    "help": "Shows general information about the bot.",
+    "short-help": "Shows general information about the bot, including memory usage, uptime, etc.",
+    "response-title": "{{name}} bot information",
+    "response-description": "This bot has been created by {{creator}}, mainly for usage on the Discord server of the Guild Wars 2 guild *Legacy of the Six*.",
+    "response-memory-usage": "Memory usage",
+    "response-memory-usage-value": "{{memory, filesize}}",
+    "response-uptime": "Uptime",
+    "response-uptime-value": "{{uptime, duration}}",
+    "response-source-code": "Source code",
+    "response-source-code-value": "[{{site}}]({{url}})"
   }
 }

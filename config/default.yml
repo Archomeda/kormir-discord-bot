@@ -85,8 +85,8 @@ modules:
         #    channels:
         #      - first-channel-id
         #      - second-channel-id
-      source:
-        trigger: source
+      info:
+        trigger: info
         enabled: true
 
   # Provides stuff for managing the bot

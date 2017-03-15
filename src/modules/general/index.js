@@ -2,7 +2,7 @@
 
 const Module = require('../Module');
 const CommandHelp = require('./CommandHelp');
-const CommandSource = require('./CommandSource');
+const CommandInfo = require('./CommandInfo');
 
 
 class ModuleGeneral extends Module {
@@ -10,7 +10,7 @@ class ModuleGeneral extends Module {
         super();
 
         this.registerCommand(new CommandHelp(this));
-        this.registerCommand(new CommandSource(this));
+        this.registerCommand(new CommandInfo(this));
     }
 }
 
