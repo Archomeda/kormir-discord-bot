@@ -23,10 +23,7 @@ class CommandHelp extends Command {
             this.params = new CommandParam('command', i18next.t('general:help.param-command'), true);
         });
 
-        this.initializeMiddleware([
-            new CacheMiddleware(),
-            new AutoRemoveMessageMiddleware({ request: 300, response: 300 })
-        ]);
+        this.initializeMiddleware(new CacheMiddleware());
     }
 
     onCommand(response) {
