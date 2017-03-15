@@ -144,6 +144,11 @@ modules:
       quaggan:
         trigger: quaggan
         enabled: true
+        middleware:
+          # Throttle this command for 60 seconds once used (since this command can be quite spammy)
+          ThrottleMiddleware:
+            type: command
+            duration: 60
 
     hooks:
       member_role:
