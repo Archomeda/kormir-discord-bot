@@ -4,6 +4,8 @@ const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
 
 const Command = require('../Command');
+const CommandReplyMessage = require('../CommandReplyMessage');
+const ReplyChannelMiddleware = require('../../middleware/ReplyChannelMiddleware');
 const bot = require('../../bot');
 
 
@@ -17,7 +19,7 @@ class CommandExportIds extends Command {
             this.helpText = i18next.t('manage:export-ids.help');
         });
 
-        this.initializeMiddleware();
+        this.initializeMiddleware(new ReplyChannelMiddleware({ channel: 'dm' }));
     }
 
     onCommand(response) {
@@ -47,7 +49,7 @@ class CommandExportIds extends Command {
             }
             result.push('\n');
         }
-        response.request.message.author.sendFile(Buffer.from(result.join('\n')), 'ids.txt');
+        return new CommandReplyMessage('', { file: { attachment: Buffer.from(result.join('\n')), name: 'ids.txt' } });
     }
 }
 

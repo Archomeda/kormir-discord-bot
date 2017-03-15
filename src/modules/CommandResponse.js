@@ -18,7 +18,12 @@ class CommandResponse {
         this.targetUsers = [request.message.author];
 
         this.error = undefined;
-        this.replyText = undefined;
+
+        /**
+         * The reply message.
+         * @type {CommandReplyMessage|Promise.<CommandReplyMessage>|undefined}
+         */
+        this.reply = undefined;
     }
 
     /**
@@ -31,7 +36,7 @@ class CommandResponse {
 
     /**
      * Calls the command.
-     * @return {string|Promise.<string>} The command result.
+     * @return {string|Promise.<string>|CommandReplyMessage|Promise.<CommandReplyMessage>} The command result message.
      */
     callCommand() {
         return this.request.command.onCommand(this);

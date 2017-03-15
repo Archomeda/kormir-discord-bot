@@ -24,7 +24,7 @@ class CacheMiddleware extends Middleware {
         const id = this.getCacheIdFromParams(Object.values(request.params));
         return bot.cache.get(`${request.command}-exec`, id).then(cachedObj => {
             if (cachedObj) {
-                response.replyText = cachedObj;
+                response.reply = cachedObj;
             }
             return response;
         });
@@ -33,7 +33,7 @@ class CacheMiddleware extends Middleware {
     onReplyConstructed(response) {
         const request = response.request;
         const id = this.getCacheIdFromParams(Object.values(request.params));
-        return bot.cache.set(`${request.command}-exec`, id, this.options.duration, response.replyText).return(response);
+        return bot.cache.set(`${request.command}-exec`, id, this.options.duration, response.reply).return(response);
     }
 
     getCacheIdFromParams(params) {

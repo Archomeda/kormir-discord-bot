@@ -8,6 +8,8 @@ const i18next = Promise.promisifyAll(require('i18next'));
 const Command = require('../Command');
 const CommandParam = require('../CommandParam');
 const CommandError = require('../../errors/CommandError');
+const CommandReplyMessage = require('../CommandReplyMessage');
+const CacheMiddleware = require('../../middleware/CacheMiddleware');
 const bot = require('../../bot');
 
 
@@ -25,9 +27,7 @@ class CommandCats extends Command {
             this.shortHelpText = i18next.t('guildwars2:cats.short-help');
         });
 
-        this.initializeMiddleware();
-
-        // TODO: Need to find a way to implement caching for non-text responses in the middleware and add it to this command
+        this.initializeMiddleware(new CacheMiddleware());
     }
 
     onCommand(response) {
@@ -67,12 +67,7 @@ class CommandCats extends Command {
                 }
 
                 message.addField('\u200B', i18next.t('guildwars2:cats.response-more-information'));
-                return {
-                    content: request.message.author.toString(),
-                    options: {
-                        embed: message
-                    }
-                };
+                return new CommandReplyMessage('', { embed: message });
             }).catch(err => {
                 throw new CommandError(i18next.t('guildwars2:api.response-error', { error: err.content.text }));
             });

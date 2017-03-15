@@ -14,15 +14,15 @@ class ReplyWithMentionsMiddleware extends Middleware {
     }
 
     onReplyConstructed(response) {
-        if (!response.replyText) {
+        if (!response.reply) {
             return response;
         }
 
         const mentions = Array.isArray(response.targetUsers) ? response.targetUsers.map(u => u.toString()).join(' ') : response.targetUsers.toString();
         if (response.targetChannel.type === 'dm') {
-            response.replyText = i18next.t('middleware:reply-with-mentions.response-dm', { mentions, message: response.replyText });
+            response.reply.text = i18next.t('middleware:reply-with-mentions.response-dm', { mentions, message: response.reply.text });
         } else {
-            response.replyText = i18next.t('middleware:reply-with-mentions.response-public', { mentions, message: response.replyText });
+            response.reply.text = i18next.t('middleware:reply-with-mentions.response-public', { mentions, message: response.reply.text });
         }
 
         return response;

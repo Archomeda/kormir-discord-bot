@@ -1,6 +1,5 @@
 'use strict';
 
-const Discord = require('discord.js');
 const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
 const random = require('random-js')();
@@ -8,7 +7,7 @@ const random = require('random-js')();
 const Command = require('../Command');
 const CommandParam = require('../CommandParam');
 const CommandError = require('../../errors/CommandError');
-const UserThrottleMiddleware = require('../../middleware/UserThrottleMiddleware');
+const CommandReplyMessage = require('../CommandReplyMessage');
 const bot = require('../../bot');
 
 
@@ -24,19 +23,12 @@ class CommandQuaggan extends Command {
         });
 
         this.initializeMiddleware();
-
-        // TODO: Need to find a way to implement caching for non-text responses in the middleware and add it to this command
     }
 
     onCommand(response) {
         return bot.gw2Api.quaggans().all().then(quaggans => {
             const quaggan = random.pick(quaggans);
-
-            return {
-                options: {
-                    file: quaggan.url
-                }
-            };
+            return new CommandReplyMessage('', { file: quaggan.url });
         }).catch(err => {
             throw new CommandError(i18next.t('guildwars2:api.response-error', { error: err.content.text }));
         });

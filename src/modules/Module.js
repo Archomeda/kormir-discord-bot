@@ -10,6 +10,7 @@ const RestrictChannelsMiddleware = require('../middleware/RestrictChannelsMiddle
 const RestrictPermissionsMiddleware = require('../middleware/internal/RestrictPermissionsMiddleware');
 const ReplyWithMentionsMiddleware = require('../middleware/internal/ReplyWithMentionsMiddleware');
 const CommandRequest = require('./CommandRequest');
+const CommandReplyMessage = require('./CommandReplyMessage');
 
 
 /**
@@ -94,6 +95,11 @@ class Module {
     }
 
     onMessage(message) {
+        // Ignore bot messages, for safety reasons
+        if (message.author.bot) {
+            return;
+        }
+
         let typing = false;
         let request = new CommandRequest(this, message);
         let response = request.createResponse();
@@ -113,7 +119,7 @@ class Module {
                 }
 
                 // If we already have a reply, skip calling the command
-                if (!response.replyText) {
+                if (!response.reply) {
                     // Start typing
                     if (response.targetChannel.startTyping) {
                         response.targetChannel.startTyping();
@@ -122,26 +128,31 @@ class Module {
 
                     // Call actual command
                     try {
-                        response.replyText = response.callCommand();
+                        response.reply = response.callCommand();
                     } catch (err) {
                         response.error = err;
                     }
 
                     // Catch empty responses to stop typing
-                    if (!response.replyText && response.targetChannel.stopTyping && typing) {
+                    if (!response.reply && response.targetChannel.stopTyping && typing) {
                         response.targetChannel.stopTyping();
                     }
 
                     // Clear the promises, if any
-                    if (response.replyText && response.replyText.then) {
-                        return Promise.resolve(response.replyText.then(text => {
-                            response.replyText = text;
+                    if (response.reply && response.reply.then) {
+                        return Promise.resolve(response.reply.then(obj => {
+                            response.reply = obj;
                         })).catch(err => {
                             response.error = err;
-                        }).return(response);
+                        });
                     }
                 }
             });
+        }).then(() => {
+            // Correct the reply message from a string to an object if necessary
+            if (typeof response.reply === 'string') {
+                response.reply = new CommandReplyMessage(response.reply);
+            }
         }).then(() => {
             // Build response string
             if (response.error) {
@@ -150,27 +161,29 @@ class Module {
                     case 'MiddlewareError':
                     case 'PermissionError':
                         // Some middleware error, filter error message
-                        response.replyText = response.error.userMessage ? response.error.userMessage : null;
+                        if (response.error.userMessage) {
+                            response.reply = new CommandReplyMessage(response.error.userMessage);
+                        }
                         break;
                     case 'CommandError':
                         // A command error
-                        response.replyText = response.error.message;
+                        response.reply = new CommandReplyMessage(response.error.message);
                         break;
                     case 'ThrottleError':
                         // Not something that's worth notifying people, wipe the replyText
-                        response.replyText = undefined;
+                        response.reply = undefined;
                         break;
                     default: {
                         const code = random.hex(6).toUpperCase();
                         console.warn(`Unexpected error: ${response.error.message} (error identifier: ${code})`);
                         console.warn(response.error.stack);
-                        response.replyText = i18next.t('module:command-error', { code });
+                        response.reply = new CommandReplyMessage(i18next.t('module:command-error', { code }));
                     }
                 }
             }
 
             // If we got no response string, return immediately without sending a reply
-            if (!response.replyText) {
+            if (!response.reply) {
                 return response;
             }
 
@@ -182,11 +195,10 @@ class Module {
             // Call the middleware onReplyConstructed
             return response.callMiddlewareOnReplyConstructed().then(() => {
                 // Send reply
-                if (typeof response.replyText === 'string') {
-                    return response.targetChannel.sendMessage(response.replyText);
-                } else if (response.replyText.content || response.replyText.options) {
-                    return response.targetChannel.send(response.replyText.content, response.replyText.options);
-                }
+                return response.targetChannel.sendMessage(response.reply.text, {
+                    embed: response.reply.embed,
+                    file: response.reply.file
+                });
             }).then(message => {
                 if (message) {
                     // Call the middleware onReplyPosted

@@ -61,7 +61,7 @@ describe('CacheMiddleware class', () => {
         };
 
         return middleware.onCommand(response).then(result => {
-            expect(result.replyText).to.equal(text);
+            expect(result.reply).to.equal(text);
             expect(bot.cache.get).to.have.been.called;
         });
     });
@@ -82,7 +82,7 @@ describe('CacheMiddleware class', () => {
 
         return middleware.onReplyConstructed(response).then(result => {
             expect(bot.cache.set.args[0][2]).to.equal(middleware.options.duration);
-            expect(bot.cache.set.args[0][3]).to.equal(response.replyText);
+            expect(bot.cache.set.args[0][3]).to.equal(response.reply);
         });
     });
 });
