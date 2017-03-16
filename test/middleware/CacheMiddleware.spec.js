@@ -68,7 +68,7 @@ describe('CacheMiddleware class', () => {
 
     it('caches the result', () => {
         const middleware = new CacheMiddleware({
-            duration: 10,
+            duration: 10
         });
         bot.cache = {
             set: sinon.expectation.create('set').returns(Promise.resolve())
@@ -77,12 +77,85 @@ describe('CacheMiddleware class', () => {
             request: {
                 params: { }
             },
-            replyText: 'some text to cache'
+            reply: 'some text to cache'
         };
 
-        return middleware.onReplyConstructed(response).then(result => {
+        return middleware.onReplyConstructed(response).then(() => {
             expect(bot.cache.set.args[0][2]).to.equal(middleware.options.duration);
             expect(bot.cache.set.args[0][3]).to.equal(response.reply);
+        });
+    });
+
+    it('caches the result with param uniqueness', () => {
+        const middleware = new CacheMiddleware({
+            unique_params: true
+        });
+        bot.cache = {
+            get: sinon.expectation.create('get').twice().returns(Promise.resolve()),
+            set: sinon.stub().returns(Promise.resolve())
+        };
+        const response1 = {
+            request: {
+                params: { }
+            },
+            reply: 'some text to cache'
+        };
+        const response2 = {
+            request: {
+                params: {
+                    some: 'param'
+                }
+            },
+            reply: 'some text to cache'
+        };
+
+        return middleware.onReplyConstructed(response1).then(() => {
+            return Promise.all([
+                middleware.onCommand(response1),
+                middleware.onCommand(response2)
+            ]).then(() => {
+                expect(bot.cache.get.args[0][1]).to.not.equal(bot.cache.get.args[1][1]);
+            });
+        });
+    });
+
+    it('caches the result with user uniqueness', () => {
+        const middleware = new CacheMiddleware({
+            unique_params: false,
+            unique_user: true
+        });
+        bot.cache = {
+            get: sinon.expectation.create('get').twice().returns(Promise.resolve()),
+            set: sinon.stub().create('set').returns(Promise.resolve())
+        };
+        const response1 = {
+            request: {
+                message: {
+                    author: {
+                        id: '1'
+                    }
+                }
+            },
+            reply: 'some text to cache'
+        };
+        const response2 = {
+            request: {
+                message: {
+                    author: {
+                        id: '2'
+                    }
+                }
+            },
+            reply: 'some text to cache'
+        };
+
+        return middleware.onReplyConstructed(response1).then(() => {
+            return Promise.all([
+                middleware.onCommand(response1),
+                middleware.onCommand(response2)
+            ]).then(() => {
+                expect(bot.cache.get.args[0][1]).to.not.equal(bot.cache.get.args[1][1]);
+            });
         });
     });
 });

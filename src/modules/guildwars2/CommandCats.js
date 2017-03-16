@@ -27,7 +27,9 @@ class CommandCats extends Command {
             this.shortHelpText = i18next.t('guildwars2:cats.short-help');
         });
 
-        this.initializeMiddleware(new CacheMiddleware());
+        this.initializeMiddleware(new CacheMiddleware({
+            unique_user: true
+        }));
     }
 
     onCommand(response) {
