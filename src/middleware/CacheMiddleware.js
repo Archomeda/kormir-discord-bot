@@ -35,7 +35,11 @@ class CacheMiddleware extends Middleware {
     onReplyConstructed(response) {
         const request = response.request;
         const id = this.getCacheId(request);
-        return bot.cache.set(`${request.command}-exec`, id, this.options.duration, response.reply).return(response);
+        return bot.cache.get(`${request.command}-exec`, id).then(cachedObj => {
+            if (!cachedObj) {
+                return bot.cache.set(`${request.command}-exec`, id, this.options.duration, response.reply);
+            }
+        }).return(response);
     }
 
     getCacheId(request) {
