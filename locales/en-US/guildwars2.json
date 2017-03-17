@@ -26,8 +26,9 @@
     "help": "Searches the Guild Wars 2 Wiki for an article and returns a summary and the article link if found.",
     "short-help": "Searches the Guild Wars 2 Wiki for an article",
     "param-terms": "Search terms",
-    "response-title-only": "{{title}}: {{- url}}",
-    "response-with-intro": "{{text}}\n\nMore: {{- url}}",
+    "response-title": "{{title}}",
+    "response-description": "{{description}}",
+    "response-empty": "No detailed information found.",
     "response-not-found": "Your request did not come up with any results. Try using different search terms.",
     "response-no-title": "Please provide a wiki article title or search terms."
   },

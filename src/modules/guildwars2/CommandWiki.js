@@ -1,5 +1,6 @@
 'use strict';
 
+const Discord = require('discord.js');
 const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
 const MWBot = require('mwbot');
@@ -8,6 +9,7 @@ const convertHtmlToMarkdown = require('../../utils/text').convertHtmlToMarkdown;
 
 const Command = require('../Command');
 const CommandParam = require('../CommandParam');
+const CommandReplyMessage = require('../CommandReplyMessage');
 const CommandError = require('../../errors/CommandError');
 const CacheMiddleware = require('../../middleware/CacheMiddleware');
 const MentionableCommandMiddleware = require('../../middleware/MentionableCommandMiddleware');
@@ -86,14 +88,15 @@ class CommandWiki extends Command {
                 const title = response.parse.title;
 
                 // Construct message
-                text = convertHtmlToMarkdown(text).split('\n')[0].trim();
-                const url = encodeURI(`https://wiki.guildwars2.com/wiki/${title}`);
+                const message = new Discord.RichEmbed().setTitle(i18next.t('guildwars2:wiki.response-title', { title }));
+                text = convertHtmlToMarkdown(text, 'wiki-ext', { prefixUrl: 'https://wiki.guildwars2.com' }).split('\n')[0].trim();
+                message.setURL(encodeURI(`https://wiki.guildwars2.com/wiki/${title}`));
                 if (text) {
-                    text = i18next.t('guildwars2:wiki.response-with-intro', { text, url });
+                    message.setDescription(i18next.t('guildwars2:wiki.response-description', { description: text }));
                 } else {
-                    text = i18next.t('guildwars2:wiki.response-title-only', { title, url });
+                    message.setDescription(i18next.t('guildwars2:wiki.response-empty'));
                 }
-                return text;
+                return new CommandReplyMessage('', { embed: message });
             }
             throw new Error('not found');
         }).catch(err => {
