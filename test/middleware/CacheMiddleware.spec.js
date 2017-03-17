@@ -71,6 +71,7 @@ describe('CacheMiddleware class', () => {
             duration: 10
         });
         bot.cache = {
+            get: sinon.stub().returns(Promise.resolve()),
             set: sinon.expectation.create('set').returns(Promise.resolve())
         };
         const response = {
@@ -91,7 +92,7 @@ describe('CacheMiddleware class', () => {
             unique_params: true
         });
         bot.cache = {
-            get: sinon.expectation.create('get').twice().returns(Promise.resolve()),
+            get: sinon.expectation.create('get').thrice().returns(Promise.resolve()),
             set: sinon.stub().returns(Promise.resolve())
         };
         const response1 = {
@@ -114,7 +115,7 @@ describe('CacheMiddleware class', () => {
                 middleware.onCommand(response1),
                 middleware.onCommand(response2)
             ]).then(() => {
-                expect(bot.cache.get.args[0][1]).to.not.equal(bot.cache.get.args[1][1]);
+                expect(bot.cache.get.args[1][1]).to.not.equal(bot.cache.get.args[2][1]);
             });
         });
     });
@@ -125,7 +126,7 @@ describe('CacheMiddleware class', () => {
             unique_user: true
         });
         bot.cache = {
-            get: sinon.expectation.create('get').twice().returns(Promise.resolve()),
+            get: sinon.expectation.create('get').thrice().returns(Promise.resolve()),
             set: sinon.stub().create('set').returns(Promise.resolve())
         };
         const response1 = {
@@ -154,7 +155,7 @@ describe('CacheMiddleware class', () => {
                 middleware.onCommand(response1),
                 middleware.onCommand(response2)
             ]).then(() => {
-                expect(bot.cache.get.args[0][1]).to.not.equal(bot.cache.get.args[1][1]);
+                expect(bot.cache.get.args[1][1]).to.not.equal(bot.cache.get.args[2][1]);
             });
         });
     });
