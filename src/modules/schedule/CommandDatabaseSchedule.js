@@ -2,7 +2,7 @@
 
 const Promise = require('bluebird');
 const i18next = Promise.promisifyAll(require('i18next'));
-const moment = require('moment');
+const momentNlp = require('../../utils/moment-nlp');
 
 const CommandDatabaseModel = require('../CommandDatabaseModel');
 const bot = require('../../bot');
@@ -28,7 +28,7 @@ class CommandDatabaseSchedule extends CommandDatabaseModel {
         switch (paramName) {
             case 'start-date':
             case 'end-date':
-                paramValue = moment(paramValue);
+                paramValue = momentNlp(paramValue);
                 break;
             case 'reminders':
                 paramValue = paramValue ? paramValue.split(/\s*,\s*/).map(i => parseInt(i, 10)).filter(i => !isNaN(i)) : [];

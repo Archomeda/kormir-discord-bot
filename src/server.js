@@ -21,8 +21,11 @@ const ModuleBase = require('./modules/Module');
 const CacheProvider = require('./storage/cache')(config.get('cache.provider'));
 const DatabaseProvider = require('./storage/database')(config.get('database.provider'));
 
+const momentNlp = require('./utils/moment-nlp');
+
 gw2Api.cacheStorage(gw2ApiCache());
 const timezone = config.get('timezone');
+momentNlp.setTimezone(timezone);
 
 console.log('Starting bot...');
 bot.config = config;

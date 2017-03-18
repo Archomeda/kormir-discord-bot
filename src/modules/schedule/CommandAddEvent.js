@@ -33,7 +33,7 @@ class CommandAddEvent extends CommandDatabaseSchedule {
 
     formatResult(response, result) {
         this.module.scheduleEventReminders(result);
-        return i18next.t('schedule:add-event.response', { id: result.id, title: result.title });
+        return i18next.t('schedule:add-event.response', { id: result.id, title: result.title, date: result.start });
     }
 }
 
