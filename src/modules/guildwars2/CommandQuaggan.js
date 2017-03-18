@@ -41,10 +41,10 @@ class CommandQuaggan extends Command {
             }
             return new CommandReplyMessage('', { file: result.url });
         }).catch(err => {
-            if (err.response.status === 404) {
-                throw new CommandError(i18next.t('guildwars2:api.response-down'));
-            } else {
+            if (err.response.status !== 404 && err.content) {
                 throw new CommandError(i18next.t('guildwars2:api.response-error', { error: err.content.text || err.content.error }));
+            } else {
+                throw new CommandError(i18next.t('guildwars2:api.response-down'));
             }
         });
     }
