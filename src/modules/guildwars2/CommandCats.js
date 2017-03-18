@@ -71,7 +71,11 @@ class CommandCats extends Command {
                 message.addField('\u200B', i18next.t('guildwars2:cats.response-more-information'));
                 return new CommandReplyMessage('', { embed: message });
             }).catch(err => {
-                throw new CommandError(i18next.t('guildwars2:api.response-error', { error: err.content.text }));
+                if (err.response.status === 404) {
+                    throw new CommandError(i18next.t('guildwars2:api.response-down'));
+                } else {
+                    throw new CommandError(i18next.t('guildwars2:api.response-error', { error: err.content.text || err.content.error }));
+                }
             });
         });
     }

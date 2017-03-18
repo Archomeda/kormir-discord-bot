@@ -35,27 +35,35 @@ class CommandForceRegister extends Command {
 
         const Gw2Account = bot.database.Gw2Account;
 
-        return Gw2Account.find({ discordId }).then(accounts => {
-            let account = accounts.length > 0 ? accounts[0] : undefined;
+        // Check if the API is working first by getting the tokeninfo endpoint and see if we get an expected error
+        return bot.gw2Api.tokeninfo().get().catch(err => {
+            if (err.response.status === 404) {
+                // This is not expected, API is on fire!
+                throw new CommandError(i18next.t('guildwars2:api.response-down'));
+            }
 
-            return Promise.all([
-                bot.gw2Api.authenticate(key).tokeninfo().get(),
-                bot.gw2Api.authenticate(key).account().get()
-            ]).then(([tokeninfo, accountinfo]) => {
-                // This doesn't check optional permissions since we don't need to, change this once it's required
-                if (!account) {
-                    account = new Gw2Account({ discordId, accountName: accountinfo.name, apiKey: key });
-                } else {
-                    account.apiKey = key;
-                }
-                return account.save().return(i18next.t('guildwars2:force-register.response-registered', { account_name: accountinfo.name }));
-            }).catch(err => {
-                if (err.content && err.content.text) {
-                    throw new CommandError(i18next.t('guildwars2:force-register.response-api-error', { error: err.content.text }));
-                } else {
-                    console.warn(err);
-                    throw new CommandError(i18next.t('guildwars2:force-register.response-api-error-unknown'));
-                }
+            return Gw2Account.find({ discordId }).then(accounts => {
+                let account = accounts.length > 0 ? accounts[0] : undefined;
+
+                return Promise.all([
+                    bot.gw2Api.authenticate(key).tokeninfo().get(),
+                    bot.gw2Api.authenticate(key).account().get()
+                ]).then(([tokeninfo, accountinfo]) => {
+                    // This doesn't check optional permissions since we don't need to, change this once it's required
+                    if (!account) {
+                        account = new Gw2Account({ discordId, accountName: accountinfo.name, apiKey: key });
+                    } else {
+                        account.apiKey = key;
+                    }
+                    return account.save().return(i18next.t('guildwars2:force-register.response-registered', { account_name: accountinfo.name }));
+                }).catch(err => {
+                    if (err.content && err.content.text) {
+                        throw new CommandError(i18next.t('guildwars2:force-register.response-api-error', { error: err.content.text }));
+                    } else {
+                        console.warn(err);
+                        throw new CommandError(i18next.t('guildwars2:force-register.response-api-error-unknown'));
+                    }
+                });
             });
         });
     }

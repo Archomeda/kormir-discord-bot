@@ -141,6 +141,7 @@
     "upgrade-description": "● {{user}} has added {{count}}x {{upgrade}}"
   },
   "api": {
-    "response-error": "The API responded with the following error: {{error}}"
+    "response-error": "The API responded with the following error: {{error}}",
+    "response-down": "The API is on 🔥, please call the 🚒.\nOn a more serious note, this means that the API is currently inaccessible, please try again later."
   }
 }
