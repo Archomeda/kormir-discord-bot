@@ -16,6 +16,9 @@ describe('moment-nlp utils', () => {
         const expected = moment.utc();
         if (expected.isoWeekday() > 3) {
             expected.add(1, 'w');
+            if (expected.isoWeekday() >= 7) {
+                expected.add(1, 'w'); // Add another week because sugarjs works with Sunday-Saturday weeks...
+            }
         }
         expected.isoWeekday(3).hour(20).minute(0).second(0).millisecond(0);
         expect(momentNlp(input)._d).to.deep.equal(expected._d);
@@ -28,6 +31,9 @@ describe('moment-nlp utils', () => {
         const expected = moment.utc();
         if (expected.isoWeekday() > 3) {
             expected.add(1, 'w');
+            if (expected.isoWeekday() >= 7) {
+                expected.add(1, 'w'); // Add another week because sugarjs works with Sunday-Saturday weeks...
+            }
         }
         expected.isoWeekday(3).hour(20).minute(0).second(0).millisecond(0).tz(timezone);
         expect(momentNlp(input)._d).to.deep.equal(expected._d);
