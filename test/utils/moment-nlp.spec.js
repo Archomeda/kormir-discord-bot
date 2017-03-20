@@ -13,7 +13,7 @@ describe('moment-nlp utils', () => {
 
     it('creates a proper moment object using NLP from sugarjs', () => {
         const input = 'next wednesday 20:00';
-        const expected = moment.utc().expected.add(1, 'w');
+        const expected = moment.utc().add(1, 'w');
         if (expected.isoWeekday() >= 7) {
             expected.add(1, 'w'); // Add another week because sugarjs works with Sunday-Saturday weeks...
         }
@@ -25,7 +25,7 @@ describe('moment-nlp utils', () => {
         const timezone = 'America/Los_Angeles';
         momentNlp.setTimezone(timezone);
         const input = 'next wednesday 20:00';
-        const expected = moment.utc().expected.add(1, 'w');
+        const expected = moment.utc().add(1, 'w');
         if (expected.isoWeekday() >= 7) {
             expected.add(1, 'w'); // Add another week because sugarjs works with Sunday-Saturday weeks...
         }
