@@ -35,14 +35,11 @@ class CommandForceRegister extends Command {
 
         const Gw2Account = bot.database.Gw2Account;
 
-        // Check if the API is working first by getting the tokeninfo endpoint and see if we get an expected error
-        return bot.gw2Api.tokeninfo().get().catch(err => {
-            if (err.response.status === 404) {
-                // This is not expected, API is on fire!
-                throw new CommandError(i18next.t('guildwars2:api.response-down'));
-            }
-
-            return Gw2Account.find({ discordId }).then(accounts => {
+        // Check if the API is working first by getting the build endpoint and see if it works
+        // TODO: Improve this by having a global state somewhere that checks periodically if the API is working
+        return bot.gw2Api.build().get()
+            .then(() => Gw2Account.find({ discordId }))
+            .then(accounts => {
                 let account = accounts.length > 0 ? accounts[0] : undefined;
 
                 return Promise.all([
@@ -64,8 +61,13 @@ class CommandForceRegister extends Command {
                         throw new CommandError(i18next.t('guildwars2:force-register.response-api-error-unknown'));
                     }
                 });
+            }).catch(err => {
+                if (err.response && err.response.status === 404) {
+                    // This is not expected, API is on fire!
+                    throw new CommandError(i18next.t('guildwars2:api.response-down'));
+                }
+                throw err;
             });
-        });
     }
 }
 
