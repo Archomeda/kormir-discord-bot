@@ -143,6 +143,11 @@ modules:
         trigger: raids
         enabled: true
 
+      # Super Adventure Box character unlocks
+      sab:
+        trigger: sab
+        enabled: true
+
       # Get a random quaggan
       quaggan:
         trigger: quaggan

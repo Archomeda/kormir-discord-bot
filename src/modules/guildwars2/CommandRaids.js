@@ -73,7 +73,7 @@ class CommandRaids extends Command {
 
                 return new CommandReplyMessage('', { embed: message });
             }).catch(err => {
-                if (err.response.status !== 404 && err.content) {
+                if (err.response.status !== 404 || err.content) {
                     throw new CommandError(i18next.t('guildwars2:api.response-error', { error: err.content.text || err.content.error }));
                 } else {
                     throw new CommandError(i18next.t('guildwars2:api.response-down'));
