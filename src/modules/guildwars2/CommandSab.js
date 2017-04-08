@@ -97,12 +97,12 @@ class CommandSab extends Command {
 
     getCompletedZones(zones) {
         const completedZones = {
-            '101': [],
-            '102': [],
-            '103': [],
-            '201': [],
-            '202': [],
-            '203': []
+            101: [],
+            102: [],
+            103: [],
+            201: [],
+            202: [],
+            203: []
         };
         for (let zone of zones) {
             const id = `${zone.world}0${zone.zone}`;
@@ -113,9 +113,9 @@ class CommandSab extends Command {
         Object.keys(completedZones).forEach(zoneId => {
             completedZones[zoneId].sort((a, b) => {
                 const map = {
-                    'infantile': 0,
-                    'normal': 1,
-                    'tribulation': 2
+                    infantile: 0,
+                    normal: 1,
+                    tribulation: 2
                 };
                 return map[a] - map[b];
             });
