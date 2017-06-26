@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "name": "Utilities"
+  },
+  "roll": {
+    "_meta": {
+      "name": "Roll",
+      "short-description": "Rolls one or more dice",
+      "long-description": "Rolls one or more dice and gives the result.",
+      "param-input": "The input in format AdB+C or AdB-C, where A is the number of dice, B is the number of faces and C is the transformation. A has to be between 1 and {{max_dice}} (if A is not given, A is assumed 1). B has to be between 2 and {{max_faces}} (if B is not given, B is assumed 6). If C is not given, no transformation is applied."
+    },
+    "response-normal": "{{- user}} has rolled {{rolls}}.",
+    "response-transformation": "{{- user}} has rolled {{rolls}}. {{transformation}}.",
+    "response-invalid-input": "The input is invalid.",
+    "response-dice-out-of-range": "You can only roll between 1 and {{max}} times.",
+    "response-faces-out-of-range": "The die has to have between 2 and {{max}} faces.",
+    "response-rolling": "{{- user}} is rolling {{symbols}}"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "name": "Algemeen"
+  },
+  "help": {
+    "_meta": {
+      "name": "Help",
+      "short-description": "Toont informatie over hoe de opdrachten gebruikt kunnen worden",
+      "long-description": "Toont informatie over hoe de opdrachten gebruikt kunnen worden, met optioneel een opdracht als argument voor gedetailleerde informatie.",
+      "param-command": "De opdracht"
+    },
+    "command-param-restriction-optional": "optioneel",
+    "command-param-help": "{{param}} - {{help}}",
+    "command-param-help-extra": "{{param}} - {{help}} *({{extra}})*",
+    "command-param-optional-format": "[{{param}}]",
+    "module-command-help": "{{command}} - {{help}}",
+    "module-command-help-extra": "{{command}} - {{help}} *({{extra}})*",
+    "module-help": "__**{{name}}**__\n{{commands}}",
+    "command-help": "```{{command}}```{{help}}\n\n{{params}}",
+    "command-help-extra": "```{{command}}```**({{extra}})**\n{{help}}\n\n{{params}}",
+    "response-command-not-recognized": "De opdracht '{{command}}' wordt niet herkend. Typ `{{help}}` voor de opdrachtlijst.",
+    "response-command-not-allowed": "Helaas heb je geen toegang tot de opdracht '{{command}}'. Typ `{{help}}` voor de lijst met beschikbare opdrachten.",
+    "response-single-help": "{{help}}",
+    "response-all-help": "{{list}}\n\nTyp `{{help}} <command>` voor informatie over een specifieke opdracht."
+  },
+  "info": {
+    "_meta": {
+      "name": "Info",
+      "short-description": "Toont algemene informatie over de bot",
+      "long-description": "Toont algemene informatie over de bot, inclusief geheugengebruik, uptime, enz."
+    },
+    "response-title": "{{name}} bot-informatie",
+    "response-memory-usage": "Geheugengebruik",
+    "response-memory-usage-value": "{{memory, filesize}}",
+    "response-uptime": "Uptime",
+    "response-uptime-value": "{{uptime, duration}}",
+    "response-source-code": "Broncode"
+  }
+}

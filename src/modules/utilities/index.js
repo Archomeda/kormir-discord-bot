@@ -1,14 +1,14 @@
 'use strict';
 
-const Module = require('../Module');
-const CommandRoll = require('./CommandRoll');
+const Module = require('../../../bot/modules/Module');
+const CommandRoll = require('./commands/Roll');
 
 
 class ModuleUtilities extends Module {
-    constructor() {
-        super();
+    constructor(bot) {
+        super(bot, 'utilities');
 
-        this.registerCommand(new CommandRoll(this));
+        this.register(new CommandRoll(bot));
     }
 }
 

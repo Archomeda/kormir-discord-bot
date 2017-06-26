@@ -1,0 +1,12 @@
+{
+  "restrict-permissions": {
+    "access-denied": "Je hebt geen toegang tot deze opdracht."
+  },
+  "reply-with-mentions": {
+    "response-dm": "{{message}}",
+    "response-public": "{{mentions}}, {{message, lcfirst}}"
+  },
+  "redirect-to-channel": {
+    "redirect-message": "Het antwoord op jouw opdracht kan gevonden worden in {{- channel}}."
+  }
+}

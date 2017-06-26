@@ -1,18 +1,14 @@
 language: node_js
 
 node_js:
+  - "8"
   - "7"
-  - "6"
 
 matrix:
   include:
-    - node_js: "7"
+    - node_js: "8"
       env: ESLINT=true
 
 script:
   - if [ "$ESLINT" == true ]; then npm run lint;
     else npm test; fi
-
-branches:
-  only:
-    - master

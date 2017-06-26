@@ -1,0 +1,4 @@
+{
+  "description": "Copy './locales/<language>/bot.general.json' and change the strings to have your bot description appear here.",
+  "source-code": "[GitHub](https://github.com/Archomeda/kormir-discord-bot)"
+}

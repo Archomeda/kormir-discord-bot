@@ -10,10 +10,12 @@ The bot can do various tasks that helps the guild on the Discord server.
      - Automatically manage roles of world and/or guild members
    - Accounts
      - Home instance cats progression
+     - Weekly raids progression
+     - Super Adventure Box progression
    - Guilds
      - Post various guild logs automatically
    - Other
-     - Post new builds and release notes automatically
+     - Post new builds, release notes and blog posts automatically
      - Query the Guild Wars 2 wiki for something
      - Post random quaggans
  - **Event scheduling**
@@ -56,8 +58,8 @@ These commands have to be executed from within the *kormir-discord-bot* folder:
  - Start: `docker-compose up -d`
 
 ### Manual (linux)
- - Install the following software:
-   - Node.js v6
+ - The bot requires the software to be installed:
+   - Node.js 7.6+
    - MongoDB 3.4
    - Redis 3.2 (optional, make sure to configure it in the options if installed)
  - Clone or download the zip of a specific version (or master if that isn't available)

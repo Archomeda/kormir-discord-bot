@@ -13,28 +13,8 @@
 #
 #####
 
-language: en-US
-timezone: Europe/Amsterdam
-
-
 discord:
-  # The bot's token can found on the bot's application page on discordapp.com/developers/applications/me
-  token: your-token-should-be-here
-  # Command prefix; in case there is another bot running you can change the prefix of this bot's commands
-  command_prefix: "!"
-  # The default middleware to use for every command (available middleware can be found in ./middleware)
-  command_middleware:
-    # Throttles the time to wait between every command execution for every user
-    ThrottleMiddleware:
-      duration: 2
-    # Automatically removes messages
-    AutoRemoveMessageMiddleware:
-      # Duration in seconds of command requests that are not allowed before they are removed (use false to disable)
-      disallowed_request: 300
-      # Duration in seconds of responses to command requests that are not allowed before they are removed (use false to disable)
-      disallowed_response: 300
-
-  # You can assign the emoji names here; if no emoji has been assigned (or the assigned one cannot be found), the default will be used
+  # You can assign emojis here; if an emoji has not been assigned (or the assigned one cannot be found), the default will be used
   # In order to use an emoji, change it to emoji name
   emojis:
     gold: gold
@@ -43,132 +23,98 @@ discord:
 
 
 database:
-  # The database provider (currently only mongodb is supported)
-  provider: mongodb
-
   mongodb:
     uri: mongodb://127.0.0.1/kormir-discord-bot
 
 
 cache:
-  # The cache provider (only node and redis are supported)
-  provider: node
-
   redis:
-    host: 127.0.0.1
-    port: 6379
-    socket:
-    password:
-    database:
     prefix: "kormir-discord-bot-cache:"
 
 
 #####
-# Every command in a module can be enabled and disabled separately. The command to trigger on can be changed as well.
-# In order to assign custom middleware that isn't applied to all middleware (in contrast to the discord section above),
-# use the "middleware" property as shown in the help command.
-# All middleware can be found in the ./src/middleware folder.
+# Every activity (e.g. commands) in a module can be enabled and disabled separately.
 #####
 modules:
-  # Provides general stuff that probably should stay enabled
-  general:
-    commands:
-      help:
-        trigger: help
-        enabled: true
-        middleware:
-          AutoRemoveMessageMiddleware:
-            request: 300
-            response: 300
-          #RestrictChannelsMiddleware:
-          #  types:
-          #    - text # For server text channels (remove to disallow this command being used in server text channels)
-          #    - dm # For DM channels (remove to disallow this command being used in DM channels)
-          #  # The list of server channels to restrict the command to (only used when the types property above contains "text")
-          #  channels:
-          #    - first-channel-id
-          #    - second-channel-id
-      info:
-        trigger: info
-        enabled: true
-
-  # Provides stuff for managing the bot
-  manage:
-    commands:
-      export_ids:
-        trigger: exportids
-        enabled: true
-
-  # Provides an event scheduler (required by certain other modules)
-  schedule:
-    commands:
-      events:
-        trigger: events
-        enabled: true
-      event:
-        trigger: event
-        enabled: true
-      add_event:
-        trigger: addevent
-        enabled: true
-      edit_event:
-        trigger: editevent
-        enabled: true
-      delete_event:
-        trigger: removeevent
-        enabled: true
-
   # Provides general Guild Wars 2 related things
   guildwars2:
-    commands:
-      register:
-        trigger: register
-        enabled: true
-        # Code registration timeout in minutes
-        timeout: 10
-      force_register:
-        trigger: forceregister
-        enabled: true
-      wiki:
-        trigger: wiki
-        enabled: true
+    # !register - API registration
+    register:
+      enabled: true
+      # Code registration timeout in minutes
+      timeout: 10
 
-      # Everyone wants a cat! Or two, or three...
-      cats:
-        trigger: cats
-        enabled: true
+    # !forceregister - Forces API registration for an account
+    force-register:
+      enabled: true
 
-      # Weekly account progress for defeated raid wing encounters
-      raids:
-        trigger: raids
-        enabled: true
+    # !wiki - Allows searching the GW2 wiki
+    wiki:
+      enabled: true
 
-      # Get a random quaggan
-      quaggan:
-        trigger: quaggan
-        enabled: true
-        middleware:
-          # Throttle this command for 60 seconds once used (since this command can be quite spammy)
-          ThrottleMiddleware:
-            type: command
-            duration: 60
+    # !cats - Everyone wants a cat! Or two, or three...
+    cats:
+      enabled: true
 
-    hooks:
-      member_role:
-        enabled: false
-      world_role:
-        enabled: false
+    # !raids - Weekly account progress for defeated raid wing encounters
+    raids:
+      enabled: true
 
-    release_checker:
+    # !sab - Super Adventure Box character progression
+    sab:
+      enabled: true
+
+    # !quaggan - Get a random quaggan image
+    quaggan:
+      enabled: true
+
+    # Guild member role worker for maintaining the guild member role of users automatically
+    guild-member-role:
       enabled: false
-      # The target channel id to where new builds and release notes should be posted
-      target_channel: channel-id
-      # The timeout in minutes to wait between checks
-      timeout: 5
+      # The role id where guild members should be part of
+      role-id: role-id
 
-    guild_log_checker:
+    # World role worker for maintaining the world role of users automatically
+    world-role:
       enabled: false
-      # All the types listed are supported by the API, if you want to change the types that are included,
+      # The role ids where various world (or server) members should be part of, example:
+      # role-ids:
+      #   1001: anvil-rock-role-id
+      #   1002: borlis-pass-role-id
+      role-ids: []
+
+    # Periodically checks if the API is working, disabling this might have side-effects
+    api-checker:
+      enabled: true
+
+    # Periodically checks for a new build
+    build-checker:
+      enabled: false
+      # The target channel id to where new builds should be posted
+      channel-id: channel-id
+      # The rich embed message accent color
+      richcolor: '#00C800'
+
+    # Periodically checks for a new release notes
+    release-notes-checker:
+      enabled: false
+      # The target channel id to where new release notes should be posted
+      channel-id: channel-id
+      # The rich embed message accent color
+      richcolor: '#C8C800'
+
+    # Periodically checks for a new blog posts
+    blog-post-checker:
+      enabled: false
+      # The target channel id to where new release notes should be posted
+      channel-id: channel-id
+      # The rich embed message accent color
+      richcolor: '#C86400'
+
+    # Periodically checks for new guild logs
+    guild-log-checker:
+      enabled: false
+      # All the types listed below are supported by the API; if you want to change the types that are included,
       # copy only the ones you want and leave the rest
       types:
         - motd
@@ -181,30 +127,51 @@ modules:
         - treasury
         - upgrade
       # The target channel id to where the guild logs are posted
-      target_channel: channel-id
-      # The timeout in minutes to wait between checks
-      timeout: 10
+      channel-id: channel-id
+      # The rich embed message accent color
+      richcolor: '#9664FA'
 
     # Guild leader API key for guild related features
-    guild_leader_api_key:
-    # The guild GUID (see api.guildwars2.com/v2/guild/search?name=<guild_name>)
-    guild_id: guild-id
-    # The role id where guild members should be part of
-    guild_member_role: role-id
-    # The role ids where various world (or server) members should be part of, example:
-    # world_member_roles:
-    #   1001: anvil-rock-role-id
-    #   1002: borlis-pass-role-id
-    world_member_roles: []
+    guild-leader-api-key:
+    # The guild GUID for guild related features (see api.guildwars2.com/v2/guild/search?name=<guild_name>)
+    guild-id: guild-id
 
-  # Provies extra utilities
+  # Provides an event scheduler
+  schedule:
+    # The rich embed message accent color
+    richcolor: '#00C8C8'
+
+    # !events - List of scheduled events
+    events:
+      enabled: true
+
+    # !event - Scheduled event
+    event:
+      enabled: true
+
+    # !addevent - Add an event
+    add-event:
+      enabled: true
+
+    # !editevent - Edit a scheduled event
+    edit-event:
+      enabled: true
+
+    # !deleteevent - Remove a scheduled event
+    delete-event:
+      enabled: true
+
+    # Background worker for reminders, disabling this might break stuff
+    scheduler:
+      enabled: true
+
+  # Provides extra utilities
   utilities:
-    commands:
-      roll:
-        trigger: roll
-        enabled: true
-        max_dice: 10
-        max_faces: 100
+    # !roll - Rolling dice
+    roll:
+      enabled: true
+      max_dice: 10
+      max_faces: 100
 
 
 #####
@@ -219,6 +186,9 @@ modules:
 # To add a new group, just add a new key and fill in the properties.
 # Be sure to *not* delete default, as this is the fallback group in case nothing is matched.
 # The asterisk can be used as a wildcard.
+#
+# It's good practice to copy this to your own local config and change it to your own likings, because
+# when you define the root permissions property, you will override all of the roles defined below.
 #####
 permissions:
   owner:
@@ -227,6 +197,7 @@ permissions:
     role_ids: []
     blacklist: []
     whitelist:
+      # Makes sure every command is whitelisted for the owner.
       - "*"
       - "*:*"
 
@@ -234,7 +205,7 @@ permissions:
     user_ids: []
     role_ids: []
     blacklist:
-      - manage.*
+      - admin.*
     whitelist:
       # Even though it looks like all commands are whitelisted, it's not.
       # Blacklist takes precedence, the "*" in the whitelist is just a catch all so it doesn't fall back further.
@@ -253,7 +224,7 @@ permissions:
   # DO NOT define other groups below this one.
   default:
     blacklist:
-      - manage.*
+      - admin.*
       - guildwars2.force_register
       - schedule.add_event
       - schedule.edit_event # To only disallow editing other users's events, use schedule.edit_event:other

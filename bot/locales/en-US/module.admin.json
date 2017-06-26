@@ -1,0 +1,17 @@
+{
+  "_meta": {
+    "name": "Administration"
+  },
+  "export-ids": {
+    "_meta": {
+      "name": "Export ids",
+      "short-description": "Exports the list of role, channel and account ids",
+      "long-description": "Exports the list of role, channel and account ids as a text file. This file will be sent by DM."
+    },
+    "export-roles": "Roles:",
+    "export-text-channels": "Text channels:",
+    "export-voice-channels": "Voice channels:",
+    "export-members": "Members:",
+    "response-see-dm": "Check your DM."
+  }
+}

@@ -1,103 +1,110 @@
 'use strict';
 
 const Discord = require('discord.js');
-const Promise = require('bluebird');
-const i18next = Promise.promisifyAll(require('i18next'));
-const moment = require('moment');
-const scheduler = require('node-schedule');
 
-const bot = require('../../bot');
-const Module = require('../Module');
-const CommandEvents = require('./CommandEvents');
-const CommandEvent = require('./CommandEvent');
-const CommandAddEvent = require('./CommandAddEvent');
-const CommandEditEvent = require('./CommandEditEvent');
-const CommandDeleteEvent = require('./CommandDeleteEvent');
+const Module = require('../../../bot/modules/Module');
+const CommandEvents = require('./commands/Events');
+const CommandEvent = require('./commands/Event');
+const CommandAddEvent = require('./commands/AddEvent');
+const CommandEditEvent = require('./commands/EditEvent');
+const CommandDeleteEvent = require('./commands/DeleteEvent');
+const WorkerScheduler = require('./WorkerScheduler');
 
 
 class ModuleSchedule extends Module {
-    constructor() {
-        super();
-        i18next.loadNamespacesAsync('schedule');
+    constructor(bot) {
+        super(bot, 'schedule');
 
-        this.registerCommand(new CommandEvents(this));
-        this.registerCommand(new CommandEvent(this));
-        this.registerCommand(new CommandAddEvent(this));
-        this.registerCommand(new CommandEditEvent(this));
-        this.registerCommand(new CommandDeleteEvent(this));
+        this.register(new CommandEvents(bot));
+        this.register(new CommandEvent(bot));
+        this.register(new CommandAddEvent(bot));
+        this.register(new CommandEditEvent(bot));
+        this.register(new CommandDeleteEvent(bot));
 
-        this.schedule = new Map();
-        this.rescheduleAllEventReminders();
+        this._scheduler = new WorkerScheduler(bot);
+        this.register(this._scheduler);
     }
 
-    rescheduleAllEventReminders() {
-        for (let [, event] of this.schedule) {
-            for (let reminder of event) {
-                reminder.cancel();
-            }
+    getScheduler() {
+        return this._scheduler;
+    }
+
+    createEventEmbed(message, event) {
+        const bot = this.getBot();
+        const client = bot.getClient();
+        const config = this.getConfig();
+        const l = bot.getLocalizer();
+
+        let guild = message.guild;
+        if (message.channel.type !== 'text' || !message.guild) {
+            guild = client.channels.get(event.channels[0]).guild;
         }
-        this.schedule = new Map();
 
-        return bot.database.Event.find({ start: { $gte: new Date() } }).then(events => {
-            for (let event of events) {
-                this.scheduleEventReminders(event);
-            }
-        });
-    }
-
-    scheduleEventReminders(event) {
-        this.cancelEventReminders(event.id);
-
-        const remindSchedule = [];
-        for (let remindTime of event.reminders) {
-            const remindDate = new Date(event.start);
-            remindDate.setMinutes(remindDate.getMinutes() - remindTime);
-            remindSchedule.push(scheduler.scheduleJob(remindDate, this.postEventReminder.bind(this, event)));
-        }
-        remindSchedule.push(scheduler.scheduleJob(event.start, function (id) {
-            this.schedule.delete(id);
-        }.bind(this, event.id)));
-        this.schedule.set(event.id, remindSchedule);
-    }
-
-    cancelEventReminders(eventId) {
-        if (this.schedule.has(eventId)) {
-            for (let reminder of this.schedule.get(eventId)) {
-                reminder.cancel();
-            }
-        }
-    }
-
-    postEventReminder(event) {
-        const timeToEvent = moment().to(event.start);
-        for (let channelId of event.channels) {
-            const channel = bot.client.channels.get(channelId);
-            if (channel && channel.type === 'text') {
-                try {
-                    let message;
-                    if (event.mentions) {
-                        let mentions = [];
-                        const users = event.mentions.users.map(user => channel.guild.members.get(user)).filter(member => member);
-                        const roles = event.mentions.roles.map(role => channel.guild.roles.get(role)).filter(role => role);
-                        mentions = users.concat(roles);
-                        if (event.mentions.everyone) {
-                            mentions.push('@everyone');
-                        }
-                        if (mentions.length > 0) {
-                            message = i18next.t('schedule:reminder.post-mentions', { mentions: mentions.join(' ') });
-                        }
-                    }
-                    const embed = new Discord.RichEmbed()
-                        .setColor([0, 200, 200])
-                        .setTitle(event.title)
-                        .setDescription(i18next.t('schedule:reminder.post', { title: event.title, time: timeToEvent, description: event.description }));
-                    channel.sendEmbed(embed, message);
-                } catch (err) {
-                    console.log(`Failed to post reminder of event ${event.title} in channel #${channel.name}: ${err.message}`);
-                    console.log(err);
+        let channels = [];
+        let mentions = [];
+        if (guild) {
+            channels = event.channels.map(channel => guild.channels.get(channel)).filter(c => c);
+            if (event.mentions) {
+                const users = event.mentions.users.map(user => message.guild.members.get(user)).filter(m => m).map(member => member.toString());
+                const roles = event.mentions.roles.map(role => message.guild.roles.get(role)).filter(r => r).map(role => role.toString());
+                mentions = users.concat(roles);
+                if (event.mentions.everyone) {
+                    mentions.push(message.guild.defaultRole.toString());
                 }
             }
+        } else {
+            channels.push(l.t('module.schedule:common.response-unknown'));
+            mentions.push(l.t('module.schedule:common.response-unknown'));
         }
+
+        let owner = message.guild.members.get(event.owner);
+        owner = owner ? owner.nickname || owner.user.username : l.t('module.schedule:common.response-unknown');
+
+        const embed = new Discord.RichEmbed()
+            .setTitle(l.t('module.schedule:event.response-title', { title: event.title }))
+            .setDescription(l.t('module.schedule:event.response-description', { description: event.description }))
+            .setFooter(l.t('module.schedule:event.response-footer', { id: event.id, owner }))
+            .setColor(config.get('richcolor'))
+            .setTimestamp(event.start);
+
+        if (!event.recurring) {
+            embed.addField(
+                l.t('module.schedule:event.response-schedule-title'),
+                l.t('module.schedule:event.response-schedule-description', {
+                    start: event.start,
+                    end: event.end
+                })
+            );
+        } else {
+            embed.addField(
+                l.t('module.schedule:event.response-schedule-title'),
+                l.t('module.schedule:event.response-schedule-description-recurring', {
+                    start: event.start,
+                    end: event.end,
+                    recurring: event.recurring
+                })
+            );
+        }
+        if (mentions.length === 0) {
+            embed.addField(
+                l.t('module.schedule:event.response-reminder-title'),
+                l.t('module.schedule:event.response-reminder-description', {
+                    reminders: event.reminders.map(reminder => `${reminder}m`).join(', '),
+                    channels: channels.join(', ')
+                })
+            );
+        } else {
+            embed.addField(
+                l.t('module.schedule:event.response-reminder-title'),
+                l.t('module.schedule:event.response-reminder-description-mentions', {
+                    reminders: event.reminders.map(reminder => `${reminder}m`).join(', '),
+                    channels: channels.join(', '),
+                    mentions: mentions.join(', ')
+                })
+            );
+        }
+
+        return embed;
     }
 }
 

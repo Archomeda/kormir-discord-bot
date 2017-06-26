@@ -1,6 +1,0 @@
-{
-  "people": "{{count}} person",
-  "people_plural": "{{count}} people",
-  "minutes": "{{count}} minute",
-  "minutes_plural": "{{count}} minutes"
-}

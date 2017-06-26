@@ -1,0 +1,6 @@
+{
+  "commands": {
+    "throttle": "Jouw opdracht is genegeerd. Wacht even alvorens de opdracht opnieuw uit te voeren.",
+    "error": "Een onverwachte fout is opgetreden: ```{{error}}```Geef de volgende code door aan de maker van deze bot om de oorzaak van deze fout te helpen identificeren: `{{code}}`."
+  }
+}
