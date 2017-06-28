@@ -245,8 +245,8 @@ class DiscordCommand extends DiscordHook {
 
         Object.keys(permissions).forEach(name => {
             const group = permissions[name];
-            if ((group.user_ids && group.user_ids.includes(user.id)) ||
-                (user.roles && group.role_ids && _.intersection(group.role_ids, user.roles.keyArray()).length > 0)) {
+            if ((group['user-ids'] && group['user-ids'].includes(user.id)) ||
+                (user.roles && group['role-ids'] && _.intersection(group['role-ids'], user.roles.keyArray()).length > 0)) {
                 groups.push(name);
             }
         });

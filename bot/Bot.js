@@ -36,6 +36,16 @@ class Bot {
         this._defaultConfig = yaml.safeLoad(fs.readFileSync(path.join(__dirname, './config/default.yml')));
         this._defaultAppConfig = yaml.safeLoad(fs.readFileSync('./config/default.yml'));
         const config = yaml.safeLoad(fs.readFileSync('./config/local.yml'));
+
+        if (process.env.MONGODB) {
+            config.database.provider = 'mongodb';
+            config.database.mongodb.uri = process.env.MONGODB;
+        }
+        if (process.env.REDIS) {
+            config.cache.provider = 'redis';
+            config.cache.redis.host = process.env.REDIS;
+        }
+
         this._config = new ConfigItem(config, this._defaultConfig, this._defaultAppConfig);
 
         this._modules = [];

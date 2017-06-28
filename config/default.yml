@@ -170,8 +170,8 @@ modules:
     # !roll - Rolling dice
     roll:
       enabled: true
-      max_dice: 10
-      max_faces: 100
+      max-dice: 10
+      max-faces: 100
 
 
 #####
@@ -192,9 +192,9 @@ modules:
 #####
 permissions:
   owner:
-    user_ids:
+    user-ids:
       - owner-id
-    role_ids: []
+    role-ids: []
     blacklist: []
     whitelist:
       # Makes sure every command is whitelisted for the owner.
@@ -202,8 +202,8 @@ permissions:
       - "*:*"
 
   moderator:
-    user_ids: []
-    role_ids: []
+    user-ids: []
+    role-ids: []
     blacklist:
       - admin.*
     whitelist:
@@ -212,9 +212,9 @@ permissions:
       - "*"
       - "*:*"
 
-  event_manager:
-    user_ids: []
-    role_ids: []
+  event-manager:
+    user-ids: []
+    role-ids: []
     blacklist: []
     whitelist:
       - schedule.*

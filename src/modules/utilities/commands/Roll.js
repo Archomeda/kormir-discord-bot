@@ -16,8 +16,8 @@ class CommandRoll extends DiscordCommand {
 
     initializeParameters() {
         const config = this.getModule().getConfig().root(this.getId());
-        const maxDice = config.get('max_dice');
-        const maxFaces = config.get('max_faces');
+        const maxDice = config.get('max-dice');
+        const maxFaces = config.get('max-faces');
 
         return new DiscordCommandParameter('input', { optional: true, localizationContext: { max_dice: maxDice, max_faces: maxFaces } }); // eslint-disable-line camelcase
     }
@@ -37,8 +37,8 @@ class CommandRoll extends DiscordCommand {
         const faces = dieMatch[2] || 6;
         const transformation = dieMatch[3] ? parseInt(dieMatch[3], 10) : 0;
 
-        const maxDice = config.get('max_dice');
-        const maxFaces = config.get('max_faces');
+        const maxDice = config.get('max-dice');
+        const maxFaces = config.get('max-faces');
         if (dice < 1 || dice > maxDice) {
             throw new DiscordCommandError(l.t('module.utilities:roll.response-dice-out-of-range', { max: maxDice }));
         }

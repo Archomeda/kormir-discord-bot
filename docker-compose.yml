@@ -21,18 +21,5 @@ services:
       - db
       - redis
     environment:
-      NODE_CONFIG: >
-        {
-          "database": {
-            "provider": "mongodb",
-            "mongodb": {
-              "uri": "mongodb://db/kormir-discord-bot"
-            }
-          },
-          "cache": {
-            "provider": "redis",
-            "redis": {
-              "host": "redis"
-            }
-          }
-        }
+      MONGODB: mongodb://db/kormir-discord-bot
+      REDIS: redis
