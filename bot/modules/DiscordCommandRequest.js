@@ -73,6 +73,10 @@ class DiscordCommandRequest {
      * @returns {Object} The parsed parameters, indexed by parameter id.
      */
     getParams() {
+        if (this._params) {
+            return this._params;
+        }
+
         const rawParams = this.getRawParams();
         if (!rawParams) {
             return {};
@@ -101,7 +105,8 @@ class DiscordCommandRequest {
             }
         }
 
-        return params;
+        this._params = params;
+        return this._params;
     }
 
     _getParsedMessage() {

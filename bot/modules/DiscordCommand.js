@@ -5,6 +5,8 @@ const random = require('random-js')();
 
 const Throttle = require('../middleware/Throttle');
 const MiddlewareError = require('../middleware/MiddlewareError');
+const CorrectNumberOfParameters = require('../middleware/internal/CorrectNumberOfParameters');
+const ParameterError = require('../middleware/internal/ParameterError');
 const PermissionError = require('../middleware/internal/PermissionError');
 const ReplyWithMentions = require('../middleware/internal/ReplyWithMentions');
 const RestrictPermissions = require('../middleware/internal/RestrictPermissions');
@@ -44,6 +46,7 @@ class DiscordCommand extends DiscordHook {
         this._permissions = config.get('/permissions').raw();
         this.setMiddleware(new RestrictPermissions(bot, this));
         this.setMiddleware(new Throttle(bot, this));
+        this.setMiddleware(new CorrectNumberOfParameters(bot, this));
         this.setMiddleware(new ReplyWithMentions(bot, this));
     }
 
@@ -113,6 +116,10 @@ class DiscordCommand extends DiscordHook {
                     response.reply = err.message;
                 } else if (err instanceof ThrottleError && err.showError) {
                     response.reply = l.t('errors.defaults:commands.throttle');
+                } else if (err instanceof ParameterError) {
+                    const helpCommand = this.getBot().getModule('general').getActivity('help').getCommandTrigger();
+                    const command = this.getTriggers()[0];
+                    response.reply = l.t('errors.defaults:commands.wrong-parameter-count', { help: helpCommand, command });
                 } else if (!(err instanceof MiddlewareError)) {
                     // TODO: Change to something less random
                     const code = random.hex(6).toUpperCase();

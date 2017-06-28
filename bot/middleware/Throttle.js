@@ -20,6 +20,7 @@ class ThrottleMiddleware extends Middleware {
         super(bot, 'throttle', command, options);
 
         this._defaultOptions = {
+            order: -5,
             type: 'user',
             duration: this.getBot().getConfig().get('/discord.throttle', 2),
             removeDelay: 60

@@ -84,6 +84,26 @@ class Bot {
         this._modules.splice(i, 1);
     }
 
+    /**
+     * Gets the registered modules.
+     * @returns {Module[]} The list of modules.
+     */
+    getModules() {
+        return this._modules;
+    }
+
+    /**
+     * Gets a module that is registered to the bot.
+     * @param {function|string} Module - The module class or its id.
+     * @returns {Module} The activity
+     */
+    getModule(Module) {
+        if (typeof Module === 'string') {
+            return this.getModules().find(a => a.getId() === Module);
+        }
+        return this.getModules().find(a => a instanceof Module);
+    }
+
 
     /**
      * Gets the config used for the Discord bot.

@@ -1,5 +1,6 @@
 {
   "commands": {
+    "wrong-parameter-count": "The amount of given parameters does not equal the amount of required parameters for this command. Type `{{help}} {{command}}` for information about this command.",
     "throttle": "Your command has been suppressed. Please wait a bit before executing the command again.",
     "error": "An unexpected error has occured: ```{{error}}```Give the following code to the author of the bot to help identify the source of this problem: `{{code}}`."
   }
