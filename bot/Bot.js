@@ -38,10 +38,22 @@ class Bot {
         const config = yaml.safeLoad(fs.readFileSync('./config/local.yml'));
 
         if (process.env.MONGODB) {
+            if (!config.database) {
+                config.database = {};
+            }
+            if (!config.database.mongodb) {
+                config.database.mongodb = {};
+            }
             config.database.provider = 'mongodb';
             config.database.mongodb.uri = process.env.MONGODB;
         }
         if (process.env.REDIS) {
+            if (!config.cache) {
+                config.cache = {};
+            }
+            if (!config.cache.redis) {
+                config.cache.redis = {};
+            }
             config.cache.provider = 'redis';
             config.cache.redis.host = process.env.REDIS;
         }
