@@ -76,7 +76,7 @@ const converters = {
                 if (innerHTML) {
                     const url = options.prefixUrl && !(node.href.startsWith('http://') || node.href.startsWith('https://')) ?
                         `${options.prefixUrl}${node.href}` : node.href;
-                    return node.title ? `[${innerHTML}](${url} "${node.title}")` : `[${innerHTML}](${url})`;
+                    return node.title ? `[${innerHTML}](${url.replace(/\)/g, '\\)')} "${node.title}")` : `[${innerHTML}](${url})`;
                 }
                 return '';
             }
