@@ -1,5 +1,7 @@
 'use strict';
 
+const DiscordReplyMessage = require('../../DiscordReplyMessage');
+
 const AutoRemoveMessage = require('../../../../bot/middleware/AutoRemoveMessage');
 
 const DiscordCommand = require('../../../../bot/modules/DiscordCommand');
@@ -13,7 +15,7 @@ class CommandExportIds extends DiscordCommand {
         this.setMiddleware(new AutoRemoveMessage(bot, this, { defaultRequest: 60, defaultResponse: 60 })); // Auto remove messages after 1 minute
     }
 
-    onCommand(request) {
+    async onCommand(request) {
         const bot = this.getBot();
         const client = bot.getClient();
         const l = bot.getLocalizer();
@@ -46,11 +48,13 @@ class CommandExportIds extends DiscordCommand {
             result.push('\n');
         }
 
-        return message.author.dmChannel.send('', { file: { attachment: Buffer.from(result.join('\n')), name: 'ids.txt' } }).then(() => {
-            if (message.channel.type !== 'dm') {
-                return l.t('module.admin:export-ids.response-see-dm');
-            }
-        });
+        if (message.channel.type !== 'dm') {
+            // Send the file by DM instead
+            await message.author.dmChannel.send('', { file: { attachment: Buffer.from(result.join('\n')), name: 'ids.txt' } });
+            return l.t('module.admin:export-ids.response-see-dm');
+        }
+
+        return new DiscordReplyMessage('', { file: { attachment: Buffer.from(result.join('\n')), name: 'ids.txt' } });
     }
 }
 

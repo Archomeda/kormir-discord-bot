@@ -3,6 +3,10 @@
 const fs = require('fs');
 const Backend = require('i18next-node-fs-backend');
 
+
+/**
+ * A custom localization backend for i18next that allows loading from fallback files.
+ */
 class LocalizationBackend extends Backend {
     read(language, namespace, callback) {
         // Intercept this call to support loading from multiple folders

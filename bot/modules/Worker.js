@@ -9,38 +9,42 @@ const Activity = require('./Activity');
 class Worker extends Activity {
     /**
      * Initializes the worker.
+     * @returns {Promise} The promise.
      */
-    initializeWorker() {
+    async initializeWorker() {
 
     }
 
     /**
      * Enables the worker.
+     * @returns {Promise} The promise.
      */
-    enableWorker() {
+    async enableWorker() {
 
     }
 
     /**
      * Disables the worker.
+     * @returns {Promise} The promise.
      */
-    disableWorker() {
+    async disableWorker() {
 
     }
 
-    initialize() {
-        super.initialize();
-        this.initializeWorker();
+
+    async initialize() {
+        await super.initialize();
+        return this.initializeWorker();
     }
 
-    enable() {
-        super.enable();
-        this.enableWorker();
+    async enable() {
+        await super.enable();
+        return this.enableWorker();
     }
 
-    disable() {
-        this.disableWorker();
-        super.disable();
+    async disable() {
+        await this.disableWorker();
+        return super.disable();
     }
 }
 

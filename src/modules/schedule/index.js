@@ -8,7 +8,7 @@ const CommandEvent = require('./commands/Event');
 const CommandAddEvent = require('./commands/AddEvent');
 const CommandEditEvent = require('./commands/EditEvent');
 const CommandDeleteEvent = require('./commands/DeleteEvent');
-const WorkerScheduler = require('./WorkerScheduler');
+const WorkerScheduler = require('./workers/Scheduler');
 
 
 class ModuleSchedule extends Module {

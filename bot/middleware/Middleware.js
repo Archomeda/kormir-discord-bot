@@ -12,7 +12,7 @@ class Middleware {
      * @param {Bot} bot - The bot instance.
      * @param {string} id - The module id.
      * @param {DiscordCommand} command - The command.
-     * @param {Object.<string,*>} [options] - Additional options for the middleware.
+     * @param {Object<string, *>} [options] - Additional options for the middleware.
      */
     constructor(bot, id, command, options) {
         this._bot = bot;
@@ -59,7 +59,7 @@ class Middleware {
 
     /**
      * Gets the default options used for the middleware.
-     * @returns {Object.<string,*>} The default options mapped as an object.
+     * @returns {Object<string, *>} The default options mapped as an object.
      */
     getDefaultOptions() {
         return this._defaultOptions;
@@ -68,7 +68,7 @@ class Middleware {
 
     /**
      * Gets the options.
-     * @returns {Object.<string,*>} The options.
+     * @returns {Object<string, *>} The options.
      */
     getOptions() {
         return this._options;
@@ -77,28 +77,28 @@ class Middleware {
     /**
      * Gets called whenever a command is called.
      * @param {DiscordCommandResponse} response - The command response object.
-     * @returns {DiscordCommandResponse|Promise<DiscordCommandResponse>} The command response object, or a promise containing it.
+     * @returns {Promise<DiscordCommandResponse>} The promise with the command response object.
      */
-    onCommand(response) {
+    async onCommand(response) {
         return response;
     }
 
     /**
      * Gets called whenever the command reply has been constructed.
      * @param {DiscordCommandResponse} response - The command response object.
-     * @returns {DiscordCommandResponse|Promise<DiscordCommandResponse>} The command response object, or a promise containing it.
+     * @returns {Promise<DiscordCommandResponse>} The promise with the command response object.
      */
-    onReplyConstructed(response) {
+    async onReplyConstructed(response) {
         return response;
     }
 
     /**
      * Gets called whenever the command reply has been posted.
      * @param {DiscordCommandResponse} response - The command response object.
-     * @param {DiscordReplyMessage} message - The reply message.
-     * @returns {DiscordCommandResponse|Promise<DiscordCommandResponse>} The command response object, or a promise containing it.
+     * @param {Message} message - The reply message.
+     * @returns {Promise<DiscordCommandResponse>} The promise with the command response object.
      */
-    onReplyPosted(response, message) { // eslint-disable-line no-unused-vars
+    async onReplyPosted(response, message) { // eslint-disable-line no-unused-vars
         return response;
     }
 }

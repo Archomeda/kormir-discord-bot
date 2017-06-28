@@ -1,7 +1,6 @@
 'use strict';
 
 const Discord = require('discord.js');
-const Promise = require('bluebird');
 
 const { readRss } = require('../../../utils/rss');
 const { convertHtmlToMarkdown } = require('../../../utils/markdown');
@@ -19,11 +18,12 @@ class WorkerReleaseNotesChecker extends Worker {
         this._localizerNamespaces = 'module.guildwars2';
     }
 
-    check() {
-        Promise.all([
-            this.getLatestNotes(),
-            this.checkNotes()
-        ]).then(([oldNotesUrl, notes]) => {
+    async check() {
+        try {
+            const [oldNotesUrl, notes] = await Promise.all([
+                this.getLatestNotes(),
+                this._checkNotes()
+            ]);
             const allNotes = [];
             for (let i = 0; i < notes.length; i++) {
                 if (notes[i].link === oldNotesUrl) {
@@ -34,30 +34,29 @@ class WorkerReleaseNotesChecker extends Worker {
 
             if (allNotes.length > 0) {
                 // Set the latest notes to the last thread post
-                return this.setLatestNotes(allNotes[0].link).then(() => {
-                    if (oldNotesUrl) {
-                        // Signal the first new thread post, because sometimes the release notes are very long
-                        // and span multiple posts
-                        this.onNewNotes(allNotes[allNotes.length - 1]);
-                    }
-                });
+                await this.setLatestNotes(allNotes[0].link);
+                if (oldNotesUrl) {
+                    // Signal the first new thread post, because sometimes the release notes are very long
+                    // and span multiple posts
+                    return this.onNewNotes(allNotes[allNotes.length - 1]);
+                }
             }
-        }).catch(err => this.log(`Error while checking for new release notes: ${err.message}`, 'error'));
+        } catch (err) {
+            this.log(`Error while checking for new release notes: ${err.message}`, 'error');
+        }
     }
 
-    checkNotes() {
-        return readRss(rssFeed).then(feed => {
-            this.log(`Got latest release notes thread: ${feed.items[0].link}`, 'log');
-            return readRss(`${feed.items[0].link}.rss`);
-        }).then(feed => {
-            this.log(`Got latest release notes: ${feed.items[0].link}`, 'log');
-            return feed.items;
-        });
+    async _checkNotes() {
+        let feed = await readRss(rssFeed);
+        this.log(`Got latest release notes thread: ${feed.items[0].link}`, 'log');
+        feed = await readRss(`${feed.items[0].link}.rss`);
+        this.log(`Got latest release notes: ${feed.items[0].link}`, 'log');
+        return feed.items;
     }
 
-    onNewNotes(notes) {
+    async onNewNotes(notes) {
         const bot = this.getBot();
-        const config = this.getModule().getConfig().root(this.getId());
+        const config = this.getConfig();
         const client = bot.getClient();
         const l = bot.getLocalizer();
 
@@ -71,7 +70,7 @@ class WorkerReleaseNotesChecker extends Worker {
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
             const description = convertHtmlToMarkdown(notes.description, 'feed')
                 .replace(/^([a-zA-Z0-9 ]+\.\d{4})[^:]+: /, '');
-            channel.send('', {
+            return channel.send('', {
                 embed: new Discord.RichEmbed()
                     .setColor(config.get('richcolor'))
                     .setThumbnail(thumbnailUrl)
@@ -83,21 +82,21 @@ class WorkerReleaseNotesChecker extends Worker {
         }
     }
 
-    getLatestNotes() {
+    async getLatestNotes() {
         return this.getBot().getCache().get(this.getId(), 'notes');
     }
 
-    setLatestNotes(notes) {
+    async setLatestNotes(notes) {
         return this.getBot().getCache().set(this.getId(), 'notes', undefined, notes);
     }
 
 
-    enableWorker() {
+    async enableWorker() {
         this._intervalId = setInterval(this.check.bind(this), 300000);
-        this.check();
+        return this.check();
     }
 
-    disableWorker() {
+    async disableWorker() {
         if (this._intervalId) {
             clearInterval(this._intervalId);
         }

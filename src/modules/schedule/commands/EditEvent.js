@@ -26,7 +26,7 @@ class CommandEditEvent extends DatabaseScheduleBase {
         ];
     }
 
-    formatResult(request, result) {
+    async formatResult(request, result) {
         const l = this.getBot().getLocalizer();
 
         if (!result) {

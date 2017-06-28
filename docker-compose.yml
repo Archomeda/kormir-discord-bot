@@ -13,7 +13,7 @@ services:
       - ./storage/cache:/data
   bot:
     build: .
-    command: npm start
+    command: node server.js
     restart: unless-stopped
     volumes:
       - ./config:/bot/config

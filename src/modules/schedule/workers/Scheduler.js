@@ -2,11 +2,10 @@
 
 const Discord = require('discord.js');
 const moment = require('moment-timezone');
-const Promise = require('bluebird');
 const scheduler = require('node-schedule');
 
-const Worker = require('../../../bot/modules/Worker');
-const models = require('../../models');
+const Worker = require('../../../../bot/modules/Worker');
+const models = require('../../../models/index');
 
 
 class WorkerScheduler extends Worker {
@@ -36,17 +35,16 @@ class WorkerScheduler extends Worker {
         this._schedule.set(event.id, remindSchedule);
     }
 
-    rescheduleAllEventReminders() {
+    async rescheduleAllEventReminders() {
         if (!this.isEnabled()) {
             return;
         }
         this.cancelAllEventReminders();
 
-        return models.Event.find({ start: { $gte: new Date() } }).then(events => {
-            for (const event of events) {
-                this.scheduleEventReminders(event);
-            }
-        });
+        const events = await models.Event.find({ start: { $gte: new Date() } });
+        for (const event of events) {
+            this.scheduleEventReminders(event);
+        }
     }
 
     cancelEventReminders(eventId) {
@@ -76,13 +74,12 @@ class WorkerScheduler extends Worker {
         this._schedule = new Map();
     }
 
-    rescheduleAllRecurringEvents() {
-        return models.Event.find({ start: { $lt: new Date() }, recurring: { $gt: 0 } }).then(events => {
-            return Promise.each(events, event => this.scheduleRecurringEvent(event));
-        });
+    async rescheduleAllRecurringEvents() {
+        const events = await models.Event.find({ start: { $lt: new Date() }, recurring: { $gt: 0 } });
+        await Promise.all(events.map(e => this.scheduleRecurringEvent(e)));
     }
 
-    scheduleRecurringEvent(event) {
+    async scheduleRecurringEvent(event) {
         // Kind of ugly, but it works
         const newStart = moment(event.start);
         const newEnd = moment(event.end);
@@ -102,11 +99,13 @@ class WorkerScheduler extends Worker {
             mentions: event.mentions,
             recurring: event.recurring
         });
+        event.recurring = undefined;
 
-        return recurringEvent.save().then(() => {
-            event.recurring = undefined;
-            return event.save();
-        }).then(() => this.scheduleEventReminders(recurringEvent));
+        await Promise.all([
+            recurringEvent.save(),
+            event.save()
+        ]);
+        this.scheduleEventReminders(recurringEvent);
     }
 
     postEventReminder(event) {
@@ -164,12 +163,14 @@ class WorkerScheduler extends Worker {
     }
 
 
-    enableWorker() {
-        this.rescheduleAllEventReminders();
-        this.rescheduleAllRecurringEvents();
+    async enableWorker() {
+        return Promise.all([
+            this.rescheduleAllEventReminders(),
+            this.rescheduleAllRecurringEvents()
+        ]);
     }
 
-    disableWorker() {
+    async disableWorker() {
         this.cancelAllEventReminders();
     }
 }

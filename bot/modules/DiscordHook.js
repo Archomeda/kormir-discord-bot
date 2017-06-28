@@ -25,13 +25,14 @@ class DiscordHook extends Hook {
 
     /**
      * Gets the list of Discord hooks, mapped by event id (see Discord docs).
-     * @returns {Object.<string,function>} The Discord hooks.
+     * @returns {Object<string, function>} The Discord hooks.
      */
     getHooks() {
         return this._hooks;
     }
 
-    enableHook() {
+
+    async enableHook() {
         const client = this.getBot().getClient();
         const hooks = this.getHooks();
         Object.keys(hooks).forEach(hookName => {
@@ -40,7 +41,7 @@ class DiscordHook extends Hook {
         });
     }
 
-    disableHook() {
+    async disableHook() {
         const client = this.getBot().getClient();
         const hooks = this.getHooks();
         Object.keys(hooks).forEach(hookName => {

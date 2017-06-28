@@ -23,10 +23,10 @@ class HookGuildMemberRole extends DiscordHook {
         };
     }
 
-    ensureGuildMembership(user, gw2Account) {
+    async ensureGuildMembership(user, gw2Account) {
         const client = this.getBot().getClient();
         const moduleConfig = this.getModule().getConfig();
-        const config = moduleConfig.root(this.getId());
+        const config = this.getConfig();
         if (!config.has('role-id')) {
             return;
         }
@@ -34,67 +34,67 @@ class HookGuildMemberRole extends DiscordHook {
         const key = moduleConfig.get('guild-leader-api-key');
         const guildId = moduleConfig.get('guild-id');
 
-        const doEnsure = account => gw2Api.authenticate(key).guild(guildId).members().get().then(members => {
-            const member = members.find(member => member.name === account.accountName);
-            if (user.guild) {
-                // Guild member instance
-                return member ? this._addToGuildRole(user) : this._removeFromGuildRole(user);
-            }
-
-            // Just a generic user, convert it to all known guild users
-            const exec = client.guilds
-                .map(server => server.member(user))
-                .filter(u => u)
-                .map(user => member ? this._addToGuildRole(user) : this._removeFromGuildRole(user));
-            return Promise.all(exec);
-        });
-
         if (!gw2Account) {
-            return models.Gw2Account.findOne({ discordId: user.id }).then(account => {
-                if (account) {
-                    return doEnsure(account);
-                }
-            });
+            gw2Account = await models.Gw2Account.findOne({ discordId: user.id });
         }
-        return doEnsure(gw2Account);
+        if (!gw2Account) {
+            return;
+        }
+
+        // This method relies on a universal guild across one or more discord servers
+        // Might have to change that at some point
+
+        const members = await gw2Api.authenticate(key).guild(guildId).members().get();
+        const member = members.find(member => member.name === gw2Account.accountName);
+        if (user.guild) {
+            // Guild member instance
+            return member ? this._addToGuildRole(user) : this._removeFromGuildRole(user);
+        }
+
+        // Just a generic user, convert it to all known guild users
+        const exec = client.guilds
+            .map(server => server.member(user))
+            .filter(u => u)
+            .map(user => member ? this._addToGuildRole(user) : this._removeFromGuildRole(user));
+        return Promise.all(exec);
     }
 
-    _addToGuildRole(user) {
-        const role = this.getModule().getConfig().root(this.getId()).get('role-id');
+    async _addToGuildRole(user) {
+        const role = this.getConfig().get('role-id');
         if (!user.roles.has(role)) {
             return user.addRole(role);
         }
     }
 
-    _removeFromGuildRole(user) {
-        const role = this.getModule().getConfig().root(this.getId()).get('role-id');
+    async _removeFromGuildRole(user) {
+        const role = this.getConfig().get('role-id');
         if (user.roles.has(role)) {
             return user.removeRole(role);
         }
     }
 
 
-    onUpdate(oldMember, newMember) {
-        this.ensureGuildMembership(newMember);
+    async onUpdate(oldMember, newMember) {
+        return this.ensureGuildMembership(newMember);
     }
 
-    onNewRegistration(user, gw2Account) {
-        this.ensureGuildMembership(user, gw2Account);
+    async onNewRegistration(user, gw2Account) {
+        return this.ensureGuildMembership(user, gw2Account);
     }
 
 
-    enableHook() {
-        super.enableHook();
+    async enableHook() {
+        await super.enableHook();
         const module = this.getModule();
         module.getActivity(CommandRegister).on('new-registration', this.onNewRegistration.bind(this));
         module.getActivity(CommandForceRegister).on('new-registration', this.onNewRegistration.bind(this));
     }
 
-    disableHook() {
+    async disableHook() {
         const module = this.getModule();
         module.getActivity(CommandRegister).removeListener('new-registration', this.onNewRegistration.bind(this));
         module.getActivity(CommandForceRegister).removeListener('new-registration', this.onNewRegistration.bind(this));
-        super.disableHook();
+        return super.disableHook();
     }
 }
 

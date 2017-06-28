@@ -59,7 +59,7 @@ These commands have to be executed from within the *kormir-discord-bot* folder:
 
 ### Manual (linux)
  - The bot requires the software to be installed:
-   - Node.js 7.6+
+   - Node.js 8
    - MongoDB 3.4
    - Redis 3.2 (optional, make sure to configure it in the options if installed)
  - Clone or download the zip of a specific version (or master if that isn't available)

@@ -1,38 +1,51 @@
 'use strict';
 
-const Promise = require('bluebird');
-const redis = Promise.promisifyAll(require('redis'));
+const { promisify } = require('util');
+const redis = require('redis');
 
 const Base = require('./Base');
 
 
+/**
+ * A caching backend using Redis.
+ */
 class RedisCache extends Base {
-    connect() {
-        this.client = redis.createClient({
+    async connect() {
+        this._client = redis.createClient({
             host: this.getConfig().get('host'),
             port: this.getConfig().get('port'),
             socket: this.getConfig().get('socket'),
             password: this.getConfig().get('password'),
             database: this.getConfig().get('database')
         });
+        this._get = promisify(this._client.get);
+        this._set = promisify(this._client.set);
+        this._setex = promisify(this._client.setex);
+        this._del = promisify(this._client.del);
     }
 
-    disconnect() {
-        this.client.quit();
+    async disconnect() {
+        this._client.quit();
+        this._get = undefined;
+        this._set = undefined;
+        this._setex = undefined;
+        this._del = undefined;
     }
 
-    get(table, id) {
-        return this.client.getAsync(`${this.getConfig().get('prefix')}${table}:${id}`).then(value => JSON.parse(value));
+    async get(table, id) {
+        const result = await this._get(`${this.getConfig().get('prefix')}${table}:${id}`);
+        return JSON.parse(result);
     }
 
-    set(table, id, ttl, value) {
+    async set(table, id, ttl, value) {
         return ttl ?
-            this.client.setexAsync(`${this.getConfig().get('prefix')}${table}:${id}`, ttl, JSON.stringify(value)) :
-            this.client.setAsync(`${this.getConfig().get('prefix')}${table}:${id}`, JSON.stringify(value));
+            this._setex(`${this.getConfig().get('prefix')}${table}:${id}`, ttl, JSON.stringify(value)) :
+            this._set(`${this.getConfig().get('prefix')}${table}:${id}`, JSON.stringify(value));
     }
 
-    remove(table, id) {
-        return this.client.delAsync(`${this.getConfig().get('prefix')}${table}:${id}`).then(result => result > 0);
+    async remove(table, id) {
+        const result = this._del(`${this.getConfig().get('prefix')}${table}:${id}`);
+        return result > 0;
     }
 }
 

@@ -9,38 +9,42 @@ const Activity = require('./Activity');
 class Hook extends Activity {
     /**
      * Initializes the hook.
+     * @returns {Promise} The promise.
      */
-    initializeHook() {
+    async initializeHook() {
 
     }
 
     /**
      * Enables the hook.
+     * @returns {Promise} The promise.
      */
-    enableHook() {
+    async enableHook() {
 
     }
 
     /**
      * Disables the hook.
+     * @returns {Promise} The promise.
      */
-    disableHook() {
+    async disableHook() {
 
     }
 
-    initialize() {
-        this.initializeHook();
-        super.initialize();
+
+    async initialize() {
+        await super.initialize();
+        return this.initializeHook();
     }
 
-    enable() {
-        this.enableHook();
-        super.enable();
+    async enable() {
+        await super.enable();
+        return this.enableHook();
     }
 
-    disable() {
-        this.disableHook();
-        super.disable();
+    async disable() {
+        await this.disableHook();
+        return super.disable();
     }
 }
 

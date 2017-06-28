@@ -1,6 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird');
 const Feedparser = require('feedparser');
 const request = require('request');
 

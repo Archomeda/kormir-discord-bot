@@ -2,13 +2,17 @@ language: node_js
 
 node_js:
   - "8"
-  - "7"
 
 matrix:
   include:
     - node_js: "8"
       env: ESLINT=true
 
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
 script:
-  - if [ "$ESLINT" == true ]; then npm run lint;
-    else npm test; fi
+  - if [ "$ESLINT" == true ]; then yarn lint;
+    else yarn test; fi

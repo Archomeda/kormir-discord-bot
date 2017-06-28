@@ -2,8 +2,6 @@
 
 const EventEmitter = require('events');
 
-const Promise = require('bluebird');
-
 
 /**
  * An activity for a module that can be enabled and disabled.
@@ -41,6 +39,14 @@ class Activity extends EventEmitter {
     }
 
     /**
+     * Gets the configuration of this activity.
+     * @returns {ConfigItem} The config instance for this activity.
+     */
+    getConfig() {
+        return this.getModule().getConfig().root(this.getId());
+    }
+
+    /**
      * Gets the module.
      * @returns {Module} The module.
      */
@@ -75,28 +81,31 @@ class Activity extends EventEmitter {
 
     /**
      * Initializes this activity.
+     * @returns {Promise} The promise.
      */
-    initialize() {
+    async initialize() {
         this._isInitialized = true;
     }
 
     /**
      * Enables this activity.
+     * @returns {Promise} The promise.
      */
-    enable() {
+    async enable() {
         this._isEnabled = true;
 
         if (this._localizerNamespaces) {
             const l = this.getBot().getLocalizer();
             return l.loadNamespacesAsync(this._localizerNamespaces);
         }
-        return Promise.resolve(true);
+        return true;
     }
 
     /**
      * Disables this activity.
+     * @returns {Promise} The promise.
      */
-    disable() {
+    async disable() {
         this._isEnabled = false;
     }
 

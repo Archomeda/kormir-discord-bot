@@ -97,39 +97,40 @@ class Module {
 
     /**
      * Initializes this module.
+     * @returns {Promise} The promise.
      */
-    initialize() {
+    async initialize() {
         this._isInitialized = true;
-
-        for (const activity of this._activities) {
-            activity.initialize();
-        }
+        return Promise.all(this.getActivities().map(a => a.initialize()));
     }
 
     /**
      * Enables this module.
+     * @returns {Promise} The promise.
      */
-    enable() {
+    async enable() {
         this._isEnabled = true;
 
-        for (const activity of this._activities) {
-            if (this.getConfig().get(`${activity.getId()}.enabled`)) {
-                activity.enable();
-                activity.on('log', this.onActivityLog);
+        return Promise.all(this.getActivities().map(a => {
+            if (a.getConfig().get('enabled')) {
+                a.on('log', this.onActivityLog);
+                return a.enable();
             }
-        }
+            return undefined;
+        }));
     }
 
     /**
      * Disables this module.
+     * @returns {Promise} The promise.
      */
-    disable() {
+    async disable() {
         this._isEnabled = false;
 
-        for (const activity of this._activities) {
-            activity.disable();
-            activity.removeListener(this.onActivityLog);
-        }
+        return Promise.all(this.getActivities().map(a => {
+            a.removeListener(this.onActivityLog);
+            return a.disable();
+        }));
     }
 
     onActivityLog(log) {

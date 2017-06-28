@@ -13,8 +13,6 @@
     "cover": "echo \"Coverage is currently not maintained\""
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
-    "change-case": "^3.0.1",
     "discord.js": "^11.1.0",
     "feedparser": "^2.2.1",
     "filesize": "^3.5.10",
@@ -34,7 +32,6 @@
     "random-js": "^1.0.8",
     "redis": "^2.7.1",
     "request": "^2.81.0",
-    "request-promise": "^4.2.1",
     "sugar-date": "^2.0.4",
     "to-markdown": "^3.0.4"
   },

@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const Promise = require('bluebird');
 const random = require('random-js')();
 
 const Throttle = require('../middleware/Throttle');
@@ -11,11 +10,14 @@ const ReplyWithMentions = require('../middleware/internal/ReplyWithMentions');
 const RestrictPermissions = require('../middleware/internal/RestrictPermissions');
 const ThrottleError = require('../middleware/ThrottleError');
 
+const { wait } = require('../utils/Async');
+
 const DiscordHook = require('./DiscordHook');
 const DiscordCommandError = require('./DiscordCommandError');
 const DiscordCommandRequest = require('./DiscordCommandRequest');
 const DiscordCommandResponse = require('./DiscordCommandResponse');
 const DiscordReplyMessage = require('./DiscordReplyMessage');
+
 
 /**
  * A Discord command.
@@ -44,6 +46,119 @@ class DiscordCommand extends DiscordHook {
         this.setMiddleware(new Throttle(bot, this));
         this.setMiddleware(new ReplyWithMentions(bot, this));
     }
+
+    /**
+     * Checks if a command is allowed to be executed in the current context.
+     * @param {User} user - The Discord user.
+     * @param {string} [subPermission] - The sub-permission.
+     * @returns {boolean} True if allowed; false otherwise.
+     */
+    isCommandAllowed(user, subPermission) {
+        const groups = this._getUserPermissionGroups(user);
+        const permissions = this._getPermissionsList();
+
+        for (const name of groups) {
+            const perm = permissions[name] ? permissions[name](subPermission) : undefined;
+            if (perm !== undefined) {
+                return Boolean(perm);
+            }
+        }
+        return true; // By default allow
+    }
+
+
+    /**
+     * Gets called whenever the command is being executed.
+     * @param {DiscordCommandRequest} request - The request.
+     * @returns {Promise<string|DiscordReplyMessage|undefined>} The promise with the reply message, string or undefined if there's no reply.
+     */
+    async onCommand(request) { // eslint-disable-line no-unused-vars
+
+    }
+
+    /**
+     * Gets called whenever a message is created in Discord.
+     * @param {Message} message - The Discord message.
+     * @returns {Promise} The promise.
+     */
+    async onMessage(message) {
+        // Ignore bot messages, for safety reasons
+        if (message.author.bot) {
+            return;
+        }
+
+        const l = this.getBot().getLocalizer();
+
+        const request = new DiscordCommandRequest(this.getBot(), this, message);
+        const rawCommand = request.getRawCommand();
+        const commandStartTime = Date.now(); // Use this to delay the response for startTyping and stopTyping
+        if (rawCommand !== undefined && this.getTriggers().includes(rawCommand.toLowerCase())) {
+            // TODO: Add a UX friendly way of executing parameterized commands
+
+            // Construct response
+            let typing = false;
+            let response = new DiscordCommandResponse(request);
+            try {
+                response = await this._callMiddlewareOnCommand(response);
+                if (!response.reply) {
+                    // Construct message
+                    response.getTargetChannel().startTyping();
+                    typing = true;
+                    response.reply = await this.onCommand(response.getRequest());
+                }
+            } catch (err) {
+                if (err instanceof PermissionError) {
+                    response.reply = l.t('middleware.defaults:restrict-permissions.access-denied');
+                } else if (err instanceof DiscordCommandError) {
+                    response.reply = err.message;
+                } else if (err instanceof ThrottleError && err.showError) {
+                    response.reply = l.t('errors.defaults:commands.throttle');
+                } else if (!(err instanceof MiddlewareError)) {
+                    // TODO: Change to something less random
+                    const code = random.hex(6).toUpperCase();
+                    this.log(`Unexpected error: ${err.message} (error identifier: ${code})`, 'warn');
+                    this.log(err.stack, 'warn');
+                    response.reply = l.t('errors.defaults:commands.error', {
+                        error: err.message || 'undefined',
+                        code
+                    });
+                }
+            }
+            if (typeof response.reply === 'string') {
+                response.reply = new DiscordReplyMessage(response.reply);
+            }
+
+            // Execute middleware
+            response = await this._callMiddlewareOnReplyConstructed(response);
+
+            // Wait a bit if the command has taken less than 300ms
+            const timeDiff = Date.now() - commandStartTime;
+            if (timeDiff < 300) {
+                await wait(300 - timeDiff);
+            }
+
+            if (typing) {
+                response.getTargetChannel().stopTyping(true);
+            }
+
+            // Send message
+            let replyMessage;
+            if (response.reply) {
+                replyMessage = await response.getTargetChannel().send(response.reply.text, {
+                    embed: response.reply.embed,
+                    file: response.reply.file
+                });
+            }
+
+            if (replyMessage) {
+                // Execute last middleware
+                response = await this._callMiddlewareOnReplyPosted(response, replyMessage);
+                await response.reply.onReplyPosted(response, replyMessage);
+            }
+            return response;
+        }
+    }
+
 
     /**
      * Gets the triggers for this command.
@@ -111,34 +226,6 @@ class DiscordCommand extends DiscordHook {
     }
 
 
-    enableHook() {
-        super.enableHook();
-        this.params = this.initializeParameters();
-        if (!Array.isArray(this.params)) {
-            this.params = [this.params];
-        }
-    }
-
-
-    /**
-     * Checks if a command is allowed to be executed in the current context.
-     * @param {User} user - The Discord user.
-     * @param {string} [subPermission] - The sub-permission.
-     * @returns {boolean} True if allowed; false otherwise.
-     */
-    isCommandAllowed(user, subPermission) {
-        const groups = this._getUserPermissionGroups(user);
-        const permissions = this._getPermissionsList();
-
-        for (const name of groups) {
-            const perm = permissions[name] ? permissions[name](subPermission) : undefined;
-            if (perm !== undefined) {
-                return Boolean(perm);
-            }
-        }
-        return true; // By default allow
-    }
-
     /**
      * Gets the permission groups a given user belongs to.
      * @param {User} user - The Discord user.
@@ -187,162 +274,84 @@ class DiscordCommand extends DiscordHook {
 
 
     /**
-     * Gets called whenever a message is created in Discord.
-     * @param {Message} message - The Discord message.
+     * Calls all middleware with a specific function name.
+     * @param {string} funcName - The function name.
+     * @param {DiscordCommandResponse} response - The response object.
+     * @param {*} params - The additional parameters to send.
+     * @returns {Promise<DiscordCommandResponse>} The promise with the DiscordCommandResponse.
+     * @private
      */
-    onMessage(message) {
-        // Ignore bot messages, for safety reasons
-        if (message.author.bot) {
-            return;
+    async _callMiddleware(funcName, response, ...params) {
+        if (!this.middleware || this.middleware.length === 0) {
+            return response;
         }
 
-        const l = this.getBot().getLocalizer();
-
-        const request = new DiscordCommandRequest(this.getBot(), this, message);
-        const rawCommand = request.getRawCommand();
-        const commandStartTime = Date.now(); // Use this to delay the response for startTyping and stopTyping
-        if (rawCommand !== undefined && this._triggers.includes(rawCommand.toLowerCase())) {
-            // TODO: Add a UX friendly way of executing parameterized commands
-
-            const response = new DiscordCommandResponse(request);
-            let typing = false;
-            return this.callMiddlewareOnCommand(response).then(response => {
-                if (response.reply) {
-                    // We have a reply already
-                    return response.reply;
+        for (const middleware of this.middleware) {
+            try {
+                const returnedResponse = await middleware[funcName](response, ...params); // eslint-disable-line no-await-in-loop
+                if (returnedResponse instanceof DiscordCommandResponse) {
+                    // Make sure the returned response is a usable class instance
+                    response = returnedResponse;
                 }
-
-                // Construct message
-                response.getTargetChannel().startTyping();
-                typing = true;
-                return this.onCommand(response.getRequest());
-            }).catch(PermissionError, () => {
-                return l.t('middleware.defaults:restrict-permissions.access-denied');
-            }).catch(DiscordCommandError, err => {
-                return err.message;
-            }).catch(err => {
-                if (!(err instanceof MiddlewareError)) {
-                    // TODO: Change to something less random
-                    const code = random.hex(6).toUpperCase();
-                    console.warn(`Unexpected error: ${err.message} (error identifier: ${code})`);
-                    console.warn(err.stack);
-                    return l.t('errors.defaults:commands.error', {
-                        error: err.message || 'undefined',
-                        code
-                    });
-                } else if (err.showError && err instanceof ThrottleError) {
-                    return l.t('errors.defaults:commands.throttle');
-                }
-                // Explicitly clear the reply message
-                response.reply = undefined;
-            }).then(result => {
-                if (!result) {
-                    return response;
-                }
-
-                if (typeof result === 'string') {
-                    result = new DiscordReplyMessage(result);
-                }
-                response.reply = result;
-                return this.callMiddlewareOnReplyConstructed(response);
-            }).then(response => {
-                const doReply = response => {
-                    if (response.reply) {
-                        return response.getTargetChannel().send(response.reply.text, {
-                            embed: response.reply.embed,
-                            file: response.reply.file
-                        });
+            } catch (err) {
+                if (err instanceof MiddlewareError) {
+                    // Capture error
+                    if (!response.getError()) {
+                        response.setError(err);
                     }
-                };
-                const timeDiff = Date.now() - commandStartTime;
-                if (timeDiff < 300) {
-                    return Promise.delay(300 - timeDiff).then(() => doReply(response));
+                    this.log(`Middleware threw ${err.name} in ${funcName}: ${err.message}`, 'log');
+                } else {
+                    throw err;
                 }
-                return doReply(response);
-            }).then(message => {
-                if (typing) {
-                    response.getTargetChannel().stopTyping();
-                }
-
-                if (!message) {
-                    return;
-                }
-                return this.callMiddlewareOnReplyPosted(response, message)
-                    .then(response => response.reply.onReplyPosted(response, message).return(response));
-            });
+            }
         }
+
+        return response;
     }
-
-    /**
-     * Gets called whenever the command is being executed.
-     * @param {DiscordCommandRequest|Promise<DiscordCommandRequest>} request - The request.
-     * @returns {string|Promise<string>|DiscordReplyMessage|Promise<DiscordReplyMessage>|undefined|Promise<undefined>} The reply message, or undefined if there's no reply.
-     */
-    onCommand(request) { // eslint-disable-line no-unused-vars
-
-    }
-
 
     /**
      * Calls all middleware on command request.
      * @param {DiscordCommandResponse} response - The response object.
-     * @returns {Promise.<DiscordCommandResponse>} The promise with the DiscordCommandResponse.
+     * @returns {Promise<DiscordCommandResponse>} The promise with the DiscordCommandResponse.
+     * @private
      */
-    callMiddlewareOnCommand(response) {
-        return this._callMiddleware('onCommand', response).then(response => {
-            if (response.getError()) {
-                // We have an error
-                throw response.getError();
-            }
-            return response;
-        });
+    async _callMiddlewareOnCommand(response) {
+        response = await this._callMiddleware('onCommand', response);
+        if (response.getError()) {
+            // We have an error
+            throw response.getError();
+        }
+        return response;
     }
 
     /**
      * Calls all middleware after the reply has been constructed.
      * @param {DiscordCommandResponse} response - The response object.
-     * @returns {Promise.<DiscordCommandResponse>} The promise with the DiscordCommandResponse.
+     * @returns {Promise<DiscordCommandResponse>} The promise with the DiscordCommandResponse.
+     * @private
      */
-    callMiddlewareOnReplyConstructed(response) {
+    async _callMiddlewareOnReplyConstructed(response) {
         return this._callMiddleware('onReplyConstructed', response);
     }
 
     /**
      * Calls all middleware after the reply has been posted.
-     * @param {Message} message - The reply message.
      * @param {DiscordCommandResponse} response - The response object.
-     * @returns {Promise.<DiscordCommandResponse>} The promise with the DiscordCommandResponse.
+     * @param {Message} message - The reply message.
+     * @returns {Promise<DiscordCommandResponse>} The promise with the DiscordCommandResponse.
+     * @private
      */
-    callMiddlewareOnReplyPosted(response, message) {
+    async _callMiddlewareOnReplyPosted(response, message) {
         return this._callMiddleware('onReplyPosted', response, message);
     }
 
-    /**
-     * Calls all middleware with a specific function name.
-     * @param {string} funcName - The function name.
-     * @param {DiscordCommandResponse} response - The response object.
-     * @param {*} params - The additional parameters to send.
-     * @returns {Promise.<DiscordCommandResponse>} The promise with the DiscordCommandResponse.
-     * @private
-     */
-    _callMiddleware(funcName, response, ...params) {
-        let responsePromise = Promise.resolve(response);
-        if (!this.middleware || this.middleware.length === 0) {
-            return responsePromise;
-        }
 
-        for (const middleware of this.middleware) {
-            responsePromise = responsePromise.then(response => Promise.try(() => middleware[funcName](response, ...params)).catch(MiddlewareError, err => {
-                // Capture error
-                if (!response.getError()) {
-                    response.setError(err);
-                }
-                console.log(`Middleware threw ${err.name} in ${funcName}: ${err.message}`);
-                return response;
-            }));
+    async enableHook() {
+        await super.enableHook();
+        this.params = this.initializeParameters();
+        if (!Array.isArray(this.params)) {
+            this.params = [this.params];
         }
-
-        return responsePromise;
     }
 }
 

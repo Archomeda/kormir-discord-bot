@@ -2,10 +2,10 @@
 
 const fs = require('fs');
 const path = require('path');
+const { promisify } = require('util');
 
 const Discord = require('discord.js');
-const Promise = require('bluebird');
-const i18next = Promise.promisifyAll(require('i18next'));
+const i18next = require('i18next');
 const filesize = require('filesize');
 const moment = require('moment-timezone');
 const yaml = require('js-yaml');
@@ -17,11 +17,14 @@ const LocalizationBackend = require('./external/i18next/Backend');
 const getCache = require('./external/cache');
 const getDatabase = require('./external/database');
 
-const ModuleAdmin = require('./modules/admin');
-const ModuleGeneral = require('./modules/general');
+const { modules } = require('./modules');
 
 const momentNlp = require('./utils/MomentNlp');
 const { addLazyProperty } = require('./utils/LazyProperty');
+const { wait } = require('./utils/Async');
+
+
+i18next.loadNamespacesAsync = promisify(i18next.loadNamespaces);
 
 
 /**
@@ -58,8 +61,8 @@ class Bot {
             }
         });
 
-        this.addModule(ModuleAdmin);
-        this.addModule(ModuleGeneral);
+        this.addModule(modules.Admin);
+        this.addModule(modules.General);
     }
 
     /**
@@ -73,10 +76,11 @@ class Bot {
     /**
      * Removes a module from the Discord bot.
      * @param {string} module - The module id.
+     * @returns {Promise} The promise.
      */
-    removeModule(module) {
+    async removeModule(module) {
         const i = this._modules.findIndex(m => m.getId() === module);
-        this._modules[i].disable();
+        await this._modules[i].disable();
         this._modules.splice(i, 1);
     }
 
@@ -151,12 +155,14 @@ class Bot {
     /**
      * Start the bot.
      */
-    start() {
+    async start() {
+        const config = this.getConfig();
+
         console.log('Starting bot...');
         this._client = new Discord.Client();
 
-        const language = this.getConfig().get('language');
-        const timezone = this.getConfig().get('timezone');
+        const language = config.get('language');
+        const timezone = config.get('timezone');
         moment.locale(language);
         moment.tz.setDefault(timezone);
         momentNlp.setTimezone(timezone);
@@ -203,35 +209,39 @@ class Bot {
         l.on('missingKey', (lng, ns, key) => console.warn(`Missing translation for '${key}' in localization namespace '${ns}' for ${lng}`));
 
         // Start the bot
-        return Promise.all([
+        await Promise.all([
             this._connectCache(),
             this._connectDatabase()
-        ]).then(() => {
-            // Initialize modules
-            for (const module of this._modules) {
-                try {
-                    module.initialize();
-                    console.log(`Module '${module.getId()}' initialized`);
-                } catch (err) {
-                    throw new BotError(5, `Module '${module.getId()}' could not be initialized: ${err.message}`, err);
-                }
+        ]);
+
+        // Initialize modules
+        await Promise.all(this._modules.map(async m => {
+            try {
+                await m.initialize();
+                console.log(`Module '${m.getId()}' initialized`);
+            } catch (err) {
+                throw new BotError(5, `Module '${m.getId()}' could not be initialized: ${err.message}`, err);
             }
-        }).then(() => this._connectDiscord()).catch(err => {
+        }));
+
+        try {
+            await this._connectDiscord();
+        } catch (err) {
             throw new BotError(1, err.message, err);
-        }).then(() => {
-            // Enable modules
-            for (const module of this._modules) {
-                try {
-                    module.enable();
-                    console.log(`Module '${module.getId()}' enabled`);
-                } catch (err) {
-                    throw new BotError(5, `Module '${module.getId()}' could not be enabled: ${err.message}`, err);
-                }
+        }
+
+        // Enable modules
+        await Promise.all(this._modules.map(async m => {
+            try {
+                await m.enable();
+                console.log(`Module '${m.getId()}' enabled`);
+            } catch (err) {
+                throw new BotError(5, `Module '${m.getId()}' could not be enabled: ${err.message}`, err);
             }
-        });
+        }));
     }
 
-    _connectDiscord() {
+    async _connectDiscord() {
         const c = this.getClient();
         c.on('ready', () => {
             const guilds = c.guilds.array().map(g => g.name);
@@ -255,51 +265,62 @@ class Bot {
 
         console.info('Connecting to Discord...');
 
-        return c.login(this.getConfig().get('discord.token'))
-            .catch(err => console.error(`Could not connect to Discord: ${err.message}`))
-            .then(() => c.setMaxListeners(0)); // Set max listeners on client to prevent the warning
+        try {
+            await c.login(this.getConfig().get('discord.token'));
+        } catch (err) {
+            console.error(`Could not connect to Discord: ${err.message}`);
+        }
+        c.setMaxListeners(0); // Set max listeners on client to prevent the warning
     }
 
-    _connectCache() {
+    async _connectCache() {
         if (!this.getCache()) {
             console.log('Cache support disabled');
             return;
         }
 
         let tries = 0;
-        const connect = () => {
+        const connect = async () => {
             tries++;
             console.log(`Connecting to cache, try ${tries}...`);
-            return Promise.resolve(this.getCache().connect()).catch(err => {
+            try {
+                await this.getCache().connect();
+            } catch (err) {
                 console.error(`${err.name}: ${err.message}`);
                 if (tries < 10) {
-                    return Promise.delay(5000).then(connect);
+                    await wait(5000);
+                    return connect();
                 }
                 throw new BotError(10, 'Exhausted number of tries trying to connect to the cache');
-            });
+            }
         };
-        return connect().then('Connected to cache');
+        await connect();
+        console.log('Connected to cache');
     }
 
-    _connectDatabase() {
+    async _connectDatabase() {
         if (!this.getDatabase()) {
             console.log('Database support disabled');
             return;
         }
 
         let tries = 0;
-        const connect = () => {
+        const connect = async () => {
             tries++;
             console.log(`Connecting to database, try ${tries}...`);
-            return Promise.resolve(this.getDatabase().connect()).catch(err => {
+            try {
+                await this.getDatabase().connect();
+            } catch (err) {
                 console.error(`${err.name}: ${err.message}`);
-                if (tries < 2) {
-                    return Promise.delay(5000).then(connect);
+                if (tries < 10) {
+                    await wait(5000);
+                    return connect();
                 }
                 throw new BotError(11, 'Exhausted number of tries trying to connect to the database');
-            });
+            }
         };
-        return connect().then('Connected to database');
+        await connect();
+        console.log('Connected to database');
     }
 }
 

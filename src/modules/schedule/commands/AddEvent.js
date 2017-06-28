@@ -24,7 +24,7 @@ class CommandAddEvent extends DatabaseScheduleBase {
         ];
     }
 
-    formatResult(request, result) {
+    async formatResult(request, result) {
         const l = this.getBot().getLocalizer();
 
         this.getModule().getScheduler().scheduleEventReminders(result);

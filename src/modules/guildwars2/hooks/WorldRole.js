@@ -25,28 +25,25 @@ class HookWorldRole extends DiscordHook {
         };
     }
 
-    ensureWorldMembership(user, gw2Account) {
-        const config = this.getModule().getConfig().root(this.getId());
+    async ensureWorldMembership(user, gw2Account) {
+        const config = this.getConfig();
         if (!config.has('role-ids')) {
             return;
         }
 
-        const doEnsure = account => gw2Api.authenticate(account.apiKey).account().get().then(accountInfo => {
-            return this._applyWorldRoles(user, accountInfo.world);
-        });
-
         if (!gw2Account) {
-            return models.Gw2Account.findOne({ discordId: user.id }).then(account => {
-                if (account) {
-                    return doEnsure(account);
-                }
-            });
+            gw2Account = await models.Gw2Account.findOne({ discordId: user.id });
         }
-        return doEnsure(gw2Account);
+        if (!gw2Account) {
+            return;
+        }
+
+        const accountInfo = await gw2Api.authenticate(gw2Account.apiKey).account().get();
+        return this._applyWorldRoles(user, accountInfo.world);
     }
 
-    _applyWorldRoles(user, world) {
-        const roles = this.getModule().getConfig().root(this.getId()).get('role-ids').raw();
+    async _applyWorldRoles(user, world) {
+        const roles = this.getConfig().get('role-ids').raw();
 
         const exec = [];
         if (roles[world] && !user.roles.has(roles[world])) {
@@ -63,27 +60,27 @@ class HookWorldRole extends DiscordHook {
     }
 
 
-    onUpdate(oldMember, newMember) {
-        this.ensureWorldMembership(newMember);
+    async onUpdate(oldMember, newMember) {
+        return this.ensureWorldMembership(newMember);
     }
 
-    onNewRegistration(user, gw2Account) {
-        this.ensureGuildMembership(user, gw2Account);
+    async onNewRegistration(user, gw2Account) {
+        return this.ensureGuildMembership(user, gw2Account);
     }
 
 
-    enableHook() {
-        super.enableHook();
+    async enableHook() {
+        await super.enableHook();
         const module = this.getModule();
         module.getActivity(CommandRegister).on('new-registration', this.onNewRegistration.bind(this));
         module.getActivity(CommandForceRegister).on('new-registration', this.onNewRegistration.bind(this));
     }
 
-    disableHook() {
+    async disableHook() {
         const module = this.getModule();
         module.getActivity(CommandRegister).removeListener('new-registration', this.onNewRegistration.bind(this));
         module.getActivity(CommandForceRegister).removeListener('new-registration', this.onNewRegistration.bind(this));
-        super.disableHook();
+        return super.disableHook();
     }
 }
 

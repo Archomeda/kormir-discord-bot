@@ -19,7 +19,7 @@ class CommandHelp extends DiscordCommand {
         return new DiscordCommandParameter('command', { optional: true });
     }
 
-    onCommand(request) {
+    async onCommand(request) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
         const modules = bot._modules;

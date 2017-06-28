@@ -16,7 +16,7 @@ class DatabaseScheduleBase extends DiscordDatabaseCommand {
         this._localizerNamespaces = 'module.schedule';
     }
 
-    getList(Model, props) { // eslint-disable-line no-unused-vars
+    async getList(Model, props) { // eslint-disable-line no-unused-vars
         return Model.find({ start: { $gte: new Date() } }, null, { sort: { start: 1 } });
     }
 

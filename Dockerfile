@@ -1,4 +1,4 @@
-FROM node:7-alpine
+FROM node:8-alpine
 
 LABEL maintainer "Archomeda (https://github.com/Archomeda/kormir-discord-bot)"
 
@@ -8,7 +8,7 @@ ENV NPM_CONFIG_LOGLEVEL warn
 RUN mkdir /bot
 WORKDIR /bot
 COPY . /bot
-RUN npm install
+RUN yarn install
 
 VOLUME /bot/config
-CMD npm start
+CMD node server.js

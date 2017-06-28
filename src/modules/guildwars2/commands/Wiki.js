@@ -32,7 +32,7 @@ class CommandWiki extends DiscordCommand {
         return new DiscordCommandParameter('terms', { expanded: true });
     }
 
-    onCommand(request) {
+    async onCommand(request) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
         const terms = request.getParams().terms;
@@ -41,14 +41,13 @@ class CommandWiki extends DiscordCommand {
             return;
         }
 
-        return this.searchArticle(terms).then(data => {
-            return this.createEmbed(data);
-        }).then(([embed, data]) => {
-            return this.setThumbnail(embed, data);
-        }).then(([embed]) => {
+        try {
+            const articleData = await this._searchArticle(terms);
+            const embed = this._createEmbed(articleData);
+            await this._setThumbnail(embed, articleData);
+
             return new DiscordReplyMessage('', { embed });
-        }).catch(err => {
-            // Capture errors and construct proper fail message
+        } catch (err) {
             switch (err.message) {
                 case 'not found':
                     throw new DiscordCommandError(l.t('module.guildwars2:wiki.response-not-found'));
@@ -57,95 +56,114 @@ class CommandWiki extends DiscordCommand {
                 default:
                     throw err;
             }
-        });
+        }
     }
 
-    searchArticle(terms) {
+    async _searchArticle(terms) {
+        let response;
+
         // Search with nearmatch first
-        return wiki.request({
+        response = await wiki.request({
             action: 'query',
             list: 'search',
             srsearch: terms,
             srwhat: 'nearmatch'
-        }).then(response => {
-            if (response && response.query.search.length > 0) {
-                return response;
-            }
+        });
 
+        if (!response || response.query.search.length === 0) {
             // No results, search with title
-            return wiki.request({
+            response = await wiki.request({
                 action: 'query',
                 list: 'search',
                 srsearch: terms,
                 srwhat: 'title'
             });
-        }).then(response => {
-            if (response && response.query.search.length > 0) {
-                // Found our article, get it
-                return wiki.request({
-                    action: 'parse',
-                    page: response.query.search[0].title,
-                    redirects: true,
-                    prop: 'text'
-                });
-            }
-        }).catch(err => {
-            // Make sure we have sane errors
-            if (err.code === 'missingtitle') {
-                throw new Error('not found');
-            } else if (err.info) {
-                throw new Error(err.info);
-            }
-            throw err;
-        }).then(response => {
-            if (!response || !response.parse.text['*']) {
-                throw new Error('not found');
-            }
-            return {
-                text: response.parse.text['*'],
-                title: response.parse.title
-            };
-        });
-    }
-
-    createEmbed(data) {
-        const l = this.getBot().getLocalizer();
-        let text = data.text;
-        const title = data.title;
-
-        // Construct message
-        const message = new Discord.RichEmbed().setTitle(l.t('module.guildwars2:wiki.response-title', { title }));
-        text = convertHtmlToMarkdown(text, 'wiki-ext', { prefixUrl: 'https://wiki.guildwars2.com' }).split('\n')[0].trim();
-        message.setURL(encodeURI(`https://wiki.guildwars2.com/wiki/${title}`));
-
-        if (text) {
-            message.setDescription(l.t('module.guildwars2:wiki.response-description', { description: text }));
-        } else {
-            message.setDescription(l.t('module.guildwars2:wiki.response-empty'));
         }
 
-        return [message, data];
+        if (response && !response.error && response.query.search.length > 0) {
+            // Found our article, get it
+            response = await wiki.request({
+                action: 'parse',
+                page: response.query.search[0].title,
+                redirects: true,
+                prop: 'text',
+                disabletoc: true
+            });
+        } else if (!response || response.query.search.length === 0) {
+            throw new Error('not found');
+        }
+
+        if (response && response.error) {
+            if (response.error.code === 'missingtitle') {
+                throw new Error('not found');
+            } else if (response.error.info) {
+                throw new Error(response.error.info);
+            }
+        }
+
+        if (!response || !response.parse.text['*']) {
+            throw new Error('not found');
+        }
+
+        return {
+            text: response.parse.text['*'],
+            title: response.parse.title
+        };
     }
 
-    setThumbnail(embed, data) {
-        return wiki.request({
-            action: 'browsebysubject',
-            subject: data.title
-        }).then(response => {
-            if (response && response.query.data.length > 0) {
-                // Check for a game icon
-                const iconProperty = response.query.data.find(e => e.property === 'Has_game_icon');
-                if (iconProperty && iconProperty.dataitem.length > 0) {
-                    return iconProperty.dataitem[0].item.replace(/#[^#]+#$/, '');
+    _createEmbed(articleData) {
+        const l = this.getBot().getLocalizer();
+        let text = articleData.text;
+        const title = articleData.title;
+
+        // Construct message
+        const embed = new Discord.RichEmbed().setTitle(l.t('module.guildwars2:wiki.response-title', { title }));
+        const splittedText = convertHtmlToMarkdown(text, 'wiki-ext', { prefixUrl: 'https://wiki.guildwars2.com' }).split('\n');
+        if (splittedText[0].startsWith('> ')) {
+            text = splittedText[0].trim().substr(2);
+            for (let i = 1; i < splittedText.length; i++) {
+                if (splittedText[i]) {
+                    text += `\n${splittedText[i]}`;
+                } else {
+                    if (i + 1 < splittedText.length) {
+                        text += `\n\n${splittedText[i + 1]}`;
+                    }
+                    break;
                 }
             }
-            return 'Logo.png';
-        }).then(filename => {
-            const hash = crypto.createHash('md5').update(filename).digest('hex');
-            const url = `https://wiki.guildwars2.com/images/${hash.substr(0, 1)}/${hash.substr(0, 2)}/${filename}`;
-            embed.setThumbnail(url);
-            return [embed, data];
+        } else {
+            text = splittedText[0].trim();
+        }
+        embed.setURL(encodeURI(`https://wiki.guildwars2.com/wiki/${title}`));
+
+        if (text) {
+            embed.setDescription(l.t('module.guildwars2:wiki.response-description', { description: text }));
+        } else {
+            embed.setDescription(l.t('module.guildwars2:wiki.response-empty'));
+        }
+
+        return embed;
+    }
+
+    async _setThumbnail(embed, articleData) {
+        const response = await wiki.request({
+            action: 'browsebysubject',
+            subject: articleData.title
         });
+
+        let filename = 'Logo.png';
+        if (response && response.query.data.length > 0) {
+            // Check for a game icon
+            const iconProperty = response.query.data.find(e => e.property === 'Has_game_icon');
+            if (iconProperty && iconProperty.dataitem.length > 0) {
+                filename = iconProperty.dataitem[0].item.replace(/#[^#]+#$/, '');
+            }
+        }
+
+        const hash = crypto.createHash('md5').update(filename).digest('hex');
+        const url = `https://wiki.guildwars2.com/images/${hash.substr(0, 1)}/${hash.substr(0, 2)}/${filename}`;
+        embed.setThumbnail(url);
+        return embed;
     }
 }
 

@@ -1,26 +1,25 @@
 'use strict';
 
-const Promise = require('bluebird');
 const random = require('random-js')();
 
 const AutoRemoveMessage = require('../../../../bot/middleware/AutoRemoveMessage');
 
-const DiscordCommand = require('../../../../bot/modules/DiscordCommand');
 const DiscordCommandError = require('../../../../bot/modules/DiscordCommandError');
 const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 
+const { deleteIgnoreErrors } = require('../../../../bot/utils/DiscordMessage');
+
 const models = require('../../../models');
 
-const gw2Api = require('../api');
+const ApiBase = require('./ApiBase');
 
 
 const codeCacheTable = 'register-code';
 
 
-class CommandRegister extends DiscordCommand {
+class CommandRegister extends ApiBase {
     constructor(bot) {
         super(bot, 'register', ['register']);
-        this._localizerNamespaces = 'module.guildwars2';
 
         this.setMiddleware(new AutoRemoveMessage(bot, this, { defaultRequest: 60, defaultResponse: 60 })); // Auto remove messages after 1 minute
     }
@@ -29,10 +28,9 @@ class CommandRegister extends DiscordCommand {
         return new DiscordCommandParameter('key', { optional: true });
     }
 
-    onCommand(request) {
+    async onApiCommand(request, gw2Api) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const module = this.getModule();
         const config = module.getConfig().root(this.getId());
         const cache = bot.getCache();
         const message = request.getMessage();
@@ -41,68 +39,70 @@ class CommandRegister extends DiscordCommand {
         const user = request.getMessage().author;
         const discordId = user.id;
 
-        if (module.isApiOnFire()) {
-            throw new DiscordCommandError(l.t('module.guildwars2:api.response-fire'));
+        const accounts = await models.Gw2Account.find({ discordId });
+        let account = accounts.length > 0 ? accounts[0] : undefined;
+        const register = this.getCommandTrigger();
+
+        // Option 1: No key included
+        if (!key) {
+            const code = random.hex(5).toUpperCase();
+            const time = config.get('timeout');
+
+            const result = await cache.set(codeCacheTable, discordId, time * 60, code);
+            if (!result) {
+                throw new DiscordCommandError(l.t('module.guildwars2:register.response-generation-failed'));
+            }
+
+            let reply;
+            if (account) {
+                reply = `${l.t('module.guildwars2:register.response-reregister', { key: account.apiKey })}${l.t('module.guildwars2:register.response-register-steps', { code, register, time })}`;
+            } else {
+                reply = `${l.t('module.guildwars2:register.response-info')}${l.t('module.guildwars2:register.response-register-steps', { code, register, time })}`;
+            }
+
+            if (message.channel.type !== 'dm') {
+                user.dmChannel.send(reply);
+                return l.t('module.guildwars2:register.response-see-dm');
+            }
+            return reply;
         }
 
-        return models.Gw2Account.find({ discordId }).then(accounts => {
-            let account = accounts.length > 0 ? accounts[0] : undefined;
-            const register = this.getCommandTrigger();
+        // Option 2: No DM channel
+        if (message.channel.type !== 'dm') {
+            // Delete the message with the API key immediately since it's no a DM channel
+            await deleteIgnoreErrors(message);
+            return l.t('module.guildwars2:register.response-message-removed-see-dm');
+        }
 
-            if (!key) {
-                const code = random.hex(5).toUpperCase();
-                const time = config.get('timeout');
+        // Option 3: No code prepared
+        const code = await cache.get(codeCacheTable, discordId);
+        if (!code) {
+            return l.t('module.guildwars2:register.response-no-code', { register });
+        }
 
-                return cache.set(codeCacheTable, discordId, time * 60, code).then(result => {
-                    if (result) {
-                        if (account) {
-                            user.dmChannel.send(`${l.t('module.guildwars2:register.response-reregister', { key: account.apiKey })}${l.t('module.guildwars2:register.response-register-steps', { code, register, time })}`);
-                        } else {
-                            user.dmChannel.send(`${l.t('module.guildwars2:register.response-info')}${l.t('module.guildwars2:register.response-register-steps', { code, register, time })}`);
-                        }
-                        if (message.channel.type !== 'dm') {
-                            return l.t('module.guildwars2:register.response-see-dm');
-                        }
-                        return;
-                    }
-                    throw new DiscordCommandError(l.t('module.guildwars2:register.response-generation-failed'));
-                });
+        // Option 4: Prerequisites complete
+        const [tokenInfo, accountInfo] = await Promise.all([
+            gw2Api.authenticate(key).tokeninfo().get(),
+            gw2Api.authenticate(key).account().get()
+        ]);
+
+        // This doesn't check optional permissions since we don't need to, change this once it's required
+        if (tokenInfo.name.includes(code)) {
+            await cache.remove(codeCacheTable, discordId);
+
+            if (!account) {
+                account = new models.Gw2Account({ discordId, accountName: accountInfo.name, apiKey: key });
+            } else {
+                account.apiKey = key;
             }
 
-            if (message.channel.type === 'text') {
-                // Delete the message with the API key immediately since it's public
-                return message.delete().then(() => {
-                    return l.t('module.guildwars2:register.response-message-removed-see-dm');
-                });
-            }
+            await account.save();
+            this.emit('new-registration', user, account);
+            return l.t('module.guildwars2:register.response-registered', { account_name: accountInfo.name, key_name: tokenInfo.name }); // eslint-disable-line camelcase
+        }
 
-            return cache.get(codeCacheTable, discordId).then(code => {
-                if (!code) {
-                    return l.t('module.guildwars2:register.response-no-code', { register });
-                }
-
-                return Promise.all([
-                    gw2Api.authenticate(key).tokeninfo().get(),
-                    gw2Api.authenticate(key).account().get()
-                ]).then(([tokenInfo, accountInfo]) => {
-                    // This doesn't check optional permissions since we don't need to, change this once it's required
-                    if (tokenInfo.name.includes(code)) {
-                        return cache.remove(codeCacheTable, discordId).then(() => {
-                            if (!account) {
-                                account = new models.Gw2Account({ discordId, accountName: accountInfo.name, apiKey: key });
-                            } else {
-                                account.apiKey = key;
-                            }
-                            return account.save().then(() => this.emit('new-registration', user, account))
-                                .return(l.t('module.guildwars2:register.response-registered', { account_name: accountInfo.name, key_name: tokenInfo.name })); // eslint-disable-line camelcase
-                        });
-                    }
-                    return l.t('module.guildwars2:register.response-wrong-name', { name: tokenInfo.name, code });
-                }).catch(err => {
-                    throw new DiscordCommandError(module.parseApiError(err));
-                });
-            });
-        });
+        // Option 5: Wrong code
+        return l.t('module.guildwars2:register.response-wrong-name', { name: tokenInfo.name, code });
     }
 }
 

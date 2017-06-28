@@ -10,6 +10,7 @@ const Hook = require('./Hook');
 const Module = require('./Module');
 const Worker = require('./Worker');
 
+const ModuleAdmin = require('./admin');
 const ModuleGeneral = require('./general');
 
 module.exports = {
@@ -24,6 +25,7 @@ module.exports = {
     Worker,
 
     modules: {
+        Admin: ModuleAdmin,
         General: ModuleGeneral
     }
 };

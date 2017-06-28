@@ -31,7 +31,7 @@ class DiscordDatabaseCommand extends DiscordCommand {
      * The parameter mapping from the command parameters to the database fields.
      * Fields with the same name can be omitted.
      * If fields are defined as undefined, no mapping occurs.
-     * @returns {Object.<string, string>|undefined} The mapping from command parameters to database fields.
+     * @returns {Object<string, string>|undefined} The mapping from command parameters to database fields.
      */
     get paramsMap() {
         return undefined;
@@ -139,10 +139,10 @@ class DiscordDatabaseCommand extends DiscordCommand {
     /**
      * Gets the respective item.
      * @param {Model} Model - The database model.
-     * @param {Object.<string, *>} props - The model properties.
+     * @param {Object<string, *>} props - The model properties.
      * @returns {Promise} The promise with the item.
      */
-    getExecute(Model, props) {
+    async getExecute(Model, props) {
         switch (this._type) {
             case 'list':
                 return this.getList(Model, props);
@@ -155,57 +155,57 @@ class DiscordDatabaseCommand extends DiscordCommand {
             case 'delete':
                 return this.getDelete(Model, props);
             default:
-                return undefined;
+                return undefined; // Make linter happy
         }
     }
 
     /**
      * Gets the items.
      * @param {Model} Model - The database model.
-     * @param {Object.<string, *>} props - The model properties.
+     * @param {Object<string, *>} props - The model properties.
      * @returns {Promise} The promise with the item.
      */
-    getList(Model, props) { // eslint-disable-line no-unused-vars
+    async getList(Model, props) { // eslint-disable-line no-unused-vars
         return Model.find({});
     }
 
     /**
      * Gets an individual item.
      * @param {Model} Model - The database model.
-     * @param {Object.<string, *>} props - The model properties.
+     * @param {Object<string, *>} props - The model properties.
      * @returns {Promise} The promise with the item.
      */
-    getView(Model, props) { // eslint-disable-line no-unused-vars
+    async getView(Model, props) { // eslint-disable-line no-unused-vars
         return Model.findOne({ id: props.id });
     }
 
     /**
      * Gets a new item to add.
      * @param {Model} Model - The database model.
-     * @param {Object.<string, *>} props - The model properties.
+     * @param {Object<string, *>} props - The model properties.
      * @returns {Promise} The promise with the item.
      */
-    getAdd(Model, props) { // eslint-disable-line no-unused-vars
-        return Promise.resolve(new Model(props));
+    async getAdd(Model, props) { // eslint-disable-line no-unused-vars
+        return new Model(props);
     }
 
     /**
      * Gets an item to edit.
      * @param {Model} Model - The database model.
-     * @param {Object.<string, *>} props - The model properties.
+     * @param {Object<string, *>} props - The model properties.
      * @returns {Promise} The promise with the item.
      */
-    getEdit(Model, props) { // eslint-disable-line no-unused-vars
+    async getEdit(Model, props) { // eslint-disable-line no-unused-vars
         return Model.findOne({ id: props.id });
     }
 
     /**
      * Gets an item to delete.
      * @param {Model} Model - The database model.
-     * @param {Object.<string, *>} props - The model properties.
+     * @param {Object<string, *>} props - The model properties.
      * @returns {Promise} The promise with the item.
      */
-    getDelete(Model, props) { // eslint-disable-line no-unused-vars
+    async getDelete(Model, props) { // eslint-disable-line no-unused-vars
         return Model.findOne({ id: props.id });
     }
 
@@ -224,8 +224,8 @@ class DiscordDatabaseCommand extends DiscordCommand {
     /**
      * Validates the command parameters.
      * @param {DiscordCommandRequest} request - The request.
-     * @param {Object.<string, *>} props - The model properties.
-     * @returns {(boolean|string)} True if all parameters are valid; otherwise a string explaining what is invalid.
+     * @param {Object<string, *>} props - The model properties.
+     * @returns {boolean|string} True if all parameters are valid; otherwise a string explaining what is invalid.
      */
     validateProps(request, props) { // eslint-disable-line no-unused-vars
         return true;
@@ -234,7 +234,7 @@ class DiscordDatabaseCommand extends DiscordCommand {
     /**
      * Converts command parameters to model properties.
      * @param {DiscordCommandRequest} request - The request.
-     * @returns {Object.<string, *>} The model properties.
+     * @returns {Object<string, *>} The model properties.
      */
     convertParamsToProps(request) {
         const params = request.getParams();
@@ -253,14 +253,14 @@ class DiscordDatabaseCommand extends DiscordCommand {
      * Formats the result of the performed action.
      * @param {DiscordCommandRequest} request - The request.
      * @param {*} result - The result.
-     * @returns {string|Promise<string>|DiscordReplyMessage|Promise<DiscordReplyMessage>|undefined|Promise<undefined>} The reply message, or undefined if there's no reply.
+     * @returns {Promise<string|DiscordReplyMessage|undefined>} The promise with the reply message, string, or undefined if there's no reply.
      */
-    formatResult(request, result) { // eslint-disable-line no-unused-vars
+    async formatResult(request, result) { // eslint-disable-line no-unused-vars
         throw new TypeError('Derivative should implement format');
     }
 
 
-    onCommand(request) {
+    async onCommand(request) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
 
@@ -270,29 +270,28 @@ class DiscordDatabaseCommand extends DiscordCommand {
             throw new DiscordCommandError(validation);
         }
 
-        return this.getExecute(this._Model, props).then(item => {
-            if (!this.canExecute(request, item)) {
-                return l.t('middleware.defaults:restrict-permissions.access-denied');
-            }
-
-            if (item) {
-                switch (this._type) {
-                    case 'list':
-                    case 'view':
-                        return this.formatResult(request, item);
-                    case 'add':
-                        return item.save().then(item => this.formatResult(request, item));
-                    case 'edit':
-                        return item.set(props).save().then(item => this.formatResult(request, item));
-                    case 'delete':
-                        return item.remove().then(result => this.formatResult(request, result));
-                    default:
-                        return undefined;
-                }
-            } else if (this._type !== undefined) {
-                return this.formatResult(request, item);
-            }
-        });
+        const item = await this.getExecute(this._Model, props);
+        if (!this.canExecute(request, item)) {
+            return l.t('middleware.defaults:restrict-permissions.access-denied');
+        }
+        let result = item;
+        switch (this._type) {
+            case 'list':
+            case 'view':
+                break;
+            case 'add':
+                result = await item.save();
+                break;
+            case 'edit':
+                result = await item.set(props).save();
+                break;
+            case 'delete':
+                result = await item.remove();
+                break;
+            default:
+                return;
+        }
+        return this.formatResult(request, result);
     }
 }
 

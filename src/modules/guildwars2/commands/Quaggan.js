@@ -5,18 +5,15 @@ const random = require('random-js')();
 
 const ThrottleMiddleware = require('../../../../bot/middleware/Throttle');
 
-const DiscordCommand = require('../../../../bot/modules/DiscordCommand');
-const DiscordCommandError = require('../../../../bot/modules/DiscordCommandError');
 const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage');
 
-const gw2Api = require('../api');
+const ApiBase = require('./ApiBase');
 
 
-class CommandQuaggan extends DiscordCommand {
+class CommandQuaggan extends ApiBase {
     constructor(bot) {
         super(bot, 'quaggan', ['quaggan']);
-        this._localizerNamespaces = 'module.guildwars2';
 
         // Allow one quaggan per minute to be posted
         this.setMiddleware(new ThrottleMiddleware(bot, this, { type: 'command', duration: 60 }));
@@ -26,35 +23,23 @@ class CommandQuaggan extends DiscordCommand {
         return new DiscordCommandParameter('id', { optional: true });
     }
 
-    onCommand(request) {
+    async onApiCommand(request, gw2Api) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const module = this.getModule();
-        const quaggan = request.getParams().id;
+        const quagganId = request.getParams().id;
 
-        if (module.isApiOnFire()) {
-            throw new DiscordCommandError(l.t('module.guildwars2:api.response-fire'));
-        }
-
-        let apiRequest = gw2Api.quaggans();
-        if (quaggan) {
-            apiRequest = apiRequest.get(quaggan);
+        let quaggan;
+        if (quagganId) {
+            quaggan = await gw2Api.quaggans().get(quagganId);
         } else {
-            apiRequest = apiRequest.all();
+            quaggan = random.pick(await gw2Api.quaggans().all());
         }
 
-        return apiRequest.then(result => {
-            if (Array.isArray(result)) {
-                result = random.pick(result);
-            }
+        const embed = new Discord.RichEmbed()
+            .setTitle(l.t('module.guildwars2:quaggan.response', { id: quaggan.id }))
+            .setImage(quaggan.url);
 
-            const embed = new Discord.RichEmbed().setTitle(l.t('module.guildwars2:quaggan.response', { id: result.id }))
-                .setImage(result.url);
-
-            return new DiscordReplyMessage('', { embed });
-        }).catch(err => {
-            throw new DiscordCommandError(module.parseApiError(err));
-        });
+        return new DiscordReplyMessage('', { embed });
     }
 }
 

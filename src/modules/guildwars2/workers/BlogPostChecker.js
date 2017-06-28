@@ -1,7 +1,6 @@
 'use strict';
 
 const Discord = require('discord.js');
-const Promise = require('bluebird');
 
 const { readRss } = require('../../../utils/rss');
 const { convertHtmlToMarkdown } = require('../../../utils/markdown');
@@ -19,11 +18,13 @@ class BlogPostChecker extends Worker {
         this._localizerNamespaces = 'module.guildwars2';
     }
 
-    check() {
-        Promise.all([
-            this.getLatestBlog(),
-            this.checkBlog()
-        ]).then(([oldBlogUrl, blog]) => {
+    async check() {
+        try {
+            const [oldBlogUrl, blog] = await Promise.all([
+                this.getLatestBlog(),
+                this._checkBlog()
+            ]);
+
             const allBlogs = [];
             for (let i = 0; i < blog.length; i++) {
                 if (blog[i].link === oldBlogUrl) {
@@ -34,28 +35,28 @@ class BlogPostChecker extends Worker {
 
             if (allBlogs.length > 0) {
                 // Set the latest blog to the newest blog
-                return this.setLatestBlog(allBlogs[0].link).then(() => {
-                    if (oldBlogUrl) {
-                        // Signal all new blog posts, in reversed order
-                        for (let i = allBlogs.length - 1; i >= 0; i--) {
-                            this.onNewBlog(allBlogs[i]);
-                        }
+                await this.setLatestBlog(allBlogs[0].link);
+                if (oldBlogUrl) {
+                    // Signal all new blog posts, in reversed order
+                    for (let i = allBlogs.length - 1; i >= 0; i--) {
+                        await this.onNewBlog(allBlogs[i]); // eslint-disable-line no-await-in-loop
                     }
-                });
+                }
             }
-        }).catch(err => this.log(`Error while checking for new blog posts: ${err.message}`, 'error'));
+        } catch (err) {
+            this.log(`Error while checking for new blog posts: ${err.message}`, 'error');
+        }
     }
 
-    checkBlog() {
-        return readRss(rssFeed).then(feed => {
-            this.log(`Got ${feed.items.length} blog posts`, 'log');
-            return feed.items;
-        });
+    async _checkBlog() {
+        const feed = await readRss(rssFeed);
+        this.log(`Got ${feed.items.length} blog posts`, 'log');
+        return feed.items;
     }
 
-    onNewBlog(blog) {
+    async onNewBlog(blog) {
         const bot = this.getBot();
-        const config = this.getModule().getConfig().root(this.getId());
+        const config = this.getConfig();
         const client = bot.getClient();
         const l = bot.getLocalizer();
 
@@ -68,7 +69,8 @@ class BlogPostChecker extends Worker {
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
             const description = convertHtmlToMarkdown(blog.summary, 'feed')
                 .replace(/\[read more]\([^)]+\)/i, '');
-            channel.send('', {
+
+            return channel.send('', {
                 embed: new Discord.RichEmbed()
                     .setColor(config.get('richcolor'))
                     .setThumbnail(thumbnailUrl)
@@ -90,12 +92,12 @@ class BlogPostChecker extends Worker {
     }
 
 
-    enableWorker() {
+    async enableWorker() {
         this._intervalId = setInterval(this.check.bind(this), 600000);
-        this.check();
+        return this.check();
     }
 
-    disableWorker() {
+    async disableWorker() {
         if (this._intervalId) {
             clearInterval(this._intervalId);
         }

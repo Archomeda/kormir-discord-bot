@@ -1,7 +1,6 @@
 'use strict';
 
 const Discord = require('discord.js');
-const Promise = require('bluebird');
 
 const gw2Api = require('../api');
 
@@ -19,219 +18,201 @@ class WorkerGuildLogChecker extends Worker {
         super(bot, 'guild-log-checker');
     }
 
-    check() {
+    async check() {
         // Gigantic mess ahead; just don't judge me alright? ;-;
         const config = this.getModule().getConfig();
         const types = config.get(`${this.getId()}.types`);
 
-        return this.getLatestLog().then(latestLogId =>
-            this.checkLog(latestLogId).then(log => [latestLogId, log])
-        ).then(([latestLogId, log]) => {
-            // Process the stored/live logs
-            if (log.length === 0 || !log[0].id || latestLogId === log[0].id) {
-                return;
-            }
+        const latestLogId = await this.getLatestLog();
+        const log = await this._checkLog(latestLogId);
 
-            if (!latestLogId) {
-                return this.setLatestLog(log[0].id).return(undefined);
-            }
+        // Process the stored/live logs
+        if (log.length === 0 || !log[0].id || latestLogId === log[0].id) {
+            return;
+        }
+        if (!latestLogId) {
+            return this.setLatestLog(log[0].id);
+        }
 
-            // Parse the log
-            const parsedLog = {
-                motd: [],
-                roster: [],
-                treasury: new Map(),
-                stash: new Map(),
-                upgrade: new Map()
-            };
-            for (const entry of log) {
-                if (entry.type === 'kick' && entry.user === entry.kicked_by) {
-                    entry.type = 'leave';
-                }
-                if (types.includes(entry.type)) {
-                    let key;
-                    let item;
-                    switch (entry.type) {
-                        case 'motd':
-                            parsedLog.motd.unshift({ type: 'motd', user: entry.user, motd: entry.motd, time: entry.time });
-                            break;
-                        case 'invited':
-                            parsedLog.roster.unshift({ type: 'invited', user: entry.user, invited_by: entry.invited_by, time: entry.time }); // eslint-disable-line camelcase
-                            break;
-                        case 'joined':
-                            parsedLog.roster.unshift({ type: 'joined', user: entry.user, time: entry.time });
-                            break;
-                        case 'leave':
-                            parsedLog.roster.unshift({ type: 'left', user: entry.user, time: entry.time });
-                            break;
-                        case 'kick':
-                            parsedLog.roster.unshift({ type: 'kicked', user: entry.user, kicked_by: entry.kicked_by, time: entry.time }); // eslint-disable-line camelcase
-                            break;
-                        case 'rank_change':
-                            parsedLog.roster.unshift({ type: 'rank-changed', user: entry.user, old_rank: entry.old_rank, new_rank: entry.new_rank, changed_by: entry.changed_by, time: entry.time }); // eslint-disable-line camelcase
-                            break;
-                        case 'treasury':
-                            key = `${entry.user}-${entry.item_id}`;
-                            item = parsedLog.treasury.get(key);
+        // Parse the log
+        const parsedLog = {
+            motd: [],
+            roster: [],
+            treasury: new Map(),
+            stash: new Map(),
+            upgrade: new Map()
+        };
+        for (const entry of log) {
+            if (entry.type === 'kick' && entry.user === entry.kicked_by) {
+                entry.type = 'leave';
+            }
+            if (types.includes(entry.type)) {
+                let key;
+                let item;
+                switch (entry.type) {
+                    case 'motd':
+                        parsedLog.motd.unshift({ type: 'motd', user: entry.user, motd: entry.motd, time: entry.time });
+                        break;
+                    case 'invited':
+                        parsedLog.roster.unshift({ type: 'invited', user: entry.user, invited_by: entry.invited_by, time: entry.time }); // eslint-disable-line camelcase
+                        break;
+                    case 'joined':
+                        parsedLog.roster.unshift({ type: 'joined', user: entry.user, time: entry.time });
+                        break;
+                    case 'leave':
+                        parsedLog.roster.unshift({ type: 'left', user: entry.user, time: entry.time });
+                        break;
+                    case 'kick':
+                        parsedLog.roster.unshift({ type: 'kicked', user: entry.user, kicked_by: entry.kicked_by, time: entry.time }); // eslint-disable-line camelcase
+                        break;
+                    case 'rank_change':
+                        parsedLog.roster.unshift({ type: 'rank-changed', user: entry.user, old_rank: entry.old_rank, new_rank: entry.new_rank, changed_by: entry.changed_by, time: entry.time }); // eslint-disable-line camelcase
+                        break;
+                    case 'treasury':
+                        key = `${entry.user}-${entry.item_id}`;
+                        item = parsedLog.treasury.get(key);
+                        if (item) {
+                            parsedLog.treasury.set(key, { type: 'treasury', user: entry.user, item_id: entry.item_id, count: item.count + entry.count, time: entry.time }); // eslint-disable-line camelcase
+                        } else {
+                            parsedLog.treasury.set(key, { type: 'treasury', user: entry.user, item_id: entry.item_id, count: entry.count, time: entry.time }); // eslint-disable-line camelcase
+                        }
+                        break;
+                    case 'stash':
+                        if (entry.item_id && entry.operation) {
+                            key = `${entry.user}-item-${entry.item_id}`;
+                            item = parsedLog.stash.get(key);
+                            const count = entry.operation === 'deposit' ? entry.count : entry.operation === 'withdraw' ? -entry.count : 0;
                             if (item) {
-                                parsedLog.treasury.set(key, { type: 'treasury', user: entry.user, item_id: entry.item_id, count: item.count + entry.count, time: entry.time }); // eslint-disable-line camelcase
+                                parsedLog.stash.set(key, { type: 'stash-item', user: entry.user, item_id: entry.item_id, count: item.count + count, time: entry.time }); // eslint-disable-line camelcase
                             } else {
-                                parsedLog.treasury.set(key, { type: 'treasury', user: entry.user, item_id: entry.item_id, count: entry.count, time: entry.time }); // eslint-disable-line camelcase
+                                parsedLog.stash.set(key, { type: 'stash-item', user: entry.user, item_id: entry.item_id, count, time: entry.time }); // eslint-disable-line camelcase
                             }
-                            break;
-                        case 'stash':
-                            if (entry.item_id && entry.operation) {
-                                key = `${entry.user}-item-${entry.item_id}`;
-                                item = parsedLog.stash.get(key);
-                                const count = entry.operation === 'deposit' ? entry.count : entry.operation === 'withdraw' ? -entry.count : 0;
-                                if (item) {
-                                    parsedLog.stash.set(key, { type: 'stash-item', user: entry.user, item_id: entry.item_id, count: item.count + count, time: entry.time }); // eslint-disable-line camelcase
-                                } else {
-                                    parsedLog.stash.set(key, { type: 'stash-item', user: entry.user, item_id: entry.item_id, count, time: entry.time }); // eslint-disable-line camelcase
-                                }
-                            } else if (entry.coins && entry.operation) {
-                                key = `${entry.user}-coins`;
-                                item = parsedLog.stash.get(key);
-                                const count = entry.operation === 'deposit' ? entry.coins : entry.operation === 'withdraw' ? -entry.coins : 0;
-                                if (item) {
-                                    parsedLog.stash.set(key, { type: 'stash-coins', user: entry.user, coins: item.coins + count, time: entry.time });
-                                } else {
-                                    parsedLog.stash.set(key, { type: 'stash-coins', user: entry.user, coins: count, time: entry.time });
-                                }
-                            }
-                            break;
-                        case 'upgrade':
-                            if (entry.action === 'completed') {
-                                key = `${entry.user}-${entry.upgrade_id}`;
-                                item = parsedLog.upgrade.get(key);
-                                if (item) {
-                                    parsedLog.upgrade.set(key, { type: 'upgrade', user: entry.user, upgrade_id: entry.upgrade_id, count: item.count + entry.count, time: entry.time }); // eslint-disable-line camelcase
-                                } else {
-                                    parsedLog.upgrade.set(key, { type: 'upgrade', user: entry.user, upgrade_id: entry.upgrade_id, count: entry.count, time: entry.time }); // eslint-disable-line camelcase
-                                }
-                            }
-                            break;
-                        default:
-                            break; // Make linter happy
-                    }
-                }
-            }
-            for (const type of ['treasury', 'stash', 'upgrade']) {
-                parsedLog[type] = [...parsedLog[type].values()];
-                parsedLog[type].sort((a, b) => a.time.localeCompare(b.time));
-            }
-            parsedLog.stash = parsedLog.stash
-                .filter(item => item.count || item.coins)
-                .map(item => ({
-                    type: `${item.type}-${item.count > 0 || item.coins > 0 ? 'deposit' : 'withdraw'}`,
-                    user: item.user,
-                    item_id: item.item_id, // eslint-disable-line camelcase
-                    count: item.count ? item.count > 0 ? item.count : -item.count : undefined,
-                    coins: item.coins ? item.coins > 0 ? item.coins : -item.coins : undefined,
-                    time: item.time
-                }));
-
-            return this.setLatestLog(log[0].id).return(parsedLog);
-        }).then(log => {
-            if (!log) {
-                return;
-            }
-
-            // Get the names of the mentioned items
-            const items = new Set();
-            for (const type of ['treasury', 'stash']) {
-                for (let i = 0; i < log[type].length; i++) {
-                    if (log[type][i].item_id) {
-                        items.add(log[type][i].item_id);
-                    }
-                }
-            }
-
-            // Get the names of the mentioned upgrades
-            const upgrades = new Set();
-            for (let i = 0; i < log.upgrade.length; i++) {
-                if (log.upgrade[i].upgrade_id) {
-                    upgrades.add(log.upgrade[i].upgrade_id);
-                }
-            }
-
-            // Convert all the stuff to make it human-readable
-            return Promise.all([
-                gw2Api.items().many([...items]).then(items => {
-                    const map = new Map(items.map(item => [item.id, item.name || `[${item.id}]`]));
-
-                    for (const type of ['treasury', 'stash']) {
-                        for (let i = 0; i < log[type].length; i++) {
-                            if (log[type][i].item_id && map.has(log[type][i].item_id)) {
-                                log[type][i].item = map.get(log[type][i].item_id);
+                        } else if (entry.coins && entry.operation) {
+                            key = `${entry.user}-coins`;
+                            item = parsedLog.stash.get(key);
+                            const count = entry.operation === 'deposit' ? entry.coins : entry.operation === 'withdraw' ? -entry.coins : 0;
+                            if (item) {
+                                parsedLog.stash.set(key, { type: 'stash-coins', user: entry.user, coins: item.coins + count, time: entry.time });
+                            } else {
+                                parsedLog.stash.set(key, { type: 'stash-coins', user: entry.user, coins: count, time: entry.time });
                             }
                         }
-                    }
-                }),
-                gw2Api.guild().upgrades().many([...upgrades]).then(upgrades => {
-                    const map = new Map(upgrades.map(upgrade => [upgrade.id, upgrade.name || `[${upgrade.id}]`]));
-
-                    for (let i = 0; i < log.upgrade.length; i++) {
-                        if (log.upgrade[i].upgrade_id && map.has(log.upgrade[i].upgrade_id)) {
-                            log.upgrade[i].upgrade = map.get(log.upgrade[i].upgrade_id);
+                        break;
+                    case 'upgrade':
+                        if (entry.action === 'completed') {
+                            key = `${entry.user}-${entry.upgrade_id}`;
+                            item = parsedLog.upgrade.get(key);
+                            if (item) {
+                                parsedLog.upgrade.set(key, { type: 'upgrade', user: entry.user, upgrade_id: entry.upgrade_id, count: item.count + entry.count, time: entry.time }); // eslint-disable-line camelcase
+                            } else {
+                                parsedLog.upgrade.set(key, { type: 'upgrade', user: entry.user, upgrade_id: entry.upgrade_id, count: entry.count, time: entry.time }); // eslint-disable-line camelcase
+                            }
                         }
-                    }
-                })
-            ]).return(log);
-        }).then(log => {
-            if (!log) {
-                return;
-            }
-
-            if (log.motd.length > 0) {
-                // MotD updated
-                const motd = log.motd[log.motd.length - 1];
-                this.onNewMotd(motd);
-            }
-
-            // Check for roster, stash, treasury and upgrade updates
-            for (const type of ['roster', 'stash', 'treasury', 'upgrade']) {
-                if (log[type].length > 0) {
-                    switch (type) {
-                        case 'roster':
-                            this.onUpdateRoster(log[type]);
-                            break;
-                        case 'stash':
-                            this.onUpdateStash(log[type]);
-                            break;
-                        case 'treasury':
-                            this.onUpdateTreasury(log[type]);
-                            break;
-                        case 'upgrade':
-                            this.onUpdateUpgrades(log[type]);
-                            break;
-                        default:
-                            break; // Make linter happy
-                    }
+                        break;
+                    default:
+                        break; // Make linter happy
                 }
             }
-        });
+        }
+        for (const type of ['treasury', 'stash', 'upgrade']) {
+            parsedLog[type] = [...parsedLog[type].values()];
+            parsedLog[type].sort((a, b) => a.time.localeCompare(b.time));
+        }
+        parsedLog.stash = parsedLog.stash
+            .filter(item => item.count || item.coins)
+            .map(item => ({
+                type: `${item.type}-${item.count > 0 || item.coins > 0 ? 'deposit' : 'withdraw'}`,
+                user: item.user,
+                item_id: item.item_id, // eslint-disable-line camelcase
+                count: item.count ? item.count > 0 ? item.count : -item.count : undefined,
+                coins: item.coins ? item.coins > 0 ? item.coins : -item.coins : undefined,
+                time: item.time
+            }));
+
+        await this.setLatestLog(log[0].id);
+
+        // Get the names of the mentioned items
+        const items = new Set();
+        for (const type of ['treasury', 'stash']) {
+            for (let i = 0; i < parsedLog[type].length; i++) {
+                if (parsedLog[type][i].item_id) {
+                    items.add(parsedLog[type][i].item_id);
+                }
+            }
+        }
+
+        // Get the names of the mentioned upgrades
+        const upgrades = new Set();
+        for (let i = 0; i < parsedLog.upgrade.length; i++) {
+            if (parsedLog.upgrade[i].upgrade_id) {
+                upgrades.add(parsedLog.upgrade[i].upgrade_id);
+            }
+        }
+
+        // Convert all the stuff to make it human-readable
+        const [apiItems, apiUpgrades] = await Promise.all([
+            gw2Api.items().many([...items]),
+            gw2Api.guild().upgrades().many([...upgrades])
+        ]);
+        const apiItemsMap = new Map(apiItems.map(item => [item.id, item.name || `[${item.id}]`]));
+        for (const type of ['treasury', 'stash']) {
+            for (let i = 0; i < parsedLog[type].length; i++) {
+                if (parsedLog[type][i].item_id && apiItemsMap.has(parsedLog[type][i].item_id)) {
+                    parsedLog[type][i].item = apiItemsMap.get(parsedLog[type][i].item_id);
+                }
+            }
+        }
+        const apiUpgradesMap = new Map(apiUpgrades.map(upgrade => [upgrade.id, upgrade.name || `[${upgrade.id}]`]));
+        for (let i = 0; i < parsedLog.upgrade.length; i++) {
+            if (parsedLog.upgrade[i].upgrade_id && apiUpgradesMap.has(parsedLog.upgrade[i].upgrade_id)) {
+                parsedLog.upgrade[i].upgrade = apiUpgradesMap.get(parsedLog.upgrade[i].upgrade_id);
+            }
+        }
+
+        if (parsedLog.motd.length > 0) {
+            // MotD updated
+            const motd = parsedLog.motd[parsedLog.motd.length - 1];
+            await this.onNewMotd(motd);
+        }
+
+        // Check for roster, stash, treasury and upgrade updates
+        for (const type of ['roster', 'stash', 'treasury', 'upgrade']) {
+            if (parsedLog[type].length > 0) {
+                switch (type) {
+                    case 'roster':
+                        await this.onUpdateRoster(parsedLog[type]); // eslint-disable-line no-await-in-loop
+                        break;
+                    case 'stash':
+                        await this.onUpdateStash(parsedLog[type]); // eslint-disable-line no-await-in-loop
+                        break;
+                    case 'treasury':
+                        await this.onUpdateTreasury(parsedLog[type]); // eslint-disable-line no-await-in-loop
+                        break;
+                    case 'upgrade':
+                        await this.onUpdateUpgrades(parsedLog[type]); // eslint-disable-line no-await-in-loop
+                        break;
+                    default:
+                        break; // Make linter happy
+                }
+            }
+        }
     }
 
-    checkLog(sinceLogId) {
+    async _checkLog(sinceLogId) {
         const config = this.getModule().getConfig();
         const apiKey = config.get('guild-leader-api-key');
         const guildId = config.get('guild-id');
 
-        return gw2Api.authenticate(apiKey).guild(guildId).log().since(sinceLogId).then(log => {
-            if (sinceLogId) {
-                log = log.filter(entry => entry.id > sinceLogId);
-            }
-            this.log(`Got ${log.length} new guild log entries`, 'log');
-            return log;
-        });
+        const log = await gw2Api.authenticate(apiKey).guild(guildId).log().since(sinceLogId);
+        this.log(`Got ${log.length} new guild log entries`, 'log');
+        return log;
     }
 
 
-    onNewMotd(motd) {
+    async onNewMotd(motd) {
         const bot = this.getBot();
         const client = bot.getClient();
-        const config = this.getModule().getConfig().root(this.getId());
+        const config = this.getConfig();
         const l = bot.getLocalizer();
 
         const time = new Date(motd.time);
@@ -242,24 +223,23 @@ class WorkerGuildLogChecker extends Worker {
         let channel;
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
             // Try replacing the author's GW2 account name with their known Discord account
-            models.Gw2Account.findOne({ accountName: motd.user }).then(account => {
-                const discordUser = account ? channel.guild.members.get(account.discordId) : undefined;
+            const account = await models.Gw2Account.findOne({ accountName: motd.user });
+            const discordUser = account ? channel.guild.members.get(account.discordId) : undefined;
 
-                channel.send('', {
-                    embed: new Discord.RichEmbed()
-                        .setColor(config.get('richcolor'))
-                        .setTitle(l.t('module.guildwars2:guild-log-checker.motd-title'))
-                        .setDescription(l.t('module.guildwars2:guild-log-checker.motd-description', motd))
-                        .setFooter(l.t('module.guildwars2:guild-log-checker.motd-footer', motd), discordUser ? discordUser.user.avatarURL : undefined)
-                        .setTimestamp(time)
-                });
+            return channel.send('', {
+                embed: new Discord.RichEmbed()
+                    .setColor(config.get('richcolor'))
+                    .setTitle(l.t('module.guildwars2:guild-log-checker.motd-title'))
+                    .setDescription(l.t('module.guildwars2:guild-log-checker.motd-description', motd))
+                    .setFooter(l.t('module.guildwars2:guild-log-checker.motd-footer', motd), discordUser ? discordUser.user.avatarURL : undefined)
+                    .setTimestamp(time)
             });
         }
     }
 
-    onUpdateRoster(roster) {
+    async onUpdateRoster(roster) {
         const client = this.getBot().getClient();
-        const config = this.getModule().getConfig().root(this.getId());
+        const config = this.getConfig();
 
         const time = new Date();
         this.log(`Roster updated with ${roster.length} entries`);
@@ -268,13 +248,14 @@ class WorkerGuildLogChecker extends Worker {
         const channelId = config.get('channel-id');
         let channel;
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
-            this.createLogMessage('roster', roster, time).then(embed => channel.send('', { embed }));
+            const embed = await this._createLogMessage('roster', roster, time);
+            return channel.send('', { embed });
         }
     }
 
-    onUpdateStash(stash) {
+    async onUpdateStash(stash) {
         const client = this.getBot().getClient();
-        const config = this.getModule().getConfig().root(this.getId());
+        const config = this.getConfig();
 
         const time = new Date();
         this.log(`Stash updated with ${stash.length} entries`);
@@ -288,13 +269,14 @@ class WorkerGuildLogChecker extends Worker {
                     stash[i].coins = this.convertCoinsToText(channel.guild, stash[i].coins);
                 }
             }
-            this.createLogMessage('stash', stash, time).then(embed => channel.send('', { embed }));
+            const embed = await this._createLogMessage('stash', stash, time);
+            return channel.send('', { embed });
         }
     }
 
-    onUpdateTreasury(treasury) {
+    async onUpdateTreasury(treasury) {
         const client = this.getBot().getClient();
-        const config = this.getModule().getConfig().root(this.getId());
+        const config = this.getConfig();
 
         const time = new Date();
         this.log(`Treasury updated with ${treasury.length} entries`);
@@ -303,13 +285,14 @@ class WorkerGuildLogChecker extends Worker {
         const channelId = config.get('channel-id');
         let channel;
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
-            this.createLogMessage('treasury', treasury, time).then(embed => channel.send('', { embed }));
+            const embed = await this._createLogMessage('treasury', treasury, time);
+            return channel.send('', { embed });
         }
     }
 
-    onUpdateUpgrades(upgrades) {
+    async onUpdateUpgrades(upgrades) {
         const client = this.getBot().getClient();
-        const config = this.getModule().getConfig().root(this.getId());
+        const config = this.getConfig();
 
         const time = new Date();
         this.log(`Upgrades updated with ${upgrades.length} entries`);
@@ -318,13 +301,14 @@ class WorkerGuildLogChecker extends Worker {
         const channelId = config.get('channel-id');
         let channel;
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
-            this.createLogMessage('upgrade', upgrades, time).then(embed => channel.send('', { embed }));
+            const embed = await this._createLogMessage('upgrade', upgrades, time);
+            return channel.send('', { embed });
         }
     }
 
-    createLogMessage(type, items, time) {
+    async _createLogMessage(type, items, time) {
         const bot = this.getBot();
-        const config = this.getModule().getConfig().root(this.getId());
+        const config = this.getConfig();
         const client = bot.getClient();
         const l = bot.getLocalizer();
 
@@ -339,23 +323,22 @@ class WorkerGuildLogChecker extends Worker {
         }
 
         // Replace GW2 account names with their known Discord accounts
-        return models.Gw2Account.find({ accountName: { $in: [...users] } }).then(accounts => {
-            const map = new Map(accounts.map(account => [account.accountName, client.users.get(account.discordId).toString() || account.accountName]));
+        const accounts = await models.Gw2Account.find({ accountName: { $in: [...users] } });
+        const map = new Map(accounts.map(account => [account.accountName, client.users.get(account.discordId).toString() || account.accountName]));
 
-            for (let i = 0; i < items.length; i++) {
-                for (const userType of ['user', 'invited_by', 'kicked_by', 'changed_by']) {
-                    let discordName;
-                    if (items[i][userType] && (discordName = map.get(items[i][userType]))) {
-                        items[i][userType] = discordName;
-                    }
+        for (let i = 0; i < items.length; i++) {
+            for (const userType of ['user', 'invited_by', 'kicked_by', 'changed_by']) {
+                let discordName;
+                if (items[i][userType] && (discordName = map.get(items[i][userType]))) {
+                    items[i][userType] = discordName;
                 }
             }
+        }
 
-            return createBigEmbedMessage(items.map(item => l.t(`module.guildwars2:guild-log-checker.${item.type}-description`, item)))
-                .setColor(config.get('richcolor'))
-                .setTitle(l.t(`module.guildwars2:guild-log-checker.${type}-title`))
-                .setTimestamp(time);
-        });
+        return createBigEmbedMessage(items.map(item => l.t(`module.guildwars2:guild-log-checker.${item.type}-description`, item)))
+            .setColor(config.get('richcolor'))
+            .setTitle(l.t(`module.guildwars2:guild-log-checker.${type}-title`))
+            .setTimestamp(time);
     }
 
     convertCoinsToText(guild, coins) {
@@ -378,7 +361,7 @@ class WorkerGuildLogChecker extends Worker {
     }
 
     getEmojis(guild, names) {
-        const config = this.getModule().getConfig();
+        const config = this.getConfig();
         if (!Array.isArray(names)) {
             names = [names];
         }
@@ -392,21 +375,21 @@ class WorkerGuildLogChecker extends Worker {
     }
 
 
-    getLatestLog() {
+    async getLatestLog() {
         return this.getBot().getCache().get(this.getId(), 'log');
     }
 
-    setLatestLog(log) {
+    async setLatestLog(log) {
         return this.getBot().getCache().set(this.getId(), 'log', undefined, log);
     }
 
 
-    enableWorker() {
+    async enableWorker() {
         this._intervalId = setInterval(this.check.bind(this), 300000);
-        this.check();
+        return this.check();
     }
 
-    disableWorker() {
+    async disableWorker() {
         if (this._intervalId) {
             clearInterval(this._intervalId);
         }

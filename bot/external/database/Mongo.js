@@ -1,12 +1,15 @@
 'use strict';
 
-const Promise = require('bluebird');
 const mongoose = require('mongoose');
 
 const Base = require('./Base');
 
-mongoose.Promise = Promise;
+mongoose.Promise = global.Promise;
 
+
+/**
+ * A database backend using Mongo.
+ */
 class MongoDatabase extends Base {
     constructor(options) {
         super(options);
@@ -14,11 +17,11 @@ class MongoDatabase extends Base {
         mongoose.connection.on('open', () => console.log('Connected to MongoDB'));
     }
 
-    connect() {
+    async connect() {
         return mongoose.connect(this.getConfig().get('uri'), { server: { reconnectTries: Number.MAX_VALUE } });
     }
 
-    disconnect() {
+    async disconnect() {
         return mongoose.disconnect();
     }
 }

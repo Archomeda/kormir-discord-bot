@@ -1,5 +1,6 @@
 'use strict';
 
+
 /**
  * The base database provider.
  */
@@ -24,7 +25,7 @@ class BaseDatabase {
      * Connects to the database provider backend.
      * @returns {Promise} The promise.
      */
-    connect() {
+    async connect() {
         throw new TypeError('Derivative should implement connect');
     }
 
@@ -32,7 +33,7 @@ class BaseDatabase {
      * Disconnects from the database provider backend.
      * @returns {Promise} The promise.
      */
-    disconnect() {
+    async disconnect() {
         throw new TypeError('Derivative should implement disconnect');
     }
 }

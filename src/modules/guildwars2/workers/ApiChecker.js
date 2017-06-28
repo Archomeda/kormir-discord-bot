@@ -10,16 +10,17 @@ class WorkerApiChecker extends Worker {
         super(bot, 'api-checker');
     }
 
-    check() {
-        gw2Api.build().get().then(() => {
+    async check() {
+        try {
+            await gw2Api.build().get();
             // API is working normally, hopefully
             this.onFire(false);
-        }).catch(err => {
+        } catch (err) {
             if (err.response && err.response.status === 404) {
                 // API is on fire!
                 this.onFire(true);
             }
-        });
+        }
     }
 
     onFire(fire) {
@@ -31,12 +32,12 @@ class WorkerApiChecker extends Worker {
         }
     }
 
-    enableWorker() {
+    async enableWorker() {
         this._intervalId = setInterval(this.check.bind(this), 300000);
-        this.check();
+        return this.check();
     }
 
-    disableWorker() {
+    async disableWorker() {
         if (this._intervalId) {
             clearInterval(this._intervalId);
         }

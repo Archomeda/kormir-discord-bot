@@ -9,7 +9,7 @@ class CommandEvents extends DatabaseScheduleBase {
         super(bot, 'events', ['events'], 'list');
     }
 
-    formatResult(request, result) {
+    async formatResult(request, result) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
         const eventCommand = this.getModule().getActivity(CommandEvent).getCommandTrigger();

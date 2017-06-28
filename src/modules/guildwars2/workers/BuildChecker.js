@@ -1,7 +1,6 @@
 'use strict';
 
 const Discord = require('discord.js');
-const Promise = require('bluebird');
 
 const gw2Api = require('../api');
 
@@ -17,29 +16,30 @@ class WorkerBuildChecker extends Worker {
         this._localizerNamespaces = 'module.guildwars2';
     }
 
-    check() {
-        Promise.all([
-            this.getLatestBuild(),
-            this.checkBuild()
-        ]).then(([oldBuild, build]) => {
+    async check() {
+        try {
+            const [oldBuild, build] = await Promise.all([
+                this.getLatestBuild(),
+                this._checkBuild()
+            ]);
             if (build !== oldBuild) {
-                return this.setLatestBuild(build).then(() => {
-                    if (oldBuild) {
-                        this.onNewBuild(build);
-                    }
-                });
+                await this.setLatestBuild(build);
+                if (oldBuild) {
+                    return this.onNewBuild(build);
+                }
             }
-        }).catch(err => this.log(`Error while checking for a new build: ${err.message}`, 'error'));
+        } catch (err) {
+            this.log(`Error while checking for a new build: ${err.message}`, 'error');
+        }
     }
 
-    checkBuild() {
-        return gw2Api.build().get().then(build => {
-            this.log(`Got live build: ${build}`, 'log');
-            return build;
-        });
+    async _checkBuild() {
+        const build = await gw2Api.build().get();
+        this.log(`Got live build: ${build}`, 'log');
+        return build;
     }
 
-    onNewBuild(build) {
+    async onNewBuild(build) {
         const bot = this.getBot();
         const config = this.getModule().getConfig().root(this.getId());
         const client = bot.getClient();
@@ -52,7 +52,7 @@ class WorkerBuildChecker extends Worker {
         const channelId = config.get('channel-id');
         let channel;
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
-            channel.send('', {
+            return channel.send('', {
                 embed: new Discord.RichEmbed()
                     .setColor(config.get('richcolor'))
                     .setThumbnail(thumbnailUrl)
@@ -63,21 +63,21 @@ class WorkerBuildChecker extends Worker {
         }
     }
 
-    getLatestBuild() {
+    async getLatestBuild() {
         return this.getBot().getCache().get(this.getId(), 'build');
     }
 
-    setLatestBuild(build) {
+    async setLatestBuild(build) {
         return this.getBot().getCache().set(this.getId(), 'build', undefined, build);
     }
 
 
-    enableWorker() {
+    async enableWorker() {
         this._intervalId = setInterval(this.check.bind(this), 300000);
-        this.check();
+        return this.check();
     }
 
-    disableWorker() {
+    async disableWorker() {
         if (this._intervalId) {
             clearInterval(this._intervalId);
         }

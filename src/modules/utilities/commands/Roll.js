@@ -22,7 +22,7 @@ class CommandRoll extends DiscordCommand {
         return new DiscordCommandParameter('input', { optional: true, localizationContext: { max_dice: maxDice, max_faces: maxFaces } }); // eslint-disable-line camelcase
     }
 
-    onCommand(request) {
+    async onCommand(request) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
         const config = this.getModule().getConfig().root(this.getId());

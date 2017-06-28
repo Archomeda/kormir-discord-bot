@@ -1,7 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird');
-
 
 /**
  * Represents a reply message for Discord.
@@ -44,12 +42,12 @@ class DiscordReplyMessage {
      * Gets called whenever the command reply has been posted.
      * @param {DiscordCommandResponse} response - The command response object.
      * @param {Message} message - The Discord message.
+     * @returns {Promise} The promise.
      */
-    onReplyPosted(response, message) {
+    async onReplyPosted(response, message) {
         if (this._onReplyPosted) {
-            return Promise.resolve(this._onReplyPosted(response, message));
+            return this._onReplyPosted(response, message);
         }
-        return Promise.resolve(true);
     }
 }
 

@@ -11,7 +11,7 @@ class ReplyWithMentionsMiddleware extends Middleware {
      * Creates a new middleware that adds mentions to the message.
      * @param {Bot} bot - The bot instance.
      * @param {DiscordCommand} command - The Discord command.
-     * @param {Object.<string,*>} [options] - Additional options for the middleware.
+     * @param {Object<string, *>} [options] - Additional options for the middleware.
      */
     constructor(bot, command, options) {
         super(bot, 'replyWithMentions', command, options);
@@ -21,7 +21,7 @@ class ReplyWithMentionsMiddleware extends Middleware {
         };
     }
 
-    onReplyConstructed(response) {
+    async onReplyConstructed(response) {
         if (!response.reply) {
             return response;
         }

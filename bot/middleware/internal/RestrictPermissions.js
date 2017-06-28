@@ -1,6 +1,6 @@
 'use strict';
 
-const Promise = require('bluebird');
+const { deleteIgnoreErrors } = require('../../utils/DiscordMessage');
 
 const Middleware = require('../Middleware');
 const PermissionError = require('./PermissionError');
@@ -14,7 +14,7 @@ class RestrictPermissionsMiddleware extends Middleware {
      * Creates a new middleware that restricts commands by permissions.
      * @param {Bot} bot - The bot instance.
      * @param {DiscordCommand} command - The Discord command.
-     * @param {Object.<string,*>} [options] - Additional options for the middleware.
+     * @param {Object<string, *>} [options] - Additional options for the middleware.
      */
     constructor(bot, command, options) {
         super(bot, 'restrictPermissions', command, options);
@@ -25,31 +25,27 @@ class RestrictPermissionsMiddleware extends Middleware {
         };
     }
 
-    onCommand(response) {
+    async onCommand(response) {
         const request = response.getRequest();
         const message = request.getMessage();
         if (!this.getCommand().isCommandAllowed(request.getMessage().author)) {
-            if (message.deletable) {
-                return Promise.resolve(message.delete()).finally(() => {
-                    throw new PermissionError(request);
-                });
-            }
+            await deleteIgnoreErrors(message);
             throw new PermissionError(request);
         }
         return response;
     }
 
-    onReplyPosted(response, message) {
+    async onReplyPosted(response, message) {
         if (!(response.getError() instanceof PermissionError)) {
             return response;
         }
 
         const options = this.getOptions();
-        if (!options.removeDelay || !message.deletable) {
+        if (!options.removeDelay) {
             return response;
         }
 
-        message.delete(options.removeDelay * 1000);
+        await deleteIgnoreErrors(message, options.removeDelay * 1000);
         return response;
     }
 }

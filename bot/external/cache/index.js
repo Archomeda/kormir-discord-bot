@@ -1,5 +1,6 @@
 'use strict';
 
+
 function getCache(name) {
     switch (name.toLowerCase()) {
         case 'node':

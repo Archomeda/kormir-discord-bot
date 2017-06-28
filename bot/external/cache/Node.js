@@ -1,30 +1,40 @@
 'use strict';
 
-const Promise = require('bluebird');
+const { promisify } = require('util');
 const NodeCache_ = require('node-cache');
 
 const Base = require('./Base');
 
 
+/**
+ * A caching backend using Node.
+ */
 class NodeCache extends Base {
-    connect() {
-        this._cache = Promise.promisifyAll(new NodeCache_());
+    async connect() {
+        this._cache = new NodeCache_();
+        this._get = promisify(this._cache.get);
+        this._set = promisify(this._cache.set);
+        this._del = promisify(this._cache.del);
     }
 
-    disconnect() {
+    async disconnect() {
         this._cache = undefined;
+        this._get = undefined;
+        this._set = undefined;
+        this._del = undefined;
     }
 
-    get(table, id) {
-        return this._cache.getAsync(`${table}:${id}`);
+    async get(table, id) {
+        return this._get(`${table}:${id}`);
     }
 
-    set(table, id, ttl, value) {
-        return this._cache.setAsync(`${table}:${id}`, value, ttl);
+    async set(table, id, ttl, value) {
+        return this._set(`${table}:${id}`, value, ttl);
     }
 
-    remove(table, id) {
-        return this._cache.delAsync(`${table}:${id}`).then(result => result > 0);
+    async remove(table, id) {
+        const result = await this._del(`${table}:${id}`);
+        return result > 0;
     }
 }
 
