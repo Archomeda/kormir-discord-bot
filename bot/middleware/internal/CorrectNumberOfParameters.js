@@ -31,8 +31,9 @@ class CorrectNumberOfParametersMiddleware extends Middleware {
      * @private
      */
     _hasCorrectAmountOfParameters(request) {
-        const minParamCount = this.getCommand().getParameters().filter(p => !p.optional).length;
-        const maxParamCount = this.getCommand().getParameters().length;
+        const params = this.getCommand().getParameters();
+        const minParamCount = params.filter(p => !p.optional).length;
+        const maxParamCount = params.length;
         const currentParamCount = Object.values(request.getParams()).length;
         return currentParamCount >= minParamCount && currentParamCount <= maxParamCount;
     }

@@ -356,7 +356,7 @@ class DiscordCommand extends DiscordHook {
     async enableHook() {
         await super.enableHook();
         this.params = this.initializeParameters();
-        if (!Array.isArray(this.params)) {
+        if (this.params && !Array.isArray(this.params)) {
             this.params = [this.params];
         }
     }
