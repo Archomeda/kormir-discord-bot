@@ -12,9 +12,9 @@ const Base = require('./Base');
 class NodeCache extends Base {
     async connect() {
         this._cache = new NodeCache_();
-        this._get = promisify(this._cache.get);
-        this._set = promisify(this._cache.set);
-        this._del = promisify(this._cache.del);
+        this._get = promisify(this._cache.get).bind(this._cache);
+        this._set = promisify(this._cache.set).bind(this._cache);
+        this._del = promisify(this._cache.del).bind(this._cache);
     }
 
     async disconnect() {

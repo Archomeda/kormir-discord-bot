@@ -18,10 +18,10 @@ class RedisCache extends Base {
             password: this.getConfig().get('password'),
             database: this.getConfig().get('database')
         });
-        this._get = promisify(this._client.get);
-        this._set = promisify(this._client.set);
-        this._setex = promisify(this._client.setex);
-        this._del = promisify(this._client.del);
+        this._get = promisify(this._client.get).bind(this._client);
+        this._set = promisify(this._client.set).bind(this._client);
+        this._setex = promisify(this._client.setex).bind(this._client);
+        this._del = promisify(this._client.del).bind(this._client);
     }
 
     async disconnect() {
