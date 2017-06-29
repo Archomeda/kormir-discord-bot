@@ -2,8 +2,8 @@
 
 const Discord = require('discord.js');
 
-const DiscordCommand = require('../../../../bot/modules/DiscordCommand');
-const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage');
+const DiscordCommand = require('../../../modules/DiscordCommand');
+const DiscordReplyMessage = require('../../../modules/DiscordReplyMessage');
 
 
 class CommandInfo extends DiscordCommand {

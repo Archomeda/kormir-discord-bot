@@ -2,9 +2,9 @@
 
 const DiscordReplyMessage = require('../../DiscordReplyMessage');
 
-const AutoRemoveMessage = require('../../../../bot/middleware/AutoRemoveMessage');
+const AutoRemoveMessage = require('../../../middleware/AutoRemoveMessage');
 
-const DiscordCommand = require('../../../../bot/modules/DiscordCommand');
+const DiscordCommand = require('../../../modules/DiscordCommand');
 
 
 class CommandExportIds extends DiscordCommand {

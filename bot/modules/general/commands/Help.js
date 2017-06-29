@@ -1,10 +1,10 @@
 'use strict';
 
-const AutoRemoveMessage = require('../../../../bot/middleware/AutoRemoveMessage');
+const AutoRemoveMessage = require('../../../middleware/AutoRemoveMessage');
 
-const DiscordCommandError = require('../../../../bot/modules/DiscordCommandError');
-const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
-const DiscordCommand = require('../../../../bot/modules/DiscordCommand');
+const DiscordCommandError = require('../../../modules/DiscordCommandError');
+const DiscordCommandParameter = require('../../../modules/DiscordCommandParameter');
+const DiscordCommand = require('../../../modules/DiscordCommand');
 
 
 class CommandHelp extends DiscordCommand {

@@ -32,6 +32,8 @@
     "response-title": "{{name}} bot-informatie",
     "response-memory-usage": "Geheugengebruik",
     "response-memory-usage-value": "{{memory, filesize}}",
+    "response-version": "Node-versie",
+    "response-version-value": "{{version}}",
     "response-uptime": "Uptime",
     "response-uptime-value": "{{uptime, duration}}",
     "response-source-code": "Broncode"
