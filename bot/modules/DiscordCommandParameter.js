@@ -30,7 +30,7 @@ class DiscordCommandParameter {
                 return message.mentions.channels.filter(channel => param.includes(channel));
             case 'mentions':
                 return {
-                    users: message.mentions.users.filter(user => param.includes(user)),
+                    users: message.mentions.users.filter(user => param.includes(user) || param.includes(`<@!${user.id}>`)), // Explicitly include nicknamed accounts, since they have a different mention format
                     roles: message.mentions.roles.filter(role => param.includes(role)),
                     everyone: param.includes('@everyone')
                 };
