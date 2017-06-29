@@ -28,7 +28,7 @@ class RestrictPermissionsMiddleware extends Middleware {
     async onCommand(response) {
         const request = response.getRequest();
         const message = request.getMessage();
-        if (!this.getCommand().isCommandAllowed(request.getMessage().author)) {
+        if (!this.getCommand().isCommandAllowed(message.member || message.author)) {
             await deleteIgnoreErrors(message);
             throw new PermissionError(request);
         }

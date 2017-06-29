@@ -23,6 +23,7 @@ class CommandHelp extends DiscordCommand {
         const bot = this.getBot();
         const l = bot.getLocalizer();
         const modules = bot._modules;
+        const message = request.getMessage();
         const commandPrefix = bot.getConfig().get('discord.commands.prefix');
         const helpCommand = this.getCommandTrigger();
         const params = request.getParams();
@@ -42,10 +43,10 @@ class CommandHelp extends DiscordCommand {
 
             if (!command) {
                 throw new DiscordCommandError(l.t('module.general:help.response-command-not-recognized', { command: commandTrigger, help: helpCommand }));
-            } else if (!command.isCommandAllowed(request.getMessage().author)) {
+            } else if (!command.isCommandAllowed(message.member || message.author)) {
                 throw new DiscordCommandError(l.t('module.general:help.response-command-not-allowed', { command: commandTrigger, help: helpCommand }));
             }
-            return l.t('module.general:help.response-single-help', { help: this._formatCommandHelp(request.getMessage(), command) });
+            return l.t('module.general:help.response-single-help', { help: this._formatCommandHelp(message, command) });
         }
 
         // Reply with general help
@@ -72,7 +73,7 @@ class CommandHelp extends DiscordCommand {
         const commands = [];
 
         module.getActivities().filter(a => a instanceof DiscordCommand && a.isEnabled()).forEach(command => {
-            if (!command.isCommandAllowed(message.author)) {
+            if (!command.isCommandAllowed(message.member || message.author)) {
                 // User has no access to this command, skip
                 return;
             }

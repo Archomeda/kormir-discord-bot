@@ -61,7 +61,7 @@ class HookGuildMemberRole extends DiscordHook {
 
     async _addToGuildRole(user) {
         const role = this.getConfig().get('role-id');
-        if (!user.roles.has(role)) {
+        if (user.guild.roles.has(role) && !user.roles.has(role)) {
             return user.addRole(role);
         }
     }

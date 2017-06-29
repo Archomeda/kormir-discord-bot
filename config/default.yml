@@ -229,8 +229,8 @@ permissions:
   default:
     blacklist:
       - admin.*
-      - guildwars2.force_register
-      - schedule.add_event
-      - schedule.edit_event # To only disallow editing other users's events, use schedule.edit_event:other
-      - schedule.delete_event # To only disallow deleting other users's events, use schedule.delete_event:other
+      - guildwars2.force-register
+      - schedule.add-event
+      - schedule.edit-event # To only disallow editing other users's events, use schedule.edit-event:other
+      - schedule.delete-event # To only disallow deleting other users's events, use schedule.delete-event:other
     whitelist: []

@@ -52,7 +52,7 @@ class DiscordCommand extends DiscordHook {
 
     /**
      * Checks if a command is allowed to be executed in the current context.
-     * @param {User} user - The Discord user.
+     * @param {User|GuildMember} user - The Discord user.
      * @param {string} [subPermission] - The sub-permission.
      * @returns {boolean} True if allowed; false otherwise.
      */
@@ -235,7 +235,7 @@ class DiscordCommand extends DiscordHook {
 
     /**
      * Gets the permission groups a given user belongs to.
-     * @param {User} user - The Discord user.
+     * @param {User|GuildMember} user - The Discord user.
      * @returns {string[]} The permission groups.
      * @private
      */

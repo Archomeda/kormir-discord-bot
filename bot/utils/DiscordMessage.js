@@ -11,17 +11,17 @@ async function deleteIgnoreErrors(message, delay = 0) {
         return;
     }
 
-    if (!delay) {
+    const doStuff = async () => {
         try {
-            return message.delete();
+            return await message.delete();
         } catch (err) { }
+    };
+
+    if (!delay) {
+        return doStuff();
     }
 
-    setTimeout(async () => {
-        try {
-            return message.delete();
-        } catch (err) { }
-    }, delay);
+    setTimeout(doStuff, delay);
 }
 
 module.exports = {

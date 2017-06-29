@@ -112,7 +112,8 @@ class DiscordDatabaseCommand extends DiscordCommand {
      * @returns {boolean} True if allowed; false otherwise.
      */
     canEditOther(request, item) { // eslint-disable-line no-unused-vars
-        return this.isCommandAllowed(request.getMessage().member || request.getMessage().author, 'other') || false;
+        const message = request.getMessage();
+        return this.isCommandAllowed(message.member || message.author, 'other') || false;
     }
 
     /**
@@ -132,7 +133,8 @@ class DiscordDatabaseCommand extends DiscordCommand {
      * @returns {boolean} True if allowed; false otherwise.
      */
     canDeleteOther(request, item) { // eslint-disable-line no-unused-vars
-        return this.isCommandAllowed(request.getMessage().member || request.getMessage().author, 'other') || false;
+        const message = request.getMessage();
+        return this.isCommandAllowed(message.member || message.author, 'other') || false;
     }
 
 

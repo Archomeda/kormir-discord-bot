@@ -46,7 +46,7 @@ class HookWorldRole extends DiscordHook {
         const roles = this.getConfig().get('role-ids').raw();
 
         const exec = [];
-        if (roles[world] && !user.roles.has(roles[world])) {
+        if (roles[world] && user.guild.roles.has(roles[world]) && !user.roles.has(roles[world])) {
             exec.push(user.addRole(roles[world]));
         }
         const excluded = Object.values(_.pickBy(roles, (roleId, worldId) => {
