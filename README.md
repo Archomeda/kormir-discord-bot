@@ -15,9 +15,11 @@ The bot can do various tasks that helps the guild on the Discord server.
    - Guilds
      - Post various guild logs automatically
    - Other
+     - Daily achievements
+     - Random quaggans
+     - Parses chat codes automatically and includes the name and wiki link
      - Post new builds, release notes and blog posts automatically
      - Query the Guild Wars 2 wiki for something
-     - Post random quaggans
  - **Event scheduling**
    - Add, edit and remove events with a title, description, associated channels and people/roles
    - Automatically post reminders about an event
