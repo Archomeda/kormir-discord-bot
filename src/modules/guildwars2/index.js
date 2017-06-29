@@ -5,6 +5,7 @@ const CommandRegister = require('./commands/Register');
 const CommandForceRegister = require('./commands/ForceRegister');
 const CommandWiki = require('./commands/Wiki');
 const CommandCats = require('./commands/Cats');
+const CommandDaily = require('./commands/Daily');
 const CommandRaids = require('./commands/Raids');
 const CommandSab = require('./commands/Sab');
 const CommandQuaggan = require('./commands/Quaggan');
@@ -27,6 +28,7 @@ class ModuleGuildWars2 extends Module {
         this.register(new CommandForceRegister(bot));
         this.register(new CommandWiki(bot));
         this.register(new CommandCats(bot));
+        this.register(new CommandDaily(bot));
         this.register(new CommandRaids(bot));
         this.register(new CommandSab(bot));
         this.register(new CommandQuaggan(bot));

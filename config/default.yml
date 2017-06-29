@@ -56,6 +56,10 @@ modules:
     cats:
       enabled: true
 
+    # !daily - Daily achievements
+    daily:
+      enabled: true
+
     # !raids - Weekly account progress for defeated raid wing encounters
     raids:
       enabled: true

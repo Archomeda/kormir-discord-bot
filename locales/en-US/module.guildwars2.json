@@ -94,6 +94,31 @@
     "response-number-cats": "You own {{count}} out of {{total}} cats 😺",
     "response-more-information": "For more information, [go to the wiki](https://wiki.guildwars2.com/wiki/Hungry_cat_scavenger_hunt)."
   },
+  "daily": {
+    "_meta": {
+      "name": "Daily achievements",
+      "short-description": "Shows today's daily achievements",
+      "long-description": "Shows today's daily achievements"
+    },
+    "response-title": "Daily achievements",
+    "response-description": "Time remaining: {{timeleft}}.",
+    "response-achievement": "{{name}} ({{access}})",
+    "achievement-unknown": "(({{id}}))",
+    "category-pve": "PvE",
+    "category-pvp": "PvP",
+    "category-wvw": "WvW",
+    "category-fractals": "Fractals",
+    "category-special": "Special",
+    "category-unknown": "Unknown ({{category}})",
+    "access-GuildWars2": "Core",
+    "access-HeartOfThorns": "HoT",
+    "access-unknown": "Unknown ({{access}})",
+    "pve-regex": "Daily (.+)",
+    "pvp-regex": "Daily PvP (.+)",
+    "wvw-regex": "Daily WvW (.+)",
+    "fractals-regex": "(?:Daily Recommended Fractal—(Scale \\d+)|Daily Tier \\d (.+))",
+    "daily-regex": "(.+)"
+  },
   "raids": {
     "_meta": {
       "name": "Raid progress",
