@@ -211,6 +211,21 @@
     },
     "response": "FooOOooo – Quaggan {{id}}"
   },
+  "chat-code": {
+    "response-message": "{{user}} has included Guild Wars 2 chat codes in their message:",
+    "response-item": "`{{code}}` – {{name}} (item {{id}}) – [W]({{wiki}} \"Wiki\")",
+    "response-map": "`{{code}}` – {{name}} ({{type}} {{id}}) – [W]({{wiki}} \"Wiki\")",
+    "response-skill": "`{{code}}` – {{name}} (skill {{id}}) – [W]({{wiki}} \"Wiki\")",
+    "response-trait": "`{{code}}` – {{name}} (trait {{id}}) – [W]({{wiki}} \"Wiki\")",
+    "response-recipe": "`{{code}}` – Recipe: {{name}} (recipe {{id}}) – [W]({{wiki}} \"Wiki\")",
+    "response-skin": "`{{code}}` – {{name}} (skin {{id}}) – [W]({{wiki}} \"Wiki\")",
+    "response-outfit": "`{{code}}` – {{name}} (outfit {{id}}) – [W]({{wiki}} \"Wiki\")",
+    "response-objective": "`{{code}}` – {{name}} (objective {{id}}) – [W]({{wiki}} \"Wiki\")",
+    "poi-waypoint": "waypoint",
+    "poi-landmark": "point of interest",
+    "poi-vista": "vista",
+    "poi-unknown": "unknown"
+  },
   "build-checker": {
     "build-title": "Guild Wars 2 Update",
     "build-description": "Guild Wars 2 has been updated to build {{build}}."

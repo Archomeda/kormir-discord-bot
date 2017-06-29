@@ -9,6 +9,7 @@ const CommandDaily = require('./commands/Daily');
 const CommandRaids = require('./commands/Raids');
 const CommandSab = require('./commands/Sab');
 const CommandQuaggan = require('./commands/Quaggan');
+const HookChatCode = require('./hooks/ChatCode');
 const HookMemberRole = require('./hooks/GuildMemberRole');
 const HookWorldRole = require('./hooks/WorldRole');
 const WorkerApiChecker = require('./workers/ApiChecker');
@@ -32,6 +33,7 @@ class ModuleGuildWars2 extends Module {
         this.register(new CommandRaids(bot));
         this.register(new CommandSab(bot));
         this.register(new CommandQuaggan(bot));
+        this.register(new HookChatCode(bot));
         this.register(new HookMemberRole(bot));
         this.register(new HookWorldRole(bot));
         this.register(new WorkerApiChecker(bot));

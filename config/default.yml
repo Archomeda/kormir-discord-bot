@@ -72,6 +72,10 @@ modules:
     quaggan:
       enabled: true
 
+    # A chat code hook that automatically decodes chat codes mentioned in messages
+    chat-code:
+      enabled: true
+
     # Guild member role worker for maintaining the guild member role of users automatically
     guild-member-role:
       enabled: false
