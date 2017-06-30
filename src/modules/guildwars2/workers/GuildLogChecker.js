@@ -235,6 +235,8 @@ class WorkerGuildLogChecker extends Worker {
                     .setTimestamp(time)
             });
         }
+
+        this.log(`Invalid channel ${channelId}`, 'error');
     }
 
     async onUpdateRoster(roster) {
@@ -251,6 +253,8 @@ class WorkerGuildLogChecker extends Worker {
             const embed = await this._createLogMessage('roster', roster, time);
             return channel.send('', { embed });
         }
+
+        this.log(`Invalid channel ${channelId}`, 'error');
     }
 
     async onUpdateStash(stash) {
@@ -272,6 +276,8 @@ class WorkerGuildLogChecker extends Worker {
             const embed = await this._createLogMessage('stash', stash, time);
             return channel.send('', { embed });
         }
+
+        this.log(`Invalid channel ${channelId}`, 'error');
     }
 
     async onUpdateTreasury(treasury) {
@@ -288,6 +294,8 @@ class WorkerGuildLogChecker extends Worker {
             const embed = await this._createLogMessage('treasury', treasury, time);
             return channel.send('', { embed });
         }
+
+        this.log(`Invalid channel ${channelId}`, 'error');
     }
 
     async onUpdateUpgrades(upgrades) {
@@ -304,6 +312,8 @@ class WorkerGuildLogChecker extends Worker {
             const embed = await this._createLogMessage('upgrade', upgrades, time);
             return channel.send('', { embed });
         }
+
+        this.log(`Invalid channel ${channelId}`, 'error');
     }
 
     async _createLogMessage(type, items, time) {

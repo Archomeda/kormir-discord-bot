@@ -24,6 +24,7 @@ class WorkerReleaseNotesChecker extends Worker {
                 this.getLatestNotes(),
                 this._checkNotes()
             ]);
+
             const allNotes = [];
             for (let i = 0; i < notes.length; i++) {
                 if (notes[i].link === oldNotesUrl) {
@@ -38,7 +39,7 @@ class WorkerReleaseNotesChecker extends Worker {
                 if (oldNotesUrl) {
                     // Signal the first new thread post, because sometimes the release notes are very long
                     // and span multiple posts
-                    return this.onNewNotes(allNotes[allNotes.length - 1]);
+                    await this.onNewNotes(allNotes[allNotes.length - 1]);
                 }
             }
         } catch (err) {
@@ -70,6 +71,7 @@ class WorkerReleaseNotesChecker extends Worker {
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
             const description = convertHtmlToMarkdown(notes.description, 'feed')
                 .replace(/^([a-zA-Z0-9 ]+\.\d{4})[^:]+: /, '');
+
             return channel.send('', {
                 embed: new Discord.RichEmbed()
                     .setColor(config.get('richcolor'))
@@ -80,6 +82,8 @@ class WorkerReleaseNotesChecker extends Worker {
                     .setTimestamp(time)
             });
         }
+
+        this.log(`Invalid channel ${channelId}`, 'error');
     }
 
     async getLatestNotes() {

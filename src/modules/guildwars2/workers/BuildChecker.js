@@ -61,6 +61,8 @@ class WorkerBuildChecker extends Worker {
                     .setTimestamp(time)
             });
         }
+
+        this.log(`Invalid channel ${channelId}`, 'error');
     }
 
     async getLatestBuild() {

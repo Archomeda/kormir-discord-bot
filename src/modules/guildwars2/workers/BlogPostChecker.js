@@ -81,6 +81,8 @@ class BlogPostChecker extends Worker {
                     .setTimestamp(time)
             });
         }
+
+        this.log(`Invalid channel ${channelId}`, 'error');
     }
 
     getLatestBlog() {
