@@ -43,7 +43,7 @@ class ConfigItem {
         val = val !== undefined ? val : objectPath.get(this._defaultAppConfig, mergedPath, defaultValue);
         val = val !== undefined ? val : objectPath.get(this._defaultConfig, mergedPath, defaultValue);
 
-        if (typeof val === 'object' && !Array.isArray(val)) {
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
             // Returned item is actually an object, wrap it
             return this.root(path);
         }

@@ -12,11 +12,11 @@ const Base = require('./Base');
 class RedisCache extends Base {
     async connect() {
         this._client = redis.createClient({
-            host: this.getConfig().get('host'),
-            port: this.getConfig().get('port'),
-            socket: this.getConfig().get('socket'),
-            password: this.getConfig().get('password'),
-            database: this.getConfig().get('database')
+            host: this.getConfig().get('host') || undefined,
+            port: this.getConfig().get('port') || undefined,
+            path: this.getConfig().get('socket') || undefined,
+            password: this.getConfig().get('password') || undefined,
+            db: this.getConfig().get('database') || undefined
         });
         this._get = promisify(this._client.get).bind(this._client);
         this._set = promisify(this._client.set).bind(this._client);
