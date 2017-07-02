@@ -12,6 +12,9 @@
     "test": "echo \"Tests are currently not maintained\"",
     "cover": "echo \"Coverage is currently not maintained\""
   },
+  "engines": {
+    "node": ">=8.0.0"
+  },
   "dependencies": {
     "discord.js": "^11.1.0",
     "feedparser": "^2.2.1",
