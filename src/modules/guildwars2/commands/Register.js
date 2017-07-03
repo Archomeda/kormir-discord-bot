@@ -31,7 +31,7 @@ class CommandRegister extends ApiBase {
     async onApiCommand(request, gw2Api) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const config = module.getConfig().root(this.getId());
+        const config = this.getModule().getConfig().root(this.getId());
         const cache = bot.getCache();
         const message = request.getMessage();
         const params = request.getParams();
