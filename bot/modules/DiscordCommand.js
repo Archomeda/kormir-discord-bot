@@ -29,17 +29,17 @@ class DiscordCommand extends DiscordHook {
      * Creates a new Discord command.
      * @param {Bot} bot - The bot instance.
      * @param {string} id - The command id.
-     * @param {string[]} triggers - The command triggers.
+     * @param {string[]} routes - The command routes.
      * @param {Object} [options] - Optional options for the command.
      */
-    constructor(bot, id, triggers, options) {
+    constructor(bot, id, routes, options) {
         super(bot, id);
 
         this._hooks = {
             message: this.onMessage.bind(this)
         };
 
-        this._triggers = triggers;
+        this._routes = routes;
         this._options = options || {};
 
         const config = this.getBot().getConfig();
@@ -93,9 +93,9 @@ class DiscordCommand extends DiscordHook {
         const l = this.getBot().getLocalizer();
 
         const request = new DiscordCommandRequest(this.getBot(), this, message);
-        const rawCommand = request.getRawCommand();
-        const commandStartTime = Date.now(); // Use this to delay the response for startTyping and stopTyping
-        if (rawCommand !== undefined && this.getTriggers().includes(rawCommand.toLowerCase())) {
+        if (request.matchesCommand()) {
+            const commandStartTime = Date.now(); // Use this to delay the response for startTyping and stopTyping
+
             // TODO: Add a UX friendly way of executing parameterized commands
 
             // Construct response
@@ -117,9 +117,12 @@ class DiscordCommand extends DiscordHook {
                 } else if (err instanceof ThrottleError && err.showError) {
                     response.reply = l.t('errors.defaults:commands.throttle');
                 } else if (err instanceof ParameterError) {
-                    const helpCommand = this.getBot().getModule('general').getActivity('help').getCommandTrigger();
-                    const command = this.getTriggers()[0];
-                    response.reply = l.t('errors.defaults:commands.wrong-parameter-count', { help: helpCommand, command });
+                    const helpCommand = this.getBot().getModule('general').getActivity('help').getCommandRoute();
+                    const command = this.getRoutes()[0];
+                    response.reply = l.t('errors.defaults:commands.wrong-parameter-count', {
+                        help: helpCommand,
+                        command
+                    });
                 } else if (!(err instanceof MiddlewareError)) {
                     // TODO: Change to something less random
                     const code = random.hex(6).toUpperCase();
@@ -168,16 +171,20 @@ class DiscordCommand extends DiscordHook {
 
 
     /**
-     * Gets the triggers for this command.
-     * @returns {string[]} The triggers.
+     * Gets the routes for this command.
+     * @returns {string[]} The routes.
      */
-    getTriggers() {
-        return this._triggers;
+    getRoutes() {
+        return this._routes;
     }
 
-    getCommandTrigger() {
+    /**
+     * Gets the main command route, including the main command prefix.
+     * @returns {string} The route.
+     */
+    getCommandRoute() {
         const prefix = this.getBot().getConfig().get('/discord.commands.prefix');
-        const triggers = this.getTriggers();
+        const triggers = this.getRoutes();
         return triggers.length > 0 ? `${prefix}${triggers[0]}` : undefined;
     }
 

@@ -12,6 +12,7 @@
     "command-param-restriction-optional": "optional",
     "command-param-help": "{{param}} - {{help}}",
     "command-param-help-extra": "{{param}} - {{help}} *({{extra}})*",
+    "command-param-required-format": "<{{param}}>",
     "command-param-optional-format": "[{{param}}]",
     "module-command-help": "{{command}} - {{help}}",
     "module-command-help-extra": "{{command}} - {{help}} *({{extra}})*",

@@ -16,7 +16,7 @@ class CommandHelp extends DiscordCommand {
     }
 
     initializeParameters() {
-        return new DiscordCommandParameter('command', { optional: true });
+        return new DiscordCommandParameter('command', { optional: true, expanded: true });
     }
 
     async onCommand(request) {
@@ -25,7 +25,7 @@ class CommandHelp extends DiscordCommand {
         const modules = bot._modules;
         const message = request.getMessage();
         const commandPrefix = bot.getConfig().get('discord.commands.prefix');
-        const helpCommand = this.getCommandTrigger();
+        const helpCommand = this.getCommandRoute();
         const params = request.getParams();
 
         if (params.command) {
@@ -34,7 +34,7 @@ class CommandHelp extends DiscordCommand {
             let command;
             for (const module of modules) {
                 const commands = module.getActivities().filter(a => a instanceof DiscordCommand && a.isEnabled());
-                const foundCommand = commands.find(command => command.getTriggers().includes(commandTrigger));
+                const foundCommand = commands.find(command => command.getRoutes().includes(commandTrigger));
                 if (foundCommand) {
                     command = foundCommand;
                     break;
@@ -78,7 +78,7 @@ class CommandHelp extends DiscordCommand {
                 return;
             }
 
-            const trigger = command.getCommandTrigger();
+            const trigger = command.getCommandRoute();
             if (!trigger) {
                 // The command has no triggers, skip
                 return;
@@ -110,7 +110,7 @@ class CommandHelp extends DiscordCommand {
         const l = bot.getLocalizer();
         const commandPrefix = bot.getConfig().get('discord.commands.prefix');
 
-        let invocation = `${commandPrefix}${command.getTriggers()[0]}`;
+        let invocation = `${commandPrefix}${command.getRoutes()[0]}`;
         const params = [];
 
         command.getParameters().forEach(param => {
@@ -123,7 +123,7 @@ class CommandHelp extends DiscordCommand {
             } else {
                 params.push(l.t('module.general:help.command-param-help', { param: paramText, help: helpText }));
             }
-            invocation += ' ' + (param.optional ? l.t('module.general:help.command-param-optional-format', { param: param.id }) : param.id);
+            invocation += ' ' + (l.t(param.optional ? 'module.general:help.command-param-optional-format' : 'module.general:help.command-param-required-format', { param: param.id }));
         });
 
         return l.t('module.general:help.command-help', { command: invocation, help: l.t(`module.${command.getModule().getId()}:${command.getId()}._meta.long-description`), params: params.join('\n') });

@@ -13,7 +13,7 @@ class ThrottleError extends MiddlewareError {
      * @param {boolean} [showError = false] - Value that indicates whether to show the error to the user or not.
      */
     constructor(request, showError = false) {
-        const command = request.getRawCommand();
+        const command = request.getCommand().getId();
         super(`Throttled '${command}' (user: ${request.getMessage().author.tag})`, showError);
         this.name = 'ThrottleError';
         Error.captureStackTrace(this, this.constructor);

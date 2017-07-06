@@ -41,7 +41,7 @@ class CommandRegister extends ApiBase {
 
         const accounts = await models.Gw2Account.find({ discordId });
         let account = accounts.length > 0 ? accounts[0] : undefined;
-        const register = this.getCommandTrigger();
+        const register = this.getCommandRoute();
 
         // Option 1: No key included
         if (!key) {

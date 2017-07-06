@@ -9,7 +9,7 @@ const DatabaseScheduleBase = require('./DatabaseScheduleBase');
 
 class CommandEditEvent extends DatabaseScheduleBase {
     constructor(bot) {
-        super(bot, 'edit-event', ['editevent'], 'edit');
+        super(bot, 'edit-event', ['events edit', 'editevent'], 'edit');
     }
 
     initializeParameters() {

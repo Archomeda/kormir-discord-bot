@@ -8,7 +8,7 @@ const DatabaseScheduleBase = require('./DatabaseScheduleBase');
 
 class CommandDeleteEvent extends DatabaseScheduleBase {
     constructor(bot) {
-        super(bot, 'delete-event', ['deleteevent'], 'delete');
+        super(bot, 'delete-event', ['events delete', 'deleteevent'], 'delete');
     }
 
     initializeParameters() {

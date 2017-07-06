@@ -48,7 +48,7 @@ class CacheMiddleware extends Middleware {
     async onCommand(response) {
         const bot = this.getBot();
         const request = response.getRequest();
-        const command = request.getRawCommand();
+        const command = request.getCommand().getId();
         const id = this._getCacheId(request);
 
         const cachedObj = await bot.getCache().get(`${command}-exec`, id);
@@ -61,7 +61,7 @@ class CacheMiddleware extends Middleware {
     async onReplyConstructed(response) {
         const bot = this.getBot();
         const request = response.getRequest();
-        const command = request.getRawCommand();
+        const command = request.getCommand().getId();
         const options = this.getOptions();
         const id = this._getCacheId(request);
 

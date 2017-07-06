@@ -19,12 +19,8 @@ class DiscordCommandRequest {
         this._message = message;
 
         addLazyProperty(this, '_prefixes', () => {
-            const prefix = this._bot.getConfig().get('/discord.commands.prefix');
+            const prefix = this.getBot().getConfig().get('/discord.commands.prefix');
             return prefix ? [prefix] : [];
-        });
-        addLazyProperty(this, '_parsedMessage', () => {
-            const match = this._message.content.match(new RegExp(`^(?:${this.getCommandPrefixes().join('|')})\\s*(\\S*)\\s*([\\s\\S]*)$`, 'i'));
-            return match ? [match[1], match[2]] : [];
         });
     }
 
@@ -53,19 +49,49 @@ class DiscordCommandRequest {
     }
 
     /**
-     * Gets the command as a string.
-     * @returns {string|undefined} The command string; or undefined if it's not a valid command.
+     * Gets the command.
+     * @returns {DiscordCommand} The command.
      */
-    getRawCommand() {
-        return this._getParsedMessage()[0];
+    getCommand() {
+        return this._command;
+    }
+
+    /**
+     * Checks if the request matches a given command instance.
+     * @returns {string|undefined} The route there's a match, undefined otherwise.
+     */
+    matchesCommand() {
+        const message = this.getMessage().content.trim().toLowerCase();
+        // Strip away the command prefix if it exists
+        const prefix = this.getCommandPrefixes().map(p => message.startsWith(p) ? p : undefined).find(p => p);
+        let strippedMessage = message.substr(prefix.length);
+
+        if (strippedMessage) {
+            strippedMessage = strippedMessage.toLowerCase();
+            // Include an extra space after the command route, to prevent unwanted matches
+            const command = this.getCommand().getRoutes().find(r => strippedMessage.startsWith(`${r.toLowerCase()} `) || strippedMessage === r.toLowerCase());
+            if (command) {
+                const trigger = `${prefix}${command}`;
+                const definedParams = this.getCommand().getParameters();
+
+                if (definedParams.length > 0 || (definedParams.length === 0 && message === trigger)) {
+                    return `${prefix}${command}`;
+                }
+            }
+        }
+        return undefined;
     }
 
     /**
      * Gets the command parameters as a string.
-     * @returns {string|undefined} The parameters; or undefined if it's not a valid command, and empty if it's valid but there are no parameters.
+     * @returns {string|undefined} The parameters, or undefined if there's no match. Can be an empty string if there's a match, but just no parameters.
      */
     getRawParams() {
-        return this._getParsedMessage()[1];
+        const route = this.matchesCommand();
+        if (route) {
+            return this.getMessage().content.substr(route.length + 1); // Explicit space
+        }
+        return undefined;
     }
 
     /**
@@ -82,7 +108,7 @@ class DiscordCommandRequest {
             return {};
         }
 
-        const definedParams = this._command.getParameters();
+        const definedParams = this.getCommand().getParameters();
 
         const params = {};
         const re = /(?:(?!\\)"([^]*?(?:[^\\])*?)"|(?!")([^ ]+))/g;
@@ -107,10 +133,6 @@ class DiscordCommandRequest {
 
         this._params = params;
         return this._params;
-    }
-
-    _getParsedMessage() {
-        return this._parsedMessage;
     }
 }
 
