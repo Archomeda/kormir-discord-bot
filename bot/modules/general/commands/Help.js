@@ -3,38 +3,32 @@
 const AutoRemoveMessage = require('../../../middleware/AutoRemoveMessage');
 
 const DiscordCommandError = require('../../../modules/DiscordCommandError');
-const DiscordCommandParameter = require('../../../modules/DiscordCommandParameter');
 const DiscordCommand = require('../../../modules/DiscordCommand');
 
 
 class CommandHelp extends DiscordCommand {
     constructor(bot) {
-        super(bot, 'help', ['help']);
+        super(bot, 'help', ['help :command?']);
         this._localizerNamespaces = 'module.general';
 
         this.setMiddleware(new AutoRemoveMessage(bot, this, { defaultRequest: 300, defaultResponse: 300 })); // Auto remove messages after 5 minutes
     }
 
-    initializeParameters() {
-        return new DiscordCommandParameter('command', { optional: true, expanded: true });
-    }
-
-    async onCommand(request) {
+    async onCommand(message, parameters) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const modules = bot._modules;
-        const message = request.getMessage();
-        const commandPrefix = bot.getConfig().get('discord.commands.prefix');
-        const helpCommand = this.getCommandRoute();
-        const params = request.getParams();
+        const modules = bot.getModules();
+        const helpInvocation = this.getCommandRoute().getInvocation();
 
-        if (params.command) {
+        if (parameters.command) {
             // Reply with help for a specific command
-            const commandTrigger = params.command.replace(new RegExp(`^${commandPrefix}?(.*)$`), '$1').toLowerCase();
             let command;
             for (const module of modules) {
                 const commands = module.getActivities().filter(a => a instanceof DiscordCommand && a.isEnabled());
-                const foundCommand = commands.find(command => command.getRoutes().includes(commandTrigger));
+                const foundCommand = commands.find(command => {
+                    const routes = command.getRoutes();
+                    return routes.length > 0 ? routes[0].getStrippedInvocation().toLowerCase() === parameters.command : false;
+                });
                 if (foundCommand) {
                     command = foundCommand;
                     break;
@@ -42,9 +36,9 @@ class CommandHelp extends DiscordCommand {
             }
 
             if (!command) {
-                throw new DiscordCommandError(l.t('module.general:help.response-command-not-recognized', { command: commandTrigger, help: helpCommand }));
+                throw new DiscordCommandError(l.t('module.general:help.response-command-not-recognized', { command: parameters.command, help: helpInvocation }));
             } else if (!command.isCommandAllowed(message.member || message.author)) {
-                throw new DiscordCommandError(l.t('module.general:help.response-command-not-allowed', { command: commandTrigger, help: helpCommand }));
+                throw new DiscordCommandError(l.t('module.general:help.response-command-not-allowed', { command: parameters.command, help: helpInvocation }));
             }
             return l.t('module.general:help.response-single-help', { help: this._formatCommandHelp(message, command) });
         }
@@ -52,12 +46,12 @@ class CommandHelp extends DiscordCommand {
         // Reply with general help
         const help = [];
         modules.forEach(module => {
-            const moduleHelp = this._formatModuleHelp(request.getMessage(), module);
+            const moduleHelp = this._formatModuleHelp(message, module);
             if (moduleHelp) {
                 help.push(moduleHelp);
             }
         });
-        return l.t('module.general:help.response-all-help', { list: help.join('\n\n'), help: helpCommand });
+        return l.t('module.general:help.response-all-help', { list: help.join('\n\n'), help: helpInvocation });
     }
 
     /**
@@ -78,9 +72,9 @@ class CommandHelp extends DiscordCommand {
                 return;
             }
 
-            const trigger = command.getCommandRoute();
-            if (!trigger) {
-                // The command has no triggers, skip
+            const route = command.getCommandRoute();
+            if (!route) {
+                // The command has no route, skip
                 return;
             }
 
@@ -89,7 +83,7 @@ class CommandHelp extends DiscordCommand {
                 return;
             }
 
-            commands.push(l.t('module.general:help.module-command-help', { command: `\`${trigger}\``, help }));
+            commands.push(l.t('module.general:help.module-command-help', { command: `\`${route.getInvocation()}\``, help }));
         });
 
         if (commands.length === 0) {
@@ -108,22 +102,22 @@ class CommandHelp extends DiscordCommand {
     _formatCommandHelp(message, command) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const commandPrefix = bot.getConfig().get('discord.commands.prefix');
 
-        let invocation = `${commandPrefix}${command.getRoutes()[0]}`;
+        const route = command.getRoutes()[0];
+        let invocation = route.getInvocation();
         const params = [];
 
-        command.getParameters().forEach(param => {
-            const paramText = `\`${param.id}\``;
-            const helpText = l.t(`module.${command.getModule().getId()}:${command.getId()}._meta.param-${param.id}`, param.localizationContext);
-            const extraText = param.optional ? l.t('module.general:help.command-param-restriction-optional') : '';
+        route.getParameters().forEach(param => {
+            const paramText = `\`${param.getId()}\``;
+            const helpText = l.t(`module.${command.getModule().getId()}:${command.getId()}._meta.param-${param.getId()}`, param.getContext());
+            const extraText = param.isOptional() ? l.t('module.general:help.command-param-restriction-optional') : '';
 
             if (extraText) {
                 params.push(l.t('module.general:help.command-param-help-extra', { param: paramText, help: helpText, extra: extraText }));
             } else {
                 params.push(l.t('module.general:help.command-param-help', { param: paramText, help: helpText }));
             }
-            invocation += ' ' + (l.t(param.optional ? 'module.general:help.command-param-optional-format' : 'module.general:help.command-param-required-format', { param: param.id }));
+            invocation += ' ' + (l.t(param.isOptional() ? 'module.general:help.command-param-optional-format' : 'module.general:help.command-param-required-format', { param: param.getId() }));
         });
 
         return l.t('module.general:help.command-help', { command: invocation, help: l.t(`module.${command.getModule().getId()}:${command.getId()}._meta.long-description`), params: params.join('\n') });

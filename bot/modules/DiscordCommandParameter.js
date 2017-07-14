@@ -1,5 +1,7 @@
 'use strict';
 
+const momentNlp = require('../utils/MomentNlp');
+
 
 /**
  * A Discord command parameter.
@@ -7,35 +9,109 @@
 class DiscordCommandParameter {
     /**
      * Creates a new Discord command parameter.
-     * @param {string} id - The parameter identifier.
-     * @param {Object} [options] - Additional options.
+     * @param {Bot} bot - The bot instance.
+     * @param {string} parameter - The parameter.
+     * @param {Object|undefined} [context = undefined] - The parameter context.
      */
-    constructor(id, options) {
-        this.id = id;
-        this.optional = options && options.optional;
-        this.type = options && options.type;
-        this.expanded = options && options.expanded;
-        this.localizationContext = options && options.localizationContext;
+    constructor(bot, parameter, context) {
+        this._bot = bot;
+        this._parameter = parameter;
+        this._context = context;
+
+        const split = parameter.split(':');
+        this._optional = split[1].endsWith('?');
+        this._id = this._optional ? split[1].substr(0, split[1].length - 1) : split[1];
+        if (split.length > 2) {
+            this._type = split[2];
+        }
     }
 
     /**
+     * Gets the bot instance.
+     * @returns {Bot} The bot instance.
+     */
+    getBot() {
+        return this._bot;
+    }
+
+    /**
+     * Gets the raw parameter.
+     * @returns {string} The raw parameter.
+     */
+    getRawParameter() {
+        return this._parameter;
+    }
+
+    /**
+     * Gets the parameter context.
+     * @returns {Object} The parameter context.
+     */
+    getContext() {
+        return typeof this._context === 'function' ? this._context() : this._context;
+    }
+
+
+    /**
+     * Gets the parameter id.
+     * @returns {string} The parameter id.
+     */
+    getId() {
+        return this._id;
+    }
+
+    /**
+     * Gets the parameter type.
+     * @returns {string|undefined} The parameter type if defined.
+     */
+    getType() {
+        return this._type;
+    }
+
+    /**
+     * Gets whether the parameter is optional or not.
+     * @returns {boolean} True if the parameter is optional, false otherwise.
+     */
+    isOptional() {
+        return this._optional;
+    }
+
+
+    /**
      * Parses a parameter.
-     * @param {string} param - The parameter string.
      * @param {Message} message - The Discord message.
+     * @param {string} parameter - The parameter string.
      * @returns {*} The parsed parameter.
      */
-    parseParam(param, message) {
-        switch (this.type) {
+    parse(message, parameter) {
+        if (!parameter) {
+            return;
+        }
+
+        switch (this.getType()) {
+            case 'date':
+                return momentNlp(parameter);
+
             case 'channels':
-                return message.mentions.channels.filter(channel => param.includes(channel));
+                return message.mentions.channels.filter(channel => {
+                    // Support <#1234567890>, 1234567890, channel-name formats
+                    return parameter.includes(channel) || parameter.includes(channel.id) || parameter.includes(channel.name);
+                });
+
             case 'mentions':
                 return {
-                    users: message.mentions.users.filter(user => param.includes(user) || param.includes(`<@!${user.id}>`)), // Explicitly include nicknamed accounts, since they have a different mention format
-                    roles: message.mentions.roles.filter(role => param.includes(role)),
-                    everyone: param.includes('@everyone')
+                    users: message.mentions.users.filter(user => {
+                        // Support <@1234567890>, <@!1234567890>, 1234567890, username#1234 formats
+                        return parameter.includes(user) || parameter.includes(`<@!${user.id}>`) || parameter.includes(user.id) || parameter.includes(user.tag);
+                    }),
+                    roles: message.mentions.roles.filter(role => {
+                        // Support <@1234567890>, 1234567890, role-name formats
+                        return parameter.includes(role) || parameter.includes(role.id) || parameter.includes.role.name;
+                    }),
+                    everyone: parameter.includes('@everyone') || parameter.includes('everyone')
                 };
+
             default:
-                return param;
+                return parameter;
         }
     }
 }

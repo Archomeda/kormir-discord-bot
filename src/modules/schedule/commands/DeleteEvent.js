@@ -1,21 +1,19 @@
 'use strict';
 
 const DiscordCommandError = require('../../../../bot/modules/DiscordCommandError');
-const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 
 const DatabaseScheduleBase = require('./DatabaseScheduleBase');
 
 
 class CommandDeleteEvent extends DatabaseScheduleBase {
     constructor(bot) {
-        super(bot, 'delete-event', ['events delete', 'deleteevent'], 'delete');
+        super(bot, 'delete-event', [
+            'events delete :id',
+            'deleteevent :id'
+        ], 'delete');
     }
 
-    initializeParameters() {
-        return new DiscordCommandParameter('id');
-    }
-
-    async formatResult(request, result) {
+    async formatResult(message, result) {
         const l = this.getBot().getLocalizer();
 
         if (!result) {

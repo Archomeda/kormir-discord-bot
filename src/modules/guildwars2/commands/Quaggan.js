@@ -5,7 +5,6 @@ const random = require('random-js')();
 
 const ThrottleMiddleware = require('../../../../bot/middleware/Throttle');
 
-const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage');
 
 const ApiBase = require('./ApiBase');
@@ -13,24 +12,19 @@ const ApiBase = require('./ApiBase');
 
 class CommandQuaggan extends ApiBase {
     constructor(bot) {
-        super(bot, 'quaggan', ['quaggan']);
+        super(bot, 'quaggan', ['quaggan :id?']);
 
         // Allow one quaggan per minute to be posted
         this.setMiddleware(new ThrottleMiddleware(bot, this, { type: 'command', duration: 60 }));
     }
 
-    initializeParameters() {
-        return new DiscordCommandParameter('id', { optional: true });
-    }
-
-    async onApiCommand(request, gw2Api) {
+    async onApiCommand(message, gw2Api, parameters) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const quagganId = request.getParams().id;
 
         let quaggan;
-        if (quagganId) {
-            quaggan = await gw2Api.quaggans().get(quagganId);
+        if (parameters.id) {
+            quaggan = await gw2Api.quaggans().get(parameters.id);
         } else {
             quaggan = random.pick(await gw2Api.quaggans().all());
         }

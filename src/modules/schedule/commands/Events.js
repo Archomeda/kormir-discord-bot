@@ -9,10 +9,10 @@ class CommandEvents extends DatabaseScheduleBase {
         super(bot, 'events', ['events'], 'list');
     }
 
-    async formatResult(request, result) {
+    async formatResult(message, result) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const eventCommand = this.getModule().getActivity(CommandEvent).getCommandRoute();
+        const eventInvocation = this.getModule().getActivity(CommandEvent).getCommandRoute().getInvocation();
 
         const list = [];
         if (result.length === 0) {
@@ -27,7 +27,7 @@ class CommandEvents extends DatabaseScheduleBase {
                 list.push(l.t('module.schedule:events.response-item', { id, title, start }));
             }
         }
-        return l.t('module.schedule:events.response-list', { events: list.join('\n'), event: eventCommand });
+        return l.t('module.schedule:events.response-list', { events: list.join('\n'), event: eventInvocation });
     }
 }
 

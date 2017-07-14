@@ -1,6 +1,5 @@
 'use strict';
 
-const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage');
 
 const DatabaseScheduleBase = require('./DatabaseScheduleBase');
@@ -8,28 +7,18 @@ const DatabaseScheduleBase = require('./DatabaseScheduleBase');
 
 class CommandAddEvent extends DatabaseScheduleBase {
     constructor(bot) {
-        super(bot, 'add-event', ['events add', 'addevent'], 'add');
+        super(bot, 'add-event', [
+            'events add :title :start:date :end:date :description :reminders :channels:channels :mentions?:mentions :recurring?',
+            'addevent :title :start:date :end:date :description :reminders :channels:channels :mentions?:mentions :recurring?'
+        ], 'add');
     }
 
-    initializeParameters() {
-        return [
-            new DiscordCommandParameter('title'),
-            new DiscordCommandParameter('start'),
-            new DiscordCommandParameter('end'),
-            new DiscordCommandParameter('description'),
-            new DiscordCommandParameter('reminders'),
-            new DiscordCommandParameter('channels', { type: 'channels' }),
-            new DiscordCommandParameter('mentions', { optional: true, type: 'mentions' }),
-            new DiscordCommandParameter('recurring', { optional: true })
-        ];
-    }
-
-    async formatResult(request, result) {
+    async formatResult(message, result) {
         const l = this.getBot().getLocalizer();
 
         this.getModule().getScheduler().scheduleEventReminders(result);
 
-        const embed = this.getModule().createEventEmbed(request.getMessage(), result);
+        const embed = this.getModule().createEventEmbed(message, result);
         return new DiscordReplyMessage(l.t('module.schedule:add-event.response'), { embed });
     }
 }

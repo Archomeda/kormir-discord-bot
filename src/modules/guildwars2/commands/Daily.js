@@ -16,7 +16,7 @@ class CommandDaily extends ApiBase {
         super(bot, 'daily', ['daily']);
     }
 
-    async onApiCommand(request, gw2Api) {
+    async onApiCommand(message, gw2Api) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
 

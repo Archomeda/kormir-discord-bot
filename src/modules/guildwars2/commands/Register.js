@@ -5,7 +5,6 @@ const random = require('random-js')();
 const AutoRemoveMessage = require('../../../../bot/middleware/AutoRemoveMessage');
 
 const DiscordCommandError = require('../../../../bot/modules/DiscordCommandError');
-const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 
 const { deleteIgnoreErrors } = require('../../../../bot/utils/DiscordMessage');
 
@@ -19,32 +18,24 @@ const codeCacheTable = 'register-code';
 
 class CommandRegister extends ApiBase {
     constructor(bot) {
-        super(bot, 'register', ['register']);
+        super(bot, 'register', ['register :key?']);
 
         this.setMiddleware(new AutoRemoveMessage(bot, this, { defaultRequest: 60, defaultResponse: 60 })); // Auto remove messages after 1 minute
     }
 
-    initializeParameters() {
-        return new DiscordCommandParameter('key', { optional: true });
-    }
-
-    async onApiCommand(request, gw2Api) {
+    async onApiCommand(message, gw2Api, parameters) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
         const config = this.getModule().getConfig().root(this.getId());
         const cache = bot.getCache();
-        const message = request.getMessage();
-        const params = request.getParams();
-        const key = params.key;
-        const user = request.getMessage().author;
-        const discordId = user.id;
+        const discordId = message.author.id;
 
         const accounts = await models.Gw2Account.find({ discordId });
         let account = accounts.length > 0 ? accounts[0] : undefined;
-        const register = this.getCommandRoute();
+        const registerInvocation = this.getCommandRoute().getInvocation();
 
         // Option 1: No key included
-        if (!key) {
+        if (!parameters.key) {
             const code = random.hex(5).toUpperCase();
             const time = config.get('timeout');
 
@@ -55,13 +46,13 @@ class CommandRegister extends ApiBase {
 
             let reply;
             if (account) {
-                reply = `${l.t('module.guildwars2:register.response-reregister', { key: account.apiKey })}${l.t('module.guildwars2:register.response-register-steps', { code, register, time })}`;
+                reply = `${l.t('module.guildwars2:register.response-reregister', { key: account.apiKey })}${l.t('module.guildwars2:register.response-register-steps', { code, register: registerInvocation, time })}`;
             } else {
-                reply = `${l.t('module.guildwars2:register.response-info')}${l.t('module.guildwars2:register.response-register-steps', { code, register, time })}`;
+                reply = `${l.t('module.guildwars2:register.response-info')}${l.t('module.guildwars2:register.response-register-steps', { code, register: registerInvocation, time })}`;
             }
 
             if (message.channel.type !== 'dm') {
-                user.dmChannel.send(reply);
+                await message.author.send(reply);
                 return l.t('module.guildwars2:register.response-see-dm');
             }
             return reply;
@@ -77,13 +68,13 @@ class CommandRegister extends ApiBase {
         // Option 3: No code prepared
         const code = await cache.get(codeCacheTable, discordId);
         if (!code) {
-            return l.t('module.guildwars2:register.response-no-code', { register });
+            return l.t('module.guildwars2:register.response-no-code', { register: registerInvocation });
         }
 
         // Option 4: Prerequisites complete
         const [tokenInfo, accountInfo] = await Promise.all([
-            gw2Api.authenticate(key).tokeninfo().get(),
-            gw2Api.authenticate(key).account().get()
+            gw2Api.authenticate(parameters.key).tokeninfo().get(),
+            gw2Api.authenticate(parameters.key).account().get()
         ]);
 
         // This doesn't check optional permissions since we don't need to, change this once it's required
@@ -91,13 +82,13 @@ class CommandRegister extends ApiBase {
             await cache.remove(codeCacheTable, discordId);
 
             if (!account) {
-                account = new models.Gw2Account({ discordId, accountName: accountInfo.name, apiKey: key });
+                account = new models.Gw2Account({ discordId, accountName: accountInfo.name, apiKey: parameters.key });
             } else {
-                account.apiKey = key;
+                account.apiKey = parameters.key;
             }
 
             await account.save();
-            this.emit('new-registration', user, account);
+            this.emit('new-registration', message.author, account);
             return l.t('module.guildwars2:register.response-registered', { account_name: accountInfo.name, key_name: tokenInfo.name }); // eslint-disable-line camelcase
         }
 

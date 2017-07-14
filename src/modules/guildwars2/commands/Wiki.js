@@ -11,7 +11,6 @@ const CacheMiddleware = require('../../../../bot/middleware/Cache');
 
 const DiscordCommand = require('../../../../bot/modules/DiscordCommand');
 const DiscordCommandError = require('../../../../bot/modules/DiscordCommandError');
-const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage');
 
 
@@ -22,27 +21,22 @@ const wiki = new MWBot({
 
 class CommandWiki extends DiscordCommand {
     constructor(bot) {
-        super(bot, 'wiki', ['wiki']);
+        super(bot, 'wiki', ['wiki :terms']);
         this._localizerNamespaces = 'module.guildwars2';
 
         this.setMiddleware(new CacheMiddleware(bot, this, { duration: 30 * 60 }));
     }
 
-    initializeParameters() {
-        return new DiscordCommandParameter('terms', { expanded: true });
-    }
-
-    async onCommand(request) {
+    async onCommand(message, parameters) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const terms = request.getParams().terms;
 
-        if (!terms) {
+        if (!parameters.terms) {
             return;
         }
 
         try {
-            const articleData = await this._searchArticle(terms);
+            const articleData = await this._searchArticle(parameters.terms);
             const embed = this._createEmbed(articleData);
             await this._setThumbnail(embed, articleData);
 

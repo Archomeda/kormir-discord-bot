@@ -12,7 +12,7 @@ class CommandInfo extends DiscordCommand {
         this._localizerNamespaces = ['bot.general', 'module.general'];
     }
 
-    async onCommand(request) { // eslint-disable-line no-unused-vars
+    async onCommand() {
         const bot = this.getBot();
         const client = bot.getClient();
         const l = bot.getLocalizer();

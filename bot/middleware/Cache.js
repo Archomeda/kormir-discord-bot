@@ -1,5 +1,7 @@
 'use strict';
 
+const hash = require('object-hash');
+
 const Middleware = require('./Middleware');
 
 
@@ -38,8 +40,7 @@ class CacheMiddleware extends Middleware {
             id += request.getMessage().author.id;
         }
         if (options.uniqueParams) {
-            const params = request.getRawParams();
-            id += params ? params.replace(/\s/g, '_') : '__noparams__';
+            id += `_${hash(request.getParameters())}`;
         }
         return id;
     }
@@ -48,7 +49,7 @@ class CacheMiddleware extends Middleware {
     async onCommand(response) {
         const bot = this.getBot();
         const request = response.getRequest();
-        const command = request.getCommand().getId();
+        const command = request.getRoute().getCommand().getId();
         const id = this._getCacheId(request);
 
         const cachedObj = await bot.getCache().get(`${command}-exec`, id);
@@ -61,7 +62,7 @@ class CacheMiddleware extends Middleware {
     async onReplyConstructed(response) {
         const bot = this.getBot();
         const request = response.getRequest();
-        const command = request.getCommand().getId();
+        const command = request.getRoute().getCommand().getId();
         const options = this.getOptions();
         const id = this._getCacheId(request);
 

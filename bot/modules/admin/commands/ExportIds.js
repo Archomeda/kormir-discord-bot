@@ -15,11 +15,10 @@ class CommandExportIds extends DiscordCommand {
         this.setMiddleware(new AutoRemoveMessage(bot, this, { defaultRequest: 60, defaultResponse: 60 })); // Auto remove messages after 1 minute
     }
 
-    async onCommand(request) {
+    async onCommand(message) {
         const bot = this.getBot();
         const client = bot.getClient();
         const l = bot.getLocalizer();
-        const message = request.getMessage();
 
         let result = [];
         for (const guild of client.guilds.array()) {
@@ -50,7 +49,7 @@ class CommandExportIds extends DiscordCommand {
 
         if (message.channel.type !== 'dm') {
             // Send the file by DM instead
-            await message.author.dmChannel.send('', { file: { attachment: Buffer.from(result.join('\n')), name: 'ids.txt' } });
+            await message.author.send('', { file: { attachment: Buffer.from(result.join('\n')), name: 'ids.txt' } });
             return l.t('module.admin:export-ids.response-see-dm');
         }
 

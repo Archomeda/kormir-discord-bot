@@ -4,7 +4,6 @@ const Discord = require('discord.js');
 
 const CacheMiddleware = require('../../../../bot/middleware/Cache');
 
-const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage');
 
 const ApiBase = require('./ApiBase');
@@ -17,25 +16,19 @@ const availableSongs = [1, 2, 3];
 
 class CommandRaids extends ApiBase {
     constructor(bot) {
-        super(bot, 'sab', ['sab']);
+        super(bot, 'sab', ['sab :character']);
 
         this.setMiddleware(new CacheMiddleware(bot, this, { uniqueUser: true }));
     }
 
-    initializeParameters() {
-        return new DiscordCommandParameter('character', { expanded: true });
-    }
-
-    async onApiCommand(request, gw2Api) {
+    async onApiCommand(message, gw2Api, parameters) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const character = request.getParams().character;
-        const apiKey = await this.getApiKey(request);
-
-        const sab = await gw2Api.authenticate(apiKey).characters(character).sab().get();
+        const apiKey = await this.getApiKey(message);
+        const sab = await gw2Api.authenticate(apiKey).characters(parameters.character).sab().get();
 
         const embed = new Discord.RichEmbed()
-            .setTitle(l.t('module.guildwars2:sab.response-title', { character }));
+            .setTitle(l.t('module.guildwars2:sab.response-title', { character: parameters.character }));
 
         const completedZones = this._getCompletedZones(sab.zones);
         const completedZonesBody = [

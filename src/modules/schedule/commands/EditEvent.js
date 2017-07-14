@@ -1,7 +1,6 @@
 'use strict';
 
 const DiscordCommandError = require('../../../../bot/modules/DiscordCommandError');
-const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage');
 
 const DatabaseScheduleBase = require('./DatabaseScheduleBase');
@@ -9,24 +8,13 @@ const DatabaseScheduleBase = require('./DatabaseScheduleBase');
 
 class CommandEditEvent extends DatabaseScheduleBase {
     constructor(bot) {
-        super(bot, 'edit-event', ['events edit', 'editevent'], 'edit');
+        super(bot, 'edit-event', [
+            'events edit :id :title :start:date :end:date :description :reminders :channels:channels :mentions?:mentions :recurring?',
+            'editevent :id :title :start:date :end:date :description :reminders :channels:channels :mentions?:mentions :recurring?'
+        ], 'edit');
     }
 
-    initializeParameters() {
-        return [
-            new DiscordCommandParameter('id'),
-            new DiscordCommandParameter('title'),
-            new DiscordCommandParameter('start'),
-            new DiscordCommandParameter('end'),
-            new DiscordCommandParameter('description'),
-            new DiscordCommandParameter('reminders'),
-            new DiscordCommandParameter('channels', { type: 'channels' }),
-            new DiscordCommandParameter('mentions', { optional: true, type: 'mentions' }),
-            new DiscordCommandParameter('recurring', { optional: true })
-        ];
-    }
-
-    async formatResult(request, result) {
+    async formatResult(message, result) {
         const l = this.getBot().getLocalizer();
 
         if (!result) {
@@ -35,7 +23,7 @@ class CommandEditEvent extends DatabaseScheduleBase {
 
         this.getModule().getScheduler().scheduleEventReminders(result);
 
-        const embed = this.getModule().createEventEmbed(request.getMessage(), result);
+        const embed = this.getModule().createEventEmbed(message, result);
         return new DiscordReplyMessage(l.t('module.schedule:edit-event.response', { title: result.title }), { embed });
     }
 }

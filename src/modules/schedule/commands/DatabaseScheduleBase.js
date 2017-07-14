@@ -2,8 +2,6 @@
 
 const DiscordDatabaseCommand = require('../../../../bot/modules/DiscordDatabaseCommand');
 
-const momentNlp = require('../../../../bot/utils/MomentNlp');
-
 const models = require('../../../models');
 
 
@@ -20,22 +18,18 @@ class DatabaseScheduleBase extends DiscordDatabaseCommand {
         return Model.find({ start: { $gte: new Date() } }, null, { sort: { start: 1 } });
     }
 
-    transformParam(request, paramName, paramValue) {
+    transformParam(message, paramName, paramValue) {
         switch (paramName) {
             case 'id':
             case 'recurring':
                 paramValue = parseInt(paramValue, 10);
-                break;
-            case 'start':
-            case 'end':
-                paramValue = momentNlp(paramValue);
                 break;
             case 'reminders':
                 paramValue = paramValue ? paramValue.split(/\s*,\s*/).map(i => parseInt(i, 10)) : [];
                 break;
             case 'channels':
                 paramValue = paramValue ? paramValue
-                    .filter(channel => channel.type === 'text' && channel.permissionsFor(request.getMessage().author).has('MANAGE_MESSAGES'))
+                    .filter(channel => channel.type === 'text' && channel.permissionsFor(message.author).has('MANAGE_MESSAGES'))
                     .map(channel => channel.id) : [];
                 break;
             case 'mentions':
@@ -53,8 +47,8 @@ class DatabaseScheduleBase extends DiscordDatabaseCommand {
         return paramValue;
     }
 
-    validateProps(request, props) {
-        const l = request.getBot().getLocalizer();
+    validateProps(message, props) {
+        const l = this.getBot().getLocalizer();
         if (['view', 'edit', 'delete'].includes(this._type)) {
             if (Number(props.id) !== props.id) {
                 return l.t('module.schedule:common.response-invalid-id');

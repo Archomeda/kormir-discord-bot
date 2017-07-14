@@ -26,15 +26,17 @@ class CorrectNumberOfParametersMiddleware extends Middleware {
 
     /**
      * Checks if a request has the correct amount of parameters.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {DiscordCommandRequest} request - The command request.
      * @returns {boolean} True if it's correct; false otherwise.
      * @private
      */
     _hasCorrectAmountOfParameters(request) {
-        const params = this.getCommand().getParameters();
-        const minParamCount = params.filter(p => !p.optional).length;
-        const maxParamCount = params.length;
-        const currentParamCount = Object.values(request.getParams()).length;
+        const routeParameters = request.getRoute().getParameters();
+        const parameters = request.getParameters();
+
+        const minParamCount = routeParameters.filter(p => !p.isOptional()).length;
+        const maxParamCount = routeParameters.length;
+        const currentParamCount = routeParameters.filter(p => parameters[p.getId()]).length;
         return currentParamCount >= minParamCount && currentParamCount <= maxParamCount;
     }
 

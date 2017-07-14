@@ -12,7 +12,7 @@ class ParameterError extends MiddlewareError {
      * @param {DiscordCommandRequest} request - The request.
      */
     constructor(request) {
-        const command = request.getCommand().getId();
+        const command = request.getRoute().getCommand().getId();
         super(`Missing required parameters for command '${command}' (user: ${request.getMessage().author.tag})`, request);
         this.name = 'ParameterError';
         Error.captureStackTrace(this, this.constructor);

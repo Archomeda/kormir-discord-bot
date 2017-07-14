@@ -17,20 +17,32 @@ class ApiBase extends DiscordCommand {
         this._localizerNamespaces = 'module.guildwars2';
     }
 
-    async getApiKey(request) {
+    /**
+     * Gets the API key of a Discord user, if available.
+     * @param {Message} message - The Discord message.
+     * @returns {Promise<string>} The promise with the API key.
+     */
+    async getApiKey(message) {
         const l = this.getBot().getLocalizer();
-        const account = await models.Gw2Account.findOne({ discordId: request.getMessage().author.id });
+        const account = await models.Gw2Account.findOne({ discordId: message.author.id });
         if (!account || !account.apiKey) {
             throw new DiscordCommandError(l.t('module.guildwars2:api.response-not-registered'));
         }
         return account.apiKey;
     }
 
-    async onApiCommand(request, gw2Api) { // eslint-disable-line no-unused-vars
+    /**
+     * Gets called whenever an API command is requested.
+     * @param {Message} message - The Discord message.
+     * @param {Object} gw2Api - The GW2 API instance.
+     * @param {Object} parameters - The request parameters.
+     * @returns {Promise<string|DiscordReplyMessage|undefined>} The promise with the reply message, string or undefined if there's no reply.
+     */
+    async onApiCommand(message, gw2Api, parameters) { // eslint-disable-line no-unused-vars
 
     }
 
-    async onCommand(request) {
+    async onCommand(message, parameters) {
         const l = this.getBot().getLocalizer();
         const module = this.getModule();
 
@@ -39,7 +51,7 @@ class ApiBase extends DiscordCommand {
         }
 
         try {
-            return this.onApiCommand(request, gw2Api);
+            return this.onApiCommand(message, gw2Api, parameters);
         } catch (err) {
             throw new DiscordCommandError(module.parseApiError(err));
         }

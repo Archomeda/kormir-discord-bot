@@ -21,11 +21,10 @@ class CommandCats extends ApiBase {
         this.setMiddleware(new CacheMiddleware(bot, this, { uniqueUser: true }));
     }
 
-    async onApiCommand(request, gw2Api) {
+    async onApiCommand(message, gw2Api) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const message = request.getMessage();
-        const apiKey = await this.getApiKey(request);
+        const apiKey = await this.getApiKey(message);
 
         const toNames = cats => cats.map(cat => l.t([`module.guildwars2:cats.cat-${cat.id}`, 'module.guildwars2:cats.cat-unknown'], { hint: cat.hint }));
         const cats = await gw2Api.authenticate(apiKey).account().home().cats().get();

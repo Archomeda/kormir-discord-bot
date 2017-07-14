@@ -16,11 +16,10 @@ class CommandRaids extends ApiBase {
         this.setMiddleware(new CacheMiddleware(bot, this, { uniqueUser: true }));
     }
 
-    async onApiCommand(request, gw2Api) {
+    async onApiCommand(message, gw2Api) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
-        const message = request.getMessage();
-        const apiKey = await this.getApiKey(request);
+        const apiKey = await this.getApiKey(message);
 
         const [raids, accountRaids] = await Promise.all([
             gw2Api.raids().all(),

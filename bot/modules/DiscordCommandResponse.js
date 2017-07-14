@@ -29,7 +29,7 @@ class DiscordCommandResponse {
 
     /**
      * Gets the target channel.
-     * @returns {TextChannel|DMChannel|GroupDMChannel} The target channel.
+     * @returns {TextChannel|DMChannel|GroupDMChannel|User} The target channel.
      */
     getTargetChannel() {
         return this._targetChannel || this._request.getMessage().channel;
@@ -37,12 +37,12 @@ class DiscordCommandResponse {
 
     /**
      * Sets the target channel.
-     * @param {TextChannel|DMChannel|GroupDMChannel|string|undefined} channel - The target channel.
+     * @param {TextChannel|DMChannel|GroupDMChannel|User|string|undefined} channel - The target channel.
      */
     setTargetChannel(channel) {
         if (typeof channel === 'string') {
             if (channel === 'dm') {
-                channel = this.getRequest().getMessage().author.dmChannel;
+                channel = this.getRequest().getMessage().author.dmChannel || this.getRequest().getMessage().author;
             } else {
                 channel = this.getRequest().getBot().channels[channel];
             }

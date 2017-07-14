@@ -12,7 +12,7 @@ class PermissionError extends MiddlewareError {
      * @param {DiscordCommandRequest} request - The request.
      */
     constructor(request) {
-        const command = request.getCommand().getId();
+        const command = request.getRoute().getCommand().getId();
         super(`Missing required permission for command '${command}' (user: ${request.getMessage().author.tag})`, request);
         this.name = 'PermissionError';
         Error.captureStackTrace(this, this.constructor);

@@ -39,27 +39,27 @@ class DiscordDatabaseCommand extends DiscordCommand {
 
     /**
      * Checks if the command can be executed in its current context.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {*} item - The item.
      */
-    canExecute(request, item) {
+    canExecute(message, item) {
         switch (this._type) {
             case 'list':
-                return this.canList(request, item);
+                return this.canList(message, item);
             case 'view':
-                return this.canView(request, item);
+                return this.canView(message, item);
             case 'add':
-                return this.canAdd(request, item);
+                return this.canAdd(message, item);
             case 'edit':
-                if (!item || request.getMessage().author.id === item.owner) {
-                    return this.canEditOwn(request, item);
+                if (!item || message.author.id === item.owner) {
+                    return this.canEditOwn(message, item);
                 }
-                return this.canEditOther(request, item);
+                return this.canEditOther(message, item);
             case 'delete':
-                if (!item || request.getMessage().author.id === item.owner) {
-                    return this.canDeleteOwn(request, item);
+                if (!item || message.author.id === item.owner) {
+                    return this.canDeleteOwn(message, item);
                 }
-                return this.canDeleteOther(request, item);
+                return this.canDeleteOther(message, item);
             default:
                 return false;
         }
@@ -67,73 +67,71 @@ class DiscordDatabaseCommand extends DiscordCommand {
 
     /**
      * Checks if the current command executor can list items.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {*} item - The item.
      * @returns {boolean} True if allowed; false otherwise.
      */
-    canList(request, item) { // eslint-disable-line no-unused-vars
+    canList(message, item) { // eslint-disable-line no-unused-vars
         return true;
     }
 
     /**
      * Checks if the current command executor can view an individual item.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {*} item - The item.
      * @returns {boolean} True if allowed; false otherwise.
      */
-    canView(request, item) { // eslint-disable-line no-unused-vars
+    canView(message, item) { // eslint-disable-line no-unused-vars
         return true;
     }
 
     /**
      * Checks if the current command executor can add items.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {*} item - The item.
      * @returns {boolean} True if allowed; false otherwise.
      */
-    canAdd(request, item) { // eslint-disable-line no-unused-vars
+    canAdd(message, item) { // eslint-disable-line no-unused-vars
         return true;
     }
 
     /**
      * Checks if the current command executor can edit their own item.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {*} item - The item.
      * @returns {boolean} True if allowed; false otherwise.
      */
-    canEditOwn(request, item) { // eslint-disable-line no-unused-vars
+    canEditOwn(message, item) { // eslint-disable-line no-unused-vars
         return true;
     }
 
     /**
      * Checks if the current command executor can edit an item that's not theirs.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {*} item - The item.
      * @returns {boolean} True if allowed; false otherwise.
      */
-    canEditOther(request, item) { // eslint-disable-line no-unused-vars
-        const message = request.getMessage();
+    canEditOther(message, item) { // eslint-disable-line no-unused-vars
         return this.isCommandAllowed(message.member || message.author, 'other') || false;
     }
 
     /**
      * Checks if the current command executor can delete their own item.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {*} item - The item.
      * @returns {boolean} True if allowed; false otherwise.
      */
-    canDeleteOwn(request, item) { // eslint-disable-line no-unused-vars
+    canDeleteOwn(message, item) { // eslint-disable-line no-unused-vars
         return true;
     }
 
     /**
      * Checks if the current command executor can delete an item that's not theirs.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {*} item - The item.
      * @returns {boolean} True if allowed; false otherwise.
      */
-    canDeleteOther(request, item) { // eslint-disable-line no-unused-vars
-        const message = request.getMessage();
+    canDeleteOther(message, item) { // eslint-disable-line no-unused-vars
         return this.isCommandAllowed(message.member || message.author, 'other') || false;
     }
 
@@ -214,66 +212,66 @@ class DiscordDatabaseCommand extends DiscordCommand {
 
     /**
      * Transforms the value of a parameter.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {string} paramName - The command parameter name.
      * @param {*} paramValue - The parameter value.
      * @returns {*} The transformed parameter value.
      */
-    transformParam(request, paramName, paramValue) { // eslint-disable-line no-unused-vars
+    transformParam(message, paramName, paramValue) { // eslint-disable-line no-unused-vars
         return paramValue;
     }
 
     /**
      * Validates the command parameters.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {Object<string, *>} props - The model properties.
      * @returns {boolean|string} True if all parameters are valid; otherwise a string explaining what is invalid.
      */
-    validateProps(request, props) { // eslint-disable-line no-unused-vars
+    validateProps(message, props) { // eslint-disable-line no-unused-vars
         return true;
     }
 
     /**
      * Converts command parameters to model properties.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
+     * @param {Object} parameters - The parameters.
      * @returns {Object<string, *>} The model properties.
      */
-    convertParamsToProps(request) {
-        const params = request.getParams();
+    convertParamsToProps(message, parameters) {
         const props = {};
-        for (const paramName in params) {
-            if (params.hasOwnProperty(paramName)) {
+        for (const paramName in parameters) {
+            if (parameters.hasOwnProperty(paramName)) {
                 const propsName = this.paramsMap && this.paramsMap[paramName] ? this.paramsMap[paramName] : paramName;
-                props[propsName] = this.transformParam(request, paramName, params[paramName]);
+                props[propsName] = this.transformParam(message, paramName, parameters[paramName]);
             }
         }
-        props.owner = request.getMessage().author.id; // Explicitly add the owner
+        props.owner = message.author.id; // Explicitly add the owner
         return props;
     }
 
     /**
      * Formats the result of the performed action.
-     * @param {DiscordCommandRequest} request - The request.
+     * @param {Message} message - The Discord message.
      * @param {*} result - The result.
      * @returns {Promise<string|DiscordReplyMessage|undefined>} The promise with the reply message, string, or undefined if there's no reply.
      */
-    async formatResult(request, result) { // eslint-disable-line no-unused-vars
+    async formatResult(message, result) { // eslint-disable-line no-unused-vars
         throw new TypeError('Derivative should implement format');
     }
 
 
-    async onCommand(request) {
+    async onCommand(message, parameters) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
 
-        const props = this.convertParamsToProps(request);
-        const validation = this.validateProps(request, props);
+        const props = this.convertParamsToProps(message, parameters);
+        const validation = this.validateProps(message, props);
         if (validation !== true) {
             throw new DiscordCommandError(validation);
         }
 
         const item = await this.getExecute(this._Model, props);
-        if (!this.canExecute(request, item)) {
+        if (!this.canExecute(message, item)) {
             return l.t('middleware.defaults:restrict-permissions.access-denied');
         }
         let result = item;
@@ -293,7 +291,7 @@ class DiscordDatabaseCommand extends DiscordCommand {
             default:
                 return;
         }
-        return this.formatResult(request, result);
+        return this.formatResult(message, result);
     }
 }
 

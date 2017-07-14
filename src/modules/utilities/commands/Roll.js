@@ -4,31 +4,32 @@ const random = require('random-js')();
 
 const DiscordCommand = require('../../../../bot/modules/DiscordCommand');
 const DiscordCommandError = require('../../../../bot/modules/DiscordCommandError');
-const DiscordCommandParameter = require('../../../../bot/modules/DiscordCommandParameter');
 const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage');
 
 
 class CommandRoll extends DiscordCommand {
     constructor(bot) {
-        super(bot, 'roll', ['roll']);
+        super(bot, 'roll', ['roll :input?'], { routeContext: () => this._getContext() });
         this._localizerNamespaces = 'module.utilities';
     }
 
-    initializeParameters() {
+    _getContext() {
         const config = this.getModule().getConfig().root(this.getId());
         const maxDice = config.get('max-dice');
         const maxFaces = config.get('max-faces');
 
-        return new DiscordCommandParameter('input', { optional: true, localizationContext: { max_dice: maxDice, max_faces: maxFaces } }); // eslint-disable-line camelcase
+        return {
+            max_dice: maxDice, // eslint-disable-line camelcase
+            max_faces: maxFaces // eslint-disable-line camelcase
+        };
     }
 
-    async onCommand(request) {
+    async onCommand(message, parameters) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
         const config = this.getModule().getConfig().root(this.getId());
 
-        const params = request.getParams();
-        const dieMatch = params.input ? params.input.match(/^(\d*)d?(\d*)(?:([+-]\d+))?$/) : [];
+        const dieMatch = parameters.input ? parameters.input.match(/^(\d*)d?(\d*)(?:([+-]\d+))?$/) : [];
         if (!dieMatch) {
             throw new DiscordCommandError(l.t('module.utilities:roll.response-invalid-input'));
         }
@@ -61,7 +62,7 @@ class CommandRoll extends DiscordCommand {
         };
 
         return new DiscordReplyMessage(l.t('module.utilities:roll.response-rolling', {
-            user: request.getMessage().author.toString(),
+            user: message.author.toString(),
             symbols: generateSymbols(0)
         }), {
             onReplyPosted(response, message) {
