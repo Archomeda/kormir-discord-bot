@@ -211,6 +211,17 @@
     },
     "response": "FooOOooo – Quaggan {{id}}"
   },
+  "whois": {
+    "_meta": {
+      "name": "Whois",
+      "short-description": "Shows the account name of registered users",
+      "long-description": "Shows the Guild Wars 2 account name of registered users.",
+      "param-users": "The users (mentioned by using the `@` symbol, supports multiple values)"
+    },
+    "response": "The following users have registered their Guild Wars 2 accounts:\n{{users}}",
+    "response-user": "● {{user}}: {{account_name}}",
+    "response-empty": "None of the mentioned users have registered their Guild Wars 2 accounts"
+  },
   "chat-code": {
     "response-message": "{{user}} has included Guild Wars 2 chat codes in their message:",
     "response-item": "`{{code}}` – {{name}} (item {{id}}) – [W]({{wiki}} \"Wiki\")",

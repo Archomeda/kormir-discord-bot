@@ -72,6 +72,10 @@ modules:
     quaggan:
       enabled: true
 
+    # !whois - Get the associated account name of one or more users
+    whois:
+      enabled: true
+
     # A chat code hook that automatically decodes chat codes mentioned in messages
     chat-code:
       enabled: true
