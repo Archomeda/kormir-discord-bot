@@ -37,7 +37,7 @@ class DiscordHook extends Hook {
         const hooks = this.getHooks();
         Object.keys(hooks).forEach(hookName => {
             const hook = hooks[hookName];
-            if (!client.listeners(hookName).find(hook)) {
+            if (!client.listeners(hookName).includes(hook)) {
                 // Prevent duplicate hook
                 client.on(hookName, hook);
             }
