@@ -15,7 +15,7 @@ class CommandWhois extends DiscordCommand {
         const l = this.getBot().getLocalizer();
 
         const users = new Map(parameters.users.users.map(u => [u.id, u]));
-        const userIds = parameters.user.users.map(u => u.id);
+        const userIds = parameters.users.users.map(u => u.id);
 
         const accounts = await models.Gw2Account.find({ discordId: { $in: userIds } });
         if (accounts.length === 0) {
