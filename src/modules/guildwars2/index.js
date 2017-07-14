@@ -56,9 +56,8 @@ class ModuleGuildWars2 extends Module {
             // TODO: Filter more error types
             if (err.content.text.startsWith('requires scope ')) {
                 return l.t('module.guildwars2:api.response-error-permission', { permissions: err.content.text.substr(15) });
-            } else {
-                return l.t('module.guildwars2:api.response-error', { error: err.content.text });
             }
+            return l.t('module.guildwars2:api.response-error', { error: err.content.text });
         }
 
         if (err.response) {
