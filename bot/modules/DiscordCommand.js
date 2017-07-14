@@ -70,7 +70,6 @@ async function globalOnMessage(message) {
     // Find the most logical route (aka the one that has the longest matched character amount)
     const route = matchedRoutes.length > 1 ? maxAll(matchedRoutes, (m, x) => x.getStrippedInvocation().length > m, true) : matchedRoutes[0];
     if (route) {
-        route.getCommand().log('Executing');
         const parameters = route.parseParameters(message, invocations.get(route.getBot()));
         await route.getCommand().onCommandCall(message, route, parameters);
     }
