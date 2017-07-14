@@ -51,7 +51,7 @@ class ApiBase extends DiscordCommand {
         }
 
         try {
-            return this.onApiCommand(message, gw2Api, parameters);
+            return await this.onApiCommand(message, gw2Api, parameters);
         } catch (err) {
             throw new DiscordCommandError(module.parseApiError(err));
         }

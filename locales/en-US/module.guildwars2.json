@@ -263,6 +263,7 @@
   },
   "api": {
     "response-error": "The API responded with the following error: {{error}}.",
+    "response-error-permission": "Your API key doesn't have the required permissions. This command requires the following: {{permissions}}.",
     "response-error-unknown": "The API responded with an unknown error.",
     "response-fire": "The API is on 🔥, please call the 🚒.\nOn a more serious note, this means that the API is currently inaccessible, please try again later.",
     "response-not-registered": "You haven't registered your API key yet. Please register your API key first."
