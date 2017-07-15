@@ -116,7 +116,7 @@ class DiscordCommandRoute {
 
         const definedParameters = this.getParameters();
         const rawParameters = invocation.substr(routeInvocation.length).trim();
-        const parameters = minimist(stringArgv(rawParameters));
+        const parameters = minimist(stringArgv(rawParameters), { strings: true });
         for (let i = 0, j = 0; i < definedParameters.length; i++) {
             // If the parameter is already defined as an explicit argument, skip it
             const parameter = definedParameters[i];

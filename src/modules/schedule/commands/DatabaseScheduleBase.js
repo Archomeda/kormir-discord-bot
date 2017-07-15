@@ -36,8 +36,7 @@ class DatabaseScheduleBase extends DiscordDatabaseCommand {
                 if (paramValue) {
                     paramValue = {
                         users: paramValue.users.map(user => user.id),
-                        roles: paramValue.roles.map(role => role.id),
-                        everyone: paramValue.everyone
+                        roles: paramValue.roles.map(role => role.id)
                     };
                 }
                 break;

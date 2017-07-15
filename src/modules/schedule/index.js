@@ -48,9 +48,6 @@ class ModuleSchedule extends Module {
                 const users = event.mentions.users.map(user => message.guild.members.get(user)).filter(m => m).map(member => member.toString());
                 const roles = event.mentions.roles.map(role => message.guild.roles.get(role)).filter(r => r).map(role => role.toString());
                 mentions = users.concat(roles);
-                if (event.mentions.everyone) {
-                    mentions.push(message.guild.defaultRole.toString());
-                }
             }
         } else {
             channels.push(l.t('module.schedule:common.response-unknown'));

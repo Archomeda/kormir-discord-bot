@@ -1,5 +1,7 @@
 'use strict';
 
+const Discord = require('discord.js');
+
 const momentNlp = require('../utils/MomentNlp');
 
 
@@ -87,28 +89,56 @@ class DiscordCommandParameter {
             return;
         }
 
+        const client = this.getBot().getClient();
+
         switch (this.getType()) {
             case 'date':
                 return momentNlp(parameter);
 
-            case 'channels':
-                return message.mentions.channels.filter(channel => {
-                    // Support <#1234567890>, 1234567890, channel-name formats
-                    return parameter.includes(channel) || parameter.includes(channel.id) || parameter.includes(channel.name);
-                });
+            case 'channels': {
+                const channels = client.channels;
+                return parameter.match(/\d+|<#\d+>|[a-zA-Z0-9-_]+/g).map(m => {
+                    const match = m.match(/(\d+)|<#(\d+)>|([a-zA-Z0-9-_]+)/);
+                    if (match[1] || match[2]) {
+                        return channels.get(match[1] || match[2]);
+                    } else if (match[3]) {
+                        return channels.find('name', match[3]);
+                    }
+                    return undefined;
+                }).filter(m => m);
+            }
 
-            case 'mentions':
+            case 'mentions': {
+                const users = client.users;
+                const roles = client.guilds.map(g => g.roles).reduce((a, b) => a.concat(b), new Discord.Collection());
+
                 return {
-                    users: message.mentions.users.filter(user => {
-                        // Support <@1234567890>, <@!1234567890>, 1234567890, username#1234 formats
-                        return parameter.includes(user) || parameter.includes(`<@!${user.id}>`) || parameter.includes(user.id) || parameter.includes(user.tag);
-                    }),
-                    roles: message.mentions.roles.filter(role => {
-                        // Support <@1234567890>, 1234567890, role-name formats
-                        return parameter.includes(role) || parameter.includes(role.id) || parameter.includes.role.name;
-                    }),
-                    everyone: parameter.includes('@everyone') || parameter.includes('everyone')
+                    users: parameter.match(/\d+|<@\d+>|<@!\d+>|\s*[^#]+#\d{4}/g).map(m => {
+                        const match = m.match(/(\d+)|<@(\d+)>|<@!(\d+)>|\s*([^#]+#\d{4})/);
+                        if (match[1] || match[2] || match[3]) {
+                            return users.get(match[1] || match[2] || match[3]);
+                        } else if (match[4]) {
+                            return users.find('tag', match[4]);
+                        }
+                        return undefined;
+                    }).filter(m => m),
+                    roles: parameter.match(/\d+|<@\d+>|\s*.+/g).map(m => {
+                        const match = m.match(/(\d+)|<@(\d+)>|\s*(.*)/);
+                        if (match[1] || match[2]) {
+                            return [users.get(match[1] || match[2])];
+                        } else if (match[3]) {
+                            // This is special, since all characters are allowed in role names and we don't have a good separator
+                            // We have to check every existing role and try to match it
+                            const result = roles.filterArray(r => match[3].includes(r.name));
+                            if (match[3].includes('everyone') && !match[3].includes('@everyone')) {
+                                result.push(message.guild.defaultRole);
+                            }
+                            return result;
+                        }
+                        return undefined;
+                    }).reduce((a, b) => a.concat(b), []).filter(m => m)
                 };
+            }
 
             default:
                 return parameter;

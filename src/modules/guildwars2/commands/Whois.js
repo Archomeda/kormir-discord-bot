@@ -25,7 +25,7 @@ class CommandWhois extends DiscordCommand {
         const knownUsers = accounts.map(a => {
             let user = users.get(a.discordId);
             user = user.nickname || (user.user && user.user.tag) || user.tag;
-            return l.t('module.guildwars2:whois.response-user', { user, account_name: a.accountName })
+            return l.t('module.guildwars2:whois.response-user', { user, account_name: a.accountName });
         });
         return l.t('module.guildwars2:whois.response', { users: knownUsers.join('\n') });
     }

@@ -140,9 +140,6 @@ class WorkerScheduler extends Worker {
                         const users = event.mentions.users.map(user => channel.guild.members.get(user)).filter(m => m);
                         const roles = event.mentions.roles.map(role => channel.guild.roles.get(role)).filter(r => r);
                         mentions = users.concat(roles);
-                        if (event.mentions.everyone) {
-                            mentions.push(channel.guild.defaultRole.toString());
-                        }
                     }
                     if (mentions.length > 0) {
                         mentions = l.t('module.schedule:scheduler.post-mentions', { mentions: mentions.join(' ') });
