@@ -29,6 +29,7 @@ class WorkerApiChecker extends Worker {
         if (wasOnFire !== fire) {
             this.log(`API ${fire ? 'went on fire' : 'is back to normal'}`);
             this.emit('on-fire', fire);
+            module.isApiOnFire(fire);
         }
     }
 
