@@ -20,181 +20,253 @@ class WorkerGuildLogChecker extends Worker {
 
     async check() {
         // Gigantic mess ahead; just don't judge me alright? ;-;
-        const config = this.getModule().getConfig();
-        const types = config.get(`${this.getId()}.types`);
+        try {
+            const config = this.getModule().getConfig();
+            const types = config.get(`${this.getId()}.types`);
 
-        const latestLogId = await this.getLatestLog();
-        const log = await this._checkLog(latestLogId);
+            const latestLogId = await this.getLatestLog();
+            const log = await this._checkLog(latestLogId);
 
-        // Process the stored/live logs
-        if (log.length === 0 || !log[0].id || latestLogId === log[0].id) {
-            return;
-        }
-        if (!latestLogId) {
-            return this.setLatestLog(log[0].id);
-        }
-
-        // Parse the log
-        const parsedLog = {
-            motd: [],
-            roster: [],
-            treasury: new Map(),
-            stash: new Map(),
-            upgrade: new Map()
-        };
-        for (const entry of log) {
-            if (entry.type === 'kick' && entry.user === entry.kicked_by) {
-                entry.type = 'leave';
+            // Process the stored/live logs
+            if (log.length === 0 || !log[0].id || latestLogId === log[0].id) {
+                return;
             }
-            if (types.includes(entry.type)) {
-                let key;
-                let item;
-                switch (entry.type) {
-                    case 'motd':
-                        parsedLog.motd.unshift({ type: 'motd', user: entry.user, motd: entry.motd, time: entry.time });
-                        break;
-                    case 'invited':
-                        parsedLog.roster.unshift({ type: 'invited', user: entry.user, invited_by: entry.invited_by, time: entry.time }); // eslint-disable-line camelcase
-                        break;
-                    case 'joined':
-                        parsedLog.roster.unshift({ type: 'joined', user: entry.user, time: entry.time });
-                        break;
-                    case 'leave':
-                        parsedLog.roster.unshift({ type: 'left', user: entry.user, time: entry.time });
-                        break;
-                    case 'kick':
-                        parsedLog.roster.unshift({ type: 'kicked', user: entry.user, kicked_by: entry.kicked_by, time: entry.time }); // eslint-disable-line camelcase
-                        break;
-                    case 'rank_change':
-                        parsedLog.roster.unshift({ type: 'rank-changed', user: entry.user, old_rank: entry.old_rank, new_rank: entry.new_rank, changed_by: entry.changed_by, time: entry.time }); // eslint-disable-line camelcase
-                        break;
-                    case 'treasury':
-                        key = `${entry.user}-${entry.item_id}`;
-                        item = parsedLog.treasury.get(key);
-                        if (item) {
-                            parsedLog.treasury.set(key, { type: 'treasury', user: entry.user, item_id: entry.item_id, count: item.count + entry.count, time: entry.time }); // eslint-disable-line camelcase
-                        } else {
-                            parsedLog.treasury.set(key, { type: 'treasury', user: entry.user, item_id: entry.item_id, count: entry.count, time: entry.time }); // eslint-disable-line camelcase
-                        }
-                        break;
-                    case 'stash':
-                        if (entry.item_id && entry.operation) {
-                            key = `${entry.user}-item-${entry.item_id}`;
-                            item = parsedLog.stash.get(key);
-                            const count = entry.operation === 'deposit' ? entry.count : entry.operation === 'withdraw' ? -entry.count : 0;
+            if (!latestLogId) {
+                return this.setLatestLog(log[0].id);
+            }
+
+            // Parse the log
+            const parsedLog = {
+                motd: [],
+                roster: [],
+                treasury: new Map(),
+                stash: new Map(),
+                upgrade: new Map()
+            };
+            for (const entry of log) {
+                if (entry.type === 'kick' && entry.user === entry.kicked_by) {
+                    entry.type = 'leave';
+                }
+                if (types.includes(entry.type)) {
+                    let key;
+                    let item;
+                    switch (entry.type) {
+                        case 'motd':
+                            parsedLog.motd.unshift({
+                                type: 'motd',
+                                user: entry.user,
+                                motd: entry.motd,
+                                time: entry.time
+                            });
+                            break;
+                        case 'invited':
+                            parsedLog.roster.unshift({
+                                type: 'invited',
+                                user: entry.user,
+                                invited_by: entry.invited_by,
+                                time: entry.time
+                            }); // eslint-disable-line camelcase
+                            break;
+                        case 'joined':
+                            parsedLog.roster.unshift({ type: 'joined', user: entry.user, time: entry.time });
+                            break;
+                        case 'leave':
+                            parsedLog.roster.unshift({ type: 'left', user: entry.user, time: entry.time });
+                            break;
+                        case 'kick':
+                            parsedLog.roster.unshift({
+                                type: 'kicked',
+                                user: entry.user,
+                                kicked_by: entry.kicked_by,
+                                time: entry.time
+                            }); // eslint-disable-line camelcase
+                            break;
+                        case 'rank_change':
+                            parsedLog.roster.unshift({
+                                type: 'rank-changed',
+                                user: entry.user,
+                                old_rank: entry.old_rank,
+                                new_rank: entry.new_rank,
+                                changed_by: entry.changed_by,
+                                time: entry.time
+                            }); // eslint-disable-line camelcase
+                            break;
+                        case 'treasury':
+                            key = `${entry.user}-${entry.item_id}`;
+                            item = parsedLog.treasury.get(key);
                             if (item) {
-                                parsedLog.stash.set(key, { type: 'stash-item', user: entry.user, item_id: entry.item_id, count: item.count + count, time: entry.time }); // eslint-disable-line camelcase
+                                parsedLog.treasury.set(key, {
+                                    type: 'treasury',
+                                    user: entry.user,
+                                    item_id: entry.item_id,
+                                    count: item.count + entry.count,
+                                    time: entry.time
+                                }); // eslint-disable-line camelcase
                             } else {
-                                parsedLog.stash.set(key, { type: 'stash-item', user: entry.user, item_id: entry.item_id, count, time: entry.time }); // eslint-disable-line camelcase
+                                parsedLog.treasury.set(key, {
+                                    type: 'treasury',
+                                    user: entry.user,
+                                    item_id: entry.item_id,
+                                    count: entry.count,
+                                    time: entry.time
+                                }); // eslint-disable-line camelcase
                             }
-                        } else if (entry.coins && entry.operation) {
-                            key = `${entry.user}-coins`;
-                            item = parsedLog.stash.get(key);
-                            const count = entry.operation === 'deposit' ? entry.coins : entry.operation === 'withdraw' ? -entry.coins : 0;
-                            if (item) {
-                                parsedLog.stash.set(key, { type: 'stash-coins', user: entry.user, coins: item.coins + count, time: entry.time });
-                            } else {
-                                parsedLog.stash.set(key, { type: 'stash-coins', user: entry.user, coins: count, time: entry.time });
+                            break;
+                        case 'stash':
+                            if (entry.item_id && entry.operation) {
+                                key = `${entry.user}-item-${entry.item_id}`;
+                                item = parsedLog.stash.get(key);
+                                const count = entry.operation === 'deposit' ? entry.count : entry.operation === 'withdraw' ? -entry.count : 0;
+                                if (item) {
+                                    parsedLog.stash.set(key, {
+                                        type: 'stash-item',
+                                        user: entry.user,
+                                        item_id: entry.item_id,
+                                        count: item.count + count,
+                                        time: entry.time
+                                    }); // eslint-disable-line camelcase
+                                } else {
+                                    parsedLog.stash.set(key, {
+                                        type: 'stash-item',
+                                        user: entry.user,
+                                        item_id: entry.item_id,
+                                        count,
+                                        time: entry.time
+                                    }); // eslint-disable-line camelcase
+                                }
+                            } else if (entry.coins && entry.operation) {
+                                key = `${entry.user}-coins`;
+                                item = parsedLog.stash.get(key);
+                                const count = entry.operation === 'deposit' ? entry.coins : entry.operation === 'withdraw' ? -entry.coins : 0;
+                                if (item) {
+                                    parsedLog.stash.set(key, {
+                                        type: 'stash-coins',
+                                        user: entry.user,
+                                        coins: item.coins + count,
+                                        time: entry.time
+                                    });
+                                } else {
+                                    parsedLog.stash.set(key, {
+                                        type: 'stash-coins',
+                                        user: entry.user,
+                                        coins: count,
+                                        time: entry.time
+                                    });
+                                }
                             }
-                        }
-                        break;
-                    case 'upgrade':
-                        if (entry.action === 'completed') {
-                            key = `${entry.user}-${entry.upgrade_id}`;
-                            item = parsedLog.upgrade.get(key);
-                            if (item) {
-                                parsedLog.upgrade.set(key, { type: 'upgrade', user: entry.user, upgrade_id: entry.upgrade_id, count: item.count + entry.count, time: entry.time }); // eslint-disable-line camelcase
-                            } else {
-                                parsedLog.upgrade.set(key, { type: 'upgrade', user: entry.user, upgrade_id: entry.upgrade_id, count: entry.count, time: entry.time }); // eslint-disable-line camelcase
+                            break;
+                        case 'upgrade':
+                            if (entry.action === 'completed') {
+                                key = `${entry.user}-${entry.upgrade_id}`;
+                                item = parsedLog.upgrade.get(key);
+                                if (item) {
+                                    parsedLog.upgrade.set(key, {
+                                        type: 'upgrade',
+                                        user: entry.user,
+                                        upgrade_id: entry.upgrade_id,
+                                        count: item.count + entry.count,
+                                        time: entry.time
+                                    }); // eslint-disable-line camelcase
+                                } else {
+                                    parsedLog.upgrade.set(key, {
+                                        type: 'upgrade',
+                                        user: entry.user,
+                                        upgrade_id: entry.upgrade_id,
+                                        count: entry.count,
+                                        time: entry.time
+                                    }); // eslint-disable-line camelcase
+                                }
                             }
-                        }
-                        break;
-                    default:
-                        break; // Make linter happy
+                            break;
+                        default:
+                            break; // Make linter happy
+                    }
                 }
             }
-        }
-        for (const type of ['treasury', 'stash', 'upgrade']) {
-            parsedLog[type] = [...parsedLog[type].values()];
-            parsedLog[type].sort((a, b) => a.time.localeCompare(b.time));
-        }
-        parsedLog.stash = parsedLog.stash
-            .filter(item => item.count || item.coins)
-            .map(item => ({
-                type: `${item.type}-${item.count > 0 || item.coins > 0 ? 'deposit' : 'withdraw'}`,
-                user: item.user,
-                item_id: item.item_id, // eslint-disable-line camelcase
-                count: item.count ? item.count > 0 ? item.count : -item.count : undefined,
-                coins: item.coins ? item.coins > 0 ? item.coins : -item.coins : undefined,
-                time: item.time
-            }));
+            for (const type of ['treasury', 'stash', 'upgrade']) {
+                parsedLog[type] = [...parsedLog[type].values()];
+                parsedLog[type].sort((a, b) => a.time.localeCompare(b.time));
+            }
+            parsedLog.stash = parsedLog.stash
+                .filter(item => item.count || item.coins)
+                .map(item => ({
+                    type: `${item.type}-${item.count > 0 || item.coins > 0 ? 'deposit' : 'withdraw'}`,
+                    user: item.user,
+                    item_id: item.item_id, // eslint-disable-line camelcase
+                    count: item.count ? item.count > 0 ? item.count : -item.count : undefined,
+                    coins: item.coins ? item.coins > 0 ? item.coins : -item.coins : undefined,
+                    time: item.time
+                }));
 
-        await this.setLatestLog(log[0].id);
+            await this.setLatestLog(log[0].id);
 
-        // Get the names of the mentioned items
-        const items = new Set();
-        for (const type of ['treasury', 'stash']) {
-            for (let i = 0; i < parsedLog[type].length; i++) {
-                if (parsedLog[type][i].item_id) {
-                    items.add(parsedLog[type][i].item_id);
+            // Get the names of the mentioned items
+            const items = new Set();
+            for (const type of ['treasury', 'stash']) {
+                for (let i = 0; i < parsedLog[type].length; i++) {
+                    if (parsedLog[type][i].item_id) {
+                        items.add(parsedLog[type][i].item_id);
+                    }
                 }
             }
-        }
 
-        // Get the names of the mentioned upgrades
-        const upgrades = new Set();
-        for (let i = 0; i < parsedLog.upgrade.length; i++) {
-            if (parsedLog.upgrade[i].upgrade_id) {
-                upgrades.add(parsedLog.upgrade[i].upgrade_id);
-            }
-        }
-
-        // Convert all the stuff to make it human-readable
-        const [apiItems, apiUpgrades] = await Promise.all([
-            gw2Api.items().many([...items]),
-            gw2Api.guild().upgrades().many([...upgrades])
-        ]);
-        const apiItemsMap = new Map(apiItems.map(item => [item.id, item.name || `[${item.id}]`]));
-        for (const type of ['treasury', 'stash']) {
-            for (let i = 0; i < parsedLog[type].length; i++) {
-                if (parsedLog[type][i].item_id && apiItemsMap.has(parsedLog[type][i].item_id)) {
-                    parsedLog[type][i].item = apiItemsMap.get(parsedLog[type][i].item_id);
+            // Get the names of the mentioned upgrades
+            const upgrades = new Set();
+            for (let i = 0; i < parsedLog.upgrade.length; i++) {
+                if (parsedLog.upgrade[i].upgrade_id) {
+                    upgrades.add(parsedLog.upgrade[i].upgrade_id);
                 }
             }
-        }
-        const apiUpgradesMap = new Map(apiUpgrades.map(upgrade => [upgrade.id, upgrade.name || `[${upgrade.id}]`]));
-        for (let i = 0; i < parsedLog.upgrade.length; i++) {
-            if (parsedLog.upgrade[i].upgrade_id && apiUpgradesMap.has(parsedLog.upgrade[i].upgrade_id)) {
-                parsedLog.upgrade[i].upgrade = apiUpgradesMap.get(parsedLog.upgrade[i].upgrade_id);
-            }
-        }
 
-        if (parsedLog.motd.length > 0) {
-            // MotD updated
-            const motd = parsedLog.motd[parsedLog.motd.length - 1];
-            await this.onNewMotd(motd);
-        }
-
-        // Check for roster, stash, treasury and upgrade updates
-        for (const type of ['roster', 'stash', 'treasury', 'upgrade']) {
-            if (parsedLog[type].length > 0) {
-                switch (type) {
-                    case 'roster':
-                        await this.onUpdateRoster(parsedLog[type]); // eslint-disable-line no-await-in-loop
-                        break;
-                    case 'stash':
-                        await this.onUpdateStash(parsedLog[type]); // eslint-disable-line no-await-in-loop
-                        break;
-                    case 'treasury':
-                        await this.onUpdateTreasury(parsedLog[type]); // eslint-disable-line no-await-in-loop
-                        break;
-                    case 'upgrade':
-                        await this.onUpdateUpgrades(parsedLog[type]); // eslint-disable-line no-await-in-loop
-                        break;
-                    default:
-                        break; // Make linter happy
+            // Convert all the stuff to make it human-readable
+            const [apiItems, apiUpgrades] = await Promise.all([
+                gw2Api.items().many([...items]),
+                gw2Api.guild().upgrades().many([...upgrades])
+            ]);
+            const apiItemsMap = new Map(apiItems.map(item => [item.id, item.name || `[${item.id}]`]));
+            for (const type of ['treasury', 'stash']) {
+                for (let i = 0; i < parsedLog[type].length; i++) {
+                    if (parsedLog[type][i].item_id && apiItemsMap.has(parsedLog[type][i].item_id)) {
+                        parsedLog[type][i].item = apiItemsMap.get(parsedLog[type][i].item_id);
+                    }
                 }
             }
+            const apiUpgradesMap = new Map(apiUpgrades.map(upgrade => [upgrade.id, upgrade.name || `[${upgrade.id}]`]));
+            for (let i = 0; i < parsedLog.upgrade.length; i++) {
+                if (parsedLog.upgrade[i].upgrade_id && apiUpgradesMap.has(parsedLog.upgrade[i].upgrade_id)) {
+                    parsedLog.upgrade[i].upgrade = apiUpgradesMap.get(parsedLog.upgrade[i].upgrade_id);
+                }
+            }
+
+            if (parsedLog.motd.length > 0) {
+                // MotD updated
+                const motd = parsedLog.motd[parsedLog.motd.length - 1];
+                await this.onNewMotd(motd);
+            }
+
+            // Check for roster, stash, treasury and upgrade updates
+            for (const type of ['roster', 'stash', 'treasury', 'upgrade']) {
+                if (parsedLog[type].length > 0) {
+                    switch (type) {
+                        case 'roster':
+                            await this.onUpdateRoster(parsedLog[type]); // eslint-disable-line no-await-in-loop
+                            break;
+                        case 'stash':
+                            await this.onUpdateStash(parsedLog[type]); // eslint-disable-line no-await-in-loop
+                            break;
+                        case 'treasury':
+                            await this.onUpdateTreasury(parsedLog[type]); // eslint-disable-line no-await-in-loop
+                            break;
+                        case 'upgrade':
+                            await this.onUpdateUpgrades(parsedLog[type]); // eslint-disable-line no-await-in-loop
+                            break;
+                        default:
+                            break; // Make linter happy
+                    }
+                }
+            }
+        } catch (err) {
+            this.log(`Error while checking for the guild log: ${err.message}`, 'error');
         }
     }
 
