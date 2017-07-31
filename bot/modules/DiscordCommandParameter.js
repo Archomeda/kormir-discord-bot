@@ -112,8 +112,15 @@ class DiscordCommandParameter {
                 const users = client.users;
                 const roles = client.guilds.map(g => g.roles).reduce((a, b) => a.concat(b), new Discord.Collection());
 
-                return {
-                    users: parameter.match(/\d+|<@\d+>|<@!\d+>|\s*[^#]+#\d{4}/g).map(m => {
+                const usersMatch = parameter.match(/\d+|<@\d+>|<@!\d+>|\s*[^#]+#\d{4}/g);
+                const rolesMatch = parameter.match(/\d+|<@&\d+>|\s*.+/g);
+                const result = {
+                    users: [],
+                    roles: []
+                };
+
+                if (usersMatch) {
+                    result.users = parameter.match(/\d+|<@\d+>|<@!\d+>|\s*[^#]+#\d{4}/g).map(m => {
                         const match = m.match(/(\d+)|<@(\d+)>|<@!(\d+)>|\s*([^#]+#\d{4})/);
                         if (match[1] || match[2] || match[3]) {
                             return users.get(match[1] || match[2] || match[3]);
@@ -121,9 +128,11 @@ class DiscordCommandParameter {
                             return users.find('tag', match[4]);
                         }
                         return undefined;
-                    }).filter(m => m),
-                    roles: parameter.match(/\d+|<@\d+>|\s*.+/g).map(m => {
-                        const match = m.match(/(\d+)|<@(\d+)>|\s*(.*)/);
+                    }).filter(m => m);
+                }
+                if (rolesMatch) {
+                    result.roles = parameter.match(/\d+|<@&\d+>|\s*.+/g).map(m => {
+                        const match = m.match(/(\d+)|<@&(\d+)>|\s*(.*)/);
                         if (match[1] || match[2]) {
                             return [users.get(match[1] || match[2])];
                         } else if (match[3]) {
@@ -136,8 +145,10 @@ class DiscordCommandParameter {
                             return result;
                         }
                         return undefined;
-                    }).reduce((a, b) => a.concat(b), []).filter(m => m)
-                };
+                    }).reduce((a, b) => a.concat(b), []).filter(m => m);
+                }
+
+                return result;
             }
 
             default:
