@@ -18,7 +18,10 @@ class MongoDatabase extends Base {
     }
 
     async connect() {
-        return mongoose.connect(this.getConfig().get('uri'), { server: { reconnectTries: Number.MAX_VALUE } });
+        return mongoose.connect(this.getConfig().get('uri'), {
+            useMongoClient: true,
+            reconnectTries: Number.MAX_VALUE
+        });
     }
 
     async disconnect() {
