@@ -63,9 +63,9 @@ class WorkerGuildLogChecker extends Worker {
                             parsedLog.roster.unshift({
                                 type: 'invited',
                                 user: entry.user,
-                                invited_by: entry.invited_by,
+                                invited_by: entry.invited_by, // eslint-disable-line camelcase
                                 time: entry.time
-                            }); // eslint-disable-line camelcase
+                            });
                             break;
                         case 'joined':
                             parsedLog.roster.unshift({ type: 'joined', user: entry.user, time: entry.time });
@@ -77,19 +77,19 @@ class WorkerGuildLogChecker extends Worker {
                             parsedLog.roster.unshift({
                                 type: 'kicked',
                                 user: entry.user,
-                                kicked_by: entry.kicked_by,
+                                kicked_by: entry.kicked_by, // eslint-disable-line camelcase
                                 time: entry.time
-                            }); // eslint-disable-line camelcase
+                            });
                             break;
                         case 'rank_change':
                             parsedLog.roster.unshift({
                                 type: 'rank-changed',
                                 user: entry.user,
-                                old_rank: entry.old_rank,
-                                new_rank: entry.new_rank,
-                                changed_by: entry.changed_by,
+                                old_rank: entry.old_rank, // eslint-disable-line camelcase
+                                new_rank: entry.new_rank, // eslint-disable-line camelcase
+                                changed_by: entry.changed_by, // eslint-disable-line camelcase
                                 time: entry.time
-                            }); // eslint-disable-line camelcase
+                            });
                             break;
                         case 'treasury':
                             key = `${entry.user}-${entry.item_id}`;
@@ -98,18 +98,18 @@ class WorkerGuildLogChecker extends Worker {
                                 parsedLog.treasury.set(key, {
                                     type: 'treasury',
                                     user: entry.user,
-                                    item_id: entry.item_id,
+                                    item_id: entry.item_id, // eslint-disable-line camelcase
                                     count: item.count + entry.count,
                                     time: entry.time
-                                }); // eslint-disable-line camelcase
+                                });
                             } else {
                                 parsedLog.treasury.set(key, {
                                     type: 'treasury',
                                     user: entry.user,
-                                    item_id: entry.item_id,
+                                    item_id: entry.item_id, // eslint-disable-line camelcase
                                     count: entry.count,
                                     time: entry.time
-                                }); // eslint-disable-line camelcase
+                                });
                             }
                             break;
                         case 'stash':
@@ -121,18 +121,18 @@ class WorkerGuildLogChecker extends Worker {
                                     parsedLog.stash.set(key, {
                                         type: 'stash-item',
                                         user: entry.user,
-                                        item_id: entry.item_id,
+                                        item_id: entry.item_id, // eslint-disable-line camelcase
                                         count: item.count + count,
                                         time: entry.time
-                                    }); // eslint-disable-line camelcase
+                                    });
                                 } else {
                                     parsedLog.stash.set(key, {
                                         type: 'stash-item',
                                         user: entry.user,
-                                        item_id: entry.item_id,
+                                        item_id: entry.item_id, // eslint-disable-line camelcase
                                         count,
                                         time: entry.time
-                                    }); // eslint-disable-line camelcase
+                                    });
                                 }
                             } else if (entry.coins && entry.operation) {
                                 key = `${entry.user}-coins`;
@@ -163,18 +163,18 @@ class WorkerGuildLogChecker extends Worker {
                                     parsedLog.upgrade.set(key, {
                                         type: 'upgrade',
                                         user: entry.user,
-                                        upgrade_id: entry.upgrade_id,
+                                        upgrade_id: entry.upgrade_id, // eslint-disable-line camelcase
                                         count: item.count + entry.count,
                                         time: entry.time
-                                    }); // eslint-disable-line camelcase
+                                    });
                                 } else {
                                     parsedLog.upgrade.set(key, {
                                         type: 'upgrade',
                                         user: entry.user,
-                                        upgrade_id: entry.upgrade_id,
+                                        upgrade_id: entry.upgrade_id, // eslint-disable-line camelcase
                                         count: entry.count,
                                         time: entry.time
-                                    }); // eslint-disable-line camelcase
+                                    });
                                 }
                             }
                             break;
