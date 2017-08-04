@@ -46,7 +46,7 @@ class ModuleSchedule extends Module {
             channels = event.channels.map(channel => guild.channels.get(channel)).filter(c => c);
             if (event.mentions) {
                 const users = event.mentions.users.map(user => message.guild.members.get(user)).filter(m => m).map(member => member.toString());
-                const roles = event.mentions.roles.map(role => message.guild.roles.get(role)).filter(r => r).map(role => role.toString());
+                const roles = event.mentions.roles.map(role => message.guild.roles.get(role) || role).filter(r => r).map(role => role.toString());
                 mentions = users.concat(roles);
             }
         } else {

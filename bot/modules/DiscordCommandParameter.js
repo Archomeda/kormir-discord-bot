@@ -138,9 +138,20 @@ class DiscordCommandParameter {
                         } else if (match[3]) {
                             // This is special, since all characters are allowed in role names and we don't have a good separator
                             // We have to check every existing role and try to match it
-                            const result = roles.filterArray(r => match[3].includes(r.name));
-                            if (match[3].includes('everyone') && !match[3].includes('@everyone')) {
+                            let rolesString = match[3];
+                            const result = [];
+                            for (const role of roles.array()) {
+                                if (rolesString.includes(role.name)) {
+                                    result.push(role);
+                                    rolesString = rolesString.replace(role.name, '');
+                                }
+                            }
+                            const splitMatch = match[3].split(' ');
+                            if (splitMatch.includes('everyone') && !splitMatch.includes('@everyone')) {
                                 result.push(message.guild.defaultRole);
+                            }
+                            if (splitMatch.includes('here') || splitMatch.includes('@here')) {
+                                result.push('@here');
                             }
                             return result;
                         }
