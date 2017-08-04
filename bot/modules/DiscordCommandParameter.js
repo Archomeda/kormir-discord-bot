@@ -134,7 +134,7 @@ class DiscordCommandParameter {
                     result.roles = parameter.match(/\d+|<@&\d+>|\s*.+/g).map(m => {
                         const match = m.match(/(\d+)|<@&(\d+)>|\s*(.*)/);
                         if (match[1] || match[2]) {
-                            return [users.get(match[1] || match[2])];
+                            return [roles.get(match[1] || match[2])];
                         } else if (match[3]) {
                             // This is special, since all characters are allowed in role names and we don't have a good separator
                             // We have to check every existing role and try to match it
