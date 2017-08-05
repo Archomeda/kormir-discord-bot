@@ -143,6 +143,10 @@ modules:
       # The rich embed message accent color
       richcolor: '#9664FA'
 
+    pof-nickname-countdown:
+      enabled: false
+      nickname: Kormir {{number}}
+
     # Guild leader API key for guild related features
     guild-leader-api-key:
     # The guild GUID for guild related features (see api.guildwars2.com/v2/guild/search?name=<guild_name>)

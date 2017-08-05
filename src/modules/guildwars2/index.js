@@ -18,6 +18,7 @@ const WorkerGuildLogChecker = require('./workers/GuildLogChecker');
 const WorkerBuildChecker = require('./workers/BuildChecker');
 const WorkerReleaseNotesChecker = require('./workers/ReleaseNotesChecker');
 const WorkerBlogPostChecker = require('./workers/BlogPostChecker');
+const WorkerPofNicknameCountdown = require('./workers/PofNicknameCountdown');
 
 
 class ModuleGuildWars2 extends Module {
@@ -43,6 +44,7 @@ class ModuleGuildWars2 extends Module {
         this.register(new WorkerBuildChecker(bot));
         this.register(new WorkerReleaseNotesChecker(bot));
         this.register(new WorkerBlogPostChecker(bot));
+        this.register(new WorkerPofNicknameCountdown(bot));
     }
 
     isApiOnFire(onFire) {
