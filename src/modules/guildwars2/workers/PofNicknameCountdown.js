@@ -53,7 +53,7 @@ class WorkerPofNicknameCountdown extends Worker {
 
     async enableWorker() {
         this._intervalId = setInterval(this.checkNickname.bind(this), 60 * 60 * 1000); // Every hour
-        return this.checkNickname();
+        setTimeout(this.checkNickname.bind(this), 1000);
     }
 
     async disableWorker() {

@@ -54,6 +54,10 @@ class ModuleGuildWars2 extends Module {
         return this._onFire;
     }
 
+    _removeApiKeys(text) {
+        return text.replace(/access_token=[A-Fa-f0-9\-]+/, 'access_token=[REMOVED]');
+    }
+
     parseApiError(err) {
         const l = this.getBot().getLocalizer();
         if (err.content && err.content.text) {
@@ -61,7 +65,7 @@ class ModuleGuildWars2 extends Module {
             if (err.content.text.startsWith('requires scope ')) {
                 return l.t('module.guildwars2:api.response-error-permission', { permissions: err.content.text.substr(15) });
             }
-            return l.t('module.guildwars2:api.response-error', { error: err.content.text });
+            return l.t('module.guildwars2:api.response-error', { error: this._removeApiKeys(err.content.text) });
         }
 
         if (err.response) {
@@ -69,6 +73,9 @@ class ModuleGuildWars2 extends Module {
             console.warn(err);
             return l.t('module.guildwars2:api.response-error-unknown');
         }
+
+        // This is an unknown error
+        err.message = this._removeApiKeys(err.message); // Make sure to remove possible API keys from the message
 
         throw err;
     }

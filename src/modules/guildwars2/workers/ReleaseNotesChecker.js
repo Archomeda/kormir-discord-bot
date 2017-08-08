@@ -97,7 +97,7 @@ class WorkerReleaseNotesChecker extends Worker {
 
     async enableWorker() {
         this._intervalId = setInterval(this.check.bind(this), 300000);
-        return this.check();
+        setTimeout(this.check.bind(this), 1000);
     }
 
     async disableWorker() {
