@@ -55,7 +55,7 @@ class ModuleGuildWars2 extends Module {
     }
 
     _removeApiKeys(text) {
-        return text.replace(/access_token=[A-Fa-f0-9\-]+/, 'access_token=[REMOVED]');
+        return text.replace(/access_token=[A-Fa-f0-9-]+/, 'access_token=[REMOVED]');
     }
 
     parseApiError(err) {
