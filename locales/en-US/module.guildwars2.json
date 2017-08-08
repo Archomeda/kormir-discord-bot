@@ -113,6 +113,7 @@
     "category-unknown": "Unknown ({{category}})",
     "access-GuildWars2": "Core",
     "access-HeartOfThorns": "HoT",
+    "aceess-PathOfFire": "PoF",
     "access-unknown": "Unknown ({{access}})",
     "pve-regex": "Daily (.+)",
     "pvp-regex": "Daily PvP (.+)",
