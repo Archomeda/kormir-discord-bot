@@ -16,7 +16,7 @@ class WorkerApiChecker extends Worker {
             // API is working normally, hopefully
             this.onFire(false);
         } catch (err) {
-            if (err.response && err.response.status === 404) {
+            if (!err.response || (err.response && err.response.status >= 400)) {
                 // API is on fire!
                 this.onFire(true);
             }
