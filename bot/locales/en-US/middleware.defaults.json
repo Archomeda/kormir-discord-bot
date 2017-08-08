@@ -1,0 +1,12 @@
+{
+  "restrict-permissions": {
+    "access-denied": "You don't have permission to access that command."
+  },
+  "reply-with-mentions": {
+    "response-dm": "{{message}}",
+    "response-public": "{{mentions}}, {{message, lcfirst}}"
+  },
+  "redirect-to-channel": {
+    "redirect-message": "The response to your command can be found in {{- channel}}."
+  }
+}

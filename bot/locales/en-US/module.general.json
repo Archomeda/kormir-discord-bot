@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "name": "General"
+  },
+  "help": {
+    "_meta": {
+      "name": "Help",
+      "short-description": "Shows information about how to use commands",
+      "long-description": "Shows information about how to use commands, with optionally a command as argument to get more detailed information.",
+      "param-command": "The command"
+    },
+    "command-param-restriction-optional": "optional",
+    "command-param-help": "{{param}} - {{help}}",
+    "command-param-help-extra": "{{param}} - {{help}} *({{extra}})*",
+    "command-param-required-format": "<{{param}}>",
+    "command-param-optional-format": "[{{param}}]",
+    "module-command-help": "{{command}} - {{help}}",
+    "module-command-help-extra": "{{command}} - {{help}} *({{extra}})*",
+    "module-help": "__**{{name}}**__\n{{commands}}",
+    "command-help": "```{{command}}```{{help}}\n\n{{params}}",
+    "command-help-extra": "```{{command}}```**({{extra}})**\n{{help}}\n\n{{params}}",
+    "response-command-not-recognized": "The command '{{command}}' is not recognized. Type `{{help}}` to see the list of commands.",
+    "response-command-not-allowed": "Unfortunately, you are not allowed to access the command '{{command}}'. Type `{{help}}` to see the list of available commands.",
+    "response-single-help": "{{help}}",
+    "response-all-help": "{{list}}\n\nType `{{help}} <command>` for information about a specific command."
+  },
+  "info": {
+    "_meta": {
+      "name": "Info",
+      "short-description": "Shows general information about the bot",
+      "long-description": "Shows general information about the bot, including memory usage, uptime, etc."
+    },
+    "response-title": "{{name}} bot information",
+    "response-memory-usage": "Memory usage",
+    "response-memory-usage-value": "{{memory, filesize}}",
+    "response-version": "Node version",
+    "response-version-value": "{{version}}",
+    "response-uptime": "Uptime",
+    "response-uptime-value": "{{uptime, duration}}",
+    "response-source-code": "Source code"
+  }
+}

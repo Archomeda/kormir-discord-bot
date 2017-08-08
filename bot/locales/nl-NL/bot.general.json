@@ -1,0 +1,4 @@
+{
+  "description": "Kopieer './locales/<taal>/bot.general.json' en verander de strings om de bescrijving van de bot hier te tonen.",
+  "source-code": "[GitHub](https://github.com/Archomeda/kormir-discord-bot)"
+}

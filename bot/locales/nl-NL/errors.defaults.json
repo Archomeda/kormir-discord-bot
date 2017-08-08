@@ -1,0 +1,7 @@
+{
+  "commands": {
+    "wrong-parameter-count": "Het aantal gegeven parameters komt niet overeen met het aantal vereiste parameters voor deze opdracht. Typ `{{help}} {{command}}` voor informatie over deze opdracht.",
+    "throttle": "Jouw opdracht is genegeerd. Wacht even alvorens de opdracht opnieuw uit te voeren.",
+    "error": "Een onverwachte fout is opgetreden: ```{{error}}```Geef de volgende code door aan de maker van deze bot om de oorzaak van deze fout te helpen identificeren: `{{code}}`."
+  }
+}

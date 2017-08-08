@@ -1,0 +1,105 @@
+{
+  "_meta": {
+    "name": "Schedule"
+  },
+  "common": {
+    "param-id": "The event id",
+    "param-title": "The event title (less than 100 characters)",
+    "param-start": "The event start date (supports values like \"tomorrow 20:00\" and \"next Sunday 13:00\")",
+    "param-end": "The event end date",
+    "param-description": "The event description",
+    "param-reminders": "The event reminders (time in minutes, supports multiple values, comma-separated)",
+    "param-channels": "The associated channels (mentioned by using the hashtag, supports multiple values)",
+    "param-mentions": "The associated users and roles (mentioned by using the `@` symbol, supports multiple values)",
+    "param-recurring": "The amount of days between the recurrences of this event (empty or 0 means no recurrence)",
+    "response-invalid-id": "The given id is invalid.",
+    "response-title-too-long": "The event title is too long.",
+    "response-invalid-start": "The start date is invalid or missing.",
+    "response-invalid-end": "The end date is invalid or missing.",
+    "response-missing-reminders": "The reminders are missing.",
+    "response-invalid-reminders": "The reminders are invalid.",
+    "response-invalid-channels": "The channels are invalid.",
+    "response-invalid-recurring": "The recurring days are invalid.",
+    "response-missing-event": "That event does not exist.",
+    "response-unknown": "Unknown",
+    "day": "{{count}} day",
+    "day_plural": "{{count}} days"
+  },
+  "scheduler": {
+    "post-mentions": "Reminder for {{mentions}}:",
+    "post-title": "Event – {{title}}",
+    "post-description": "*{{title}}* starts **{{time}}**.\n\n{{description}}",
+    "post-description-started": "*{{title}}* **has started**!\n\n{{description}}",
+    "post-footer": "ID: {{id}}"
+  },
+  "events": {
+    "_meta": {
+      "name": "Scheduled events",
+      "short-description": "Shows all the upcoming events",
+      "long-description": "Shows a list of all the upcoming events."
+    },
+    "missing-title": "(missing title)",
+    "response-item": "● {{start, ddd D MMM YYYY, H:mm z}} – Event {{id}}: {{title}}",
+    "response-list": "The following upcoming events have been scheduled:\n\n{{events}}\n\nFor more information about an event, type `{{event}} <id>`.",
+    "response-empty": "There are currently no upcoming events scheduled."
+  },
+  "event": {
+    "_meta": {
+      "name": "Scheduled event",
+      "short-description": "Shows a specific scheduled event",
+      "long-description": "Shows a specific scheduled event.",
+      "param-id": "$t(module.schedule:common.param-id)"
+    },
+    "response-title": "Event – {{title}}",
+    "response-description": "{{description}}",
+    "response-schedule-title": "Schedule",
+    "response-schedule-description": "From *{{start, dddd D MMMM YYYY, H:mm z}}*\nTo *{{end, dddd D MMMM YYYY, H:mm z}}*",
+    "response-schedule-description-recurring": "From *{{start, dddd D MMMM YYYY, H:mm z}}*\nTo *{{end, dddd D MMMM YYYY, H:mm z}}*\nRecurs every $t(module.schedule:common.day, {'count': {{recurring}}})",
+    "response-reminder-title": "Reminders",
+    "response-reminder-description": "{{reminders}} in advance\nChannels: {{- channels}}",
+    "response-reminder-description-mentions": "{{reminders}} in advance\nChannels: {{- channels}}\nMentions: {{- mentions}}",
+    "response-footer": "ID: {{id}} | Scheduled by {{owner}}"
+  },
+  "add-event": {
+    "_meta": {
+      "name": "Add scheduled event",
+      "short-description": "Adds a scheduled event",
+      "long-description": "Adds a scheduled event. You have to mention at least 1 text channel where you have permission to manage messages (by using `#text-channel`). These channels will be used to automatically post reminders about the event. You can also associate users and/or roles to the event by mentioning them (by using `@user`).",
+      "param-title": "$t(module.schedule:common.param-title)",
+      "param-start": "$t(module.schedule:common.param-start)",
+      "param-end": "$t(module.schedule:common.param-end)",
+      "param-description": "$t(module.schedule:common.param-description)",
+      "param-reminders": "$t(module.schedule:common.param-reminders)",
+      "param-channels": "$t(module.schedule:common.param-channels)",
+      "param-mentions": "$t(module.schedule:common.param-mentions)",
+      "param-recurring": "$t(module.schedule:common.param-recurring)"
+    },
+    "response": "The following event has been scheduled:"
+  },
+  "edit-event": {
+    "_meta": {
+      "name": "Edit scheduled event",
+      "short-description": "Edits a scheduled event",
+      "long-description": "Edits a scheduled event. The parameters are the same as when adding an event. Make sure to include every parameter, because they will get overwritten even if empty.",
+      "param-id": "$t(module.schedule:common.param-id)",
+      "param-title": "$t(module.schedule:common.param-title)",
+      "param-start": "$t(module.schedule:common.param-start)",
+      "param-end": "$t(module.schedule:common.param-end)",
+      "param-description": "$t(module.schedule:common.param-description)",
+      "param-reminders": "$t(module.schedule:common.param-reminders)",
+      "param-channels": "$t(module.schedule:common.param-channels)",
+      "param-mentions": "$t(module.schedule:common.param-mentions)",
+      "param-recurring": "$t(module.schedule:common.param-recurring)"
+    },
+    "response": "Event *{{title}}* has been saved:"
+  },
+  "delete-event": {
+    "_meta": {
+      "name": "Delete scheduled event",
+      "short-description": "Removes a scheduled event",
+      "long-description": "Removes a scheduled event. You have to be the owner of the event or have permission in order to remove it.",
+      "param-id": "$t(module.schedule:common.param-id)"
+    },
+    "response": "Event *{{title}}* has been removed."
+  }
+}

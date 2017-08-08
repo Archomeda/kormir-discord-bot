@@ -7,13 +7,13 @@ services:
       - ./storage/configdb:/data/configdb
       - ./storage/db:/data/db
   redis:
-    image: redis:3.2
+    image: redis:3.2-alpine
     restart: unless-stopped
     volumes:
       - ./storage/cache:/data
   bot:
     build: .
-    command: npm start
+    command: node server.js
     restart: unless-stopped
     volumes:
       - ./config:/bot/config
@@ -21,18 +21,5 @@ services:
       - db
       - redis
     environment:
-      NODE_CONFIG: >
-        {
-          "database": {
-            "provider": "mongodb",
-            "mongodb": {
-              "uri": "mongodb://db/kormir-discord-bot"
-            }
-          },
-          "cache": {
-            "provider": "redis",
-            "redis": {
-              "host": "redis"
-            }
-          }
-        }
+      MONGODB: mongodb://db/kormir-discord-bot
+      REDIS: redis

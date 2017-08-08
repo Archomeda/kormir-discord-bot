@@ -1,0 +1,17 @@
+{
+  "_meta": {
+    "name": "Administratie"
+  },
+  "export-ids": {
+    "_meta": {
+      "name": "Exporteer ids",
+      "short-description": "Exporteert de lijst met rol-, kanaal- en account-id's",
+      "long-description": "Exporteert de lijst met rol-, kanaal- en account-id's als een tekstbestand. Dit bestand wordt per PB verstuurd."
+    },
+    "export-roles": "Rollen:",
+    "export-text-channels": "Tekstkanalen:",
+    "export-voice-channels": "Spraakkanaal:",
+    "export-members": "Leden:",
+    "response-see-dm": "Controleer je PB."
+  }
+}
