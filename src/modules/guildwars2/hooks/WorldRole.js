@@ -31,15 +31,19 @@ class HookWorldRole extends DiscordHook {
             return;
         }
 
-        if (!gw2Account) {
-            gw2Account = await models.Gw2Account.findOne({ discordId: user.id });
-        }
-        if (!gw2Account) {
-            return;
-        }
+        try {
+            if (!gw2Account) {
+                gw2Account = await models.Gw2Account.findOne({ discordId: user.id });
+            }
+            if (!gw2Account) {
+                return;
+            }
 
-        const accountInfo = await gw2Api.authenticate(gw2Account.apiKey).account().get();
-        return this._applyWorldRoles(user, accountInfo.world);
+            const accountInfo = await gw2Api.authenticate(gw2Account.apiKey).account().get();
+            return await this._applyWorldRoles(user, accountInfo.world);
+        } catch (err) {
+            this.log(`Error while ensuring world membership for ${user.user ? user.user.tag : user.tag} (${user.id}): ${err.message}`, 'error');
+        }
     }
 
     async _applyWorldRoles(user, world) {

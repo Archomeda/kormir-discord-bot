@@ -34,29 +34,33 @@ class HookGuildMemberRole extends DiscordHook {
         const key = moduleConfig.get('guild-leader-api-key');
         const guildId = moduleConfig.get('guild-id');
 
-        if (!gw2Account) {
-            gw2Account = await models.Gw2Account.findOne({ discordId: user.id });
-        }
-        if (!gw2Account) {
-            return;
-        }
+        try {
+            if (!gw2Account) {
+                gw2Account = await models.Gw2Account.findOne({ discordId: user.id });
+            }
+            if (!gw2Account) {
+                return;
+            }
 
-        // This method relies on a universal guild across one or more discord servers
-        // Might have to change that at some point
+            // This method relies on a universal guild across one or more discord servers
+            // Might have to change that at some point
 
-        const members = await gw2Api.authenticate(key).guild(guildId).members().get();
-        const member = members.find(member => member.name === gw2Account.accountName);
-        if (user.guild) {
-            // Guild member instance
-            return member ? this._addToGuildRole(user) : this._removeFromGuildRole(user);
+            const members = await gw2Api.authenticate(key).guild(guildId).members().get();
+            const member = members.find(member => member.name === gw2Account.accountName);
+            if (user.guild) {
+                // Guild member instance
+                return member ? await this._addToGuildRole(user) : await this._removeFromGuildRole(user);
+            }
+
+            // Just a generic user, convert it to all known guild users
+            const exec = client.guilds
+                .map(server => server.member(user))
+                .filter(u => u)
+                .map(user => member ? this._addToGuildRole(user) : this._removeFromGuildRole(user));
+            return await Promise.all(exec);
+        } catch (err) {
+            this.log(`Error while ensuring guild membership for ${user.user ? user.user.tag : user.tag} (${user.id}): ${err.message}`, 'error');
         }
-
-        // Just a generic user, convert it to all known guild users
-        const exec = client.guilds
-            .map(server => server.member(user))
-            .filter(u => u)
-            .map(user => member ? this._addToGuildRole(user) : this._removeFromGuildRole(user));
-        return Promise.all(exec);
     }
 
     async _addToGuildRole(user) {
