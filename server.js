@@ -11,6 +11,11 @@ bot.addModule(ModuleGuildWars2);
 bot.addModule(ModuleSchedule);
 bot.addModule(ModuleUtilities);
 
+process.on('warning', e => {
+    console.warn(`${e.name}: ${e.message}`);
+    console.warn(e.stack);
+});
+
 (async function () {
     try {
         await bot.start();

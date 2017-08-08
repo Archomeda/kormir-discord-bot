@@ -32,7 +32,7 @@ class WorkerGuildLogChecker extends Worker {
                 return;
             }
             if (!latestLogId) {
-                return this.setLatestLog(log[0].id);
+                return await this.setLatestLog(log[0].id);
             }
 
             // Parse the log
