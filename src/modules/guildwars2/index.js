@@ -70,6 +70,9 @@ class ModuleGuildWars2 extends Module {
 
         if (err.response) {
             // This is an API error
+            if (err.response.status >= 400) {
+                return l.t('module.guildwars2:api.response-error-status', { status: err.response.status });
+            }
             console.warn(err);
             return l.t('module.guildwars2:api.response-error-unknown');
         }
