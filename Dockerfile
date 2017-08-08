@@ -8,4 +8,4 @@ COPY . /bot
 RUN yarn install
 
 VOLUME /bot/config
-CMD node server.js
+CMD node --trace-warnings server.js
