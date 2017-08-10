@@ -10,9 +10,12 @@ const Event = new Schema({
     start: Date,
     end: Date,
     description: String,
-    reminders: Array,
-    channels: Array,
-    mentions: Object,
+    reminders: [Number],
+    channels: [String],
+    mentions: {
+        roles: [String],
+        users: [String]
+    },
     recurring: Number
 });
 Event.plugin(AutoIncrement, { inc_field: 'id' }); // eslint-disable-line camelcase
