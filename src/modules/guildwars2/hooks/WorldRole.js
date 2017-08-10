@@ -45,9 +45,8 @@ class HookWorldRole extends DiscordHook {
             if (err.response && err.response.status === 403 && err.content && err.content.text === 'invalid key') {
                 // Handle missing API keys
                 return this._applyWorldRoles(user, 0);
-            } else {
-                this.log(`Error while ensuring world membership for ${user.user ? user.user.tag : user.tag} (${user.id}): ${err.message}`, 'error');
             }
+            this.log(`Error while ensuring world membership for ${user.user ? user.user.tag : user.tag} (${user.id}): ${err.message}`, 'error');
         }
     }
 
