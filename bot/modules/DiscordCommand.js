@@ -136,6 +136,16 @@ class DiscordCommand extends DiscordHook {
     }
 
     /**
+     * Gets called whenever the reply to the command has been posted.
+     * @param {DiscordCommandResponse} response - The command response.
+     * @param {Message} message - The Discord message.
+     * @returns {Promise} The promise.
+     */
+    async onReplyPosted(response, message) { // eslint-disable-line no-unused-vars
+
+    }
+
+    /**
      * Gets called whenever the command is being called.
      * @param {Message} message - The Discord message.
      * @param {DiscordCommandRoute} route - The command route.
@@ -216,7 +226,7 @@ class DiscordCommand extends DiscordHook {
         if (replyMessage) {
             // Execute last middleware
             response = await this._callMiddlewareOnReplyPosted(response, replyMessage);
-            await response.reply.onReplyPosted(response, replyMessage);
+            await this.onReplyPosted(response, replyMessage);
         }
         return response;
     }

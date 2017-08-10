@@ -30,24 +30,12 @@ class DiscordReplyMessage {
         this.file = options && options.file;
 
         /**
-         * Gets called whenever the command reply has been posted.
-         * @type {function(DiscordCommandResponse, Message)}
+         * Extra data.
+         * @type {*}
          */
-        this._onReplyPosted = options && options.onReplyPosted;
+        this.data = options && options.data;
 
         // TODO: support splitting messages somehow...
-    }
-
-    /**
-     * Gets called whenever the command reply has been posted.
-     * @param {DiscordCommandResponse} response - The command response object.
-     * @param {Message} message - The Discord message.
-     * @returns {Promise} The promise.
-     */
-    async onReplyPosted(response, message) {
-        if (this._onReplyPosted) {
-            return this._onReplyPosted(response, message);
-        }
     }
 }
 

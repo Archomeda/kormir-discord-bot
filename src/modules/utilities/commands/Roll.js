@@ -47,56 +47,61 @@ class CommandRoll extends DiscordCommand {
             throw new DiscordCommandError(l.t('module.utilities:roll.response-faces-out-of-range', { max: maxFaces }));
         }
 
-        const result = {
-            rolls: random.dice(faces, dice),
-            transformation
-        };
-        const generateSymbols = index => {
-            const black = '◾';
-            const white = '◽';
-            return (
-                (index % 4 === 0 ? black : white) +
-                (index % 4 === 1 ? black : white) +
-                (index % 4 === 2 ? black : white)
-            );
-        };
-
-        return new DiscordReplyMessage(l.t('module.utilities:roll.response-rolling', {
+        const reply = new DiscordReplyMessage(l.t('module.utilities:roll.response-rolling', {
             user: message.author.toString(),
-            symbols: generateSymbols(0)
+            symbols: this._generateSymbols(0)
         }), {
-            onReplyPosted(response, message) {
-                const update = ((message, result, receiver, i) => () => {
-                    if (i < 3) {
-                        message.edit(l.t('module.utilities:roll.response-rolling', {
-                            user: receiver.toString(),
-                            symbols: generateSymbols(i)
-                        }));
-                        setTimeout(update, 600);
-                        i++;
-                    } else {
-                        const total = result.rolls.reduce((a, b) => a + b, 0);
-                        const rolls = result.rolls.length === 1 ? `**${result.rolls[0]}**` : `${result.rolls.join(' + ')} = **${total}**`;
-
-                        let text;
-                        if (!result.transformation) {
-                            text = l.t('module.utilities:roll.response-normal', {
-                                user: receiver.toString(),
-                                rolls
-                            });
-                        } else {
-                            text = l.t('module.utilities:roll.response-transformation', {
-                                user: receiver.toString(),
-                                rolls,
-                                transformation: `${result.transformation > 0 ? `+${result.transformation}` : result.transformation} = **${total + result.transformation}**`
-                            });
-                        }
-                        message.edit(text);
-                    }
-                })(message, result, response.getRequest().getMessage().author, 1);
-                setTimeout(update, 600);
+            data: {
+                rolls: random.dice(faces, dice),
+                transformation
             }
         });
+        return reply;
+    }
+
+    async onReplyPosted(response, message) {
+        const bot = this.getBot();
+        const l = bot.getLocalizer();
+
+        const update = ((message, result, receiver, i) => async () => {
+            if (i < 3) {
+                await message.edit(l.t('module.utilities:roll.response-rolling', {
+                    user: receiver.toString(),
+                    symbols: this._generateSymbols(i)
+                }));
+                setTimeout(update, 600);
+                i++;
+            } else {
+                const total = result.rolls.reduce((a, b) => a + b, 0);
+                const rolls = result.rolls.length === 1 ? `**${result.rolls[0]}**` : `${result.rolls.join(' + ')} = **${total}**`;
+
+                let text;
+                if (!result.transformation) {
+                    text = l.t('module.utilities:roll.response-normal', {
+                        user: receiver.toString(),
+                        rolls
+                    });
+                } else {
+                    text = l.t('module.utilities:roll.response-transformation', {
+                        user: receiver.toString(),
+                        rolls,
+                        transformation: `${result.transformation > 0 ? `+${result.transformation}` : result.transformation} = **${total + result.transformation}**`
+                    });
+                }
+                await message.edit(text);
+            }
+        })(message, response.reply.data, response.getRequest().getMessage().author, 1);
+        setTimeout(update, 600);
+    }
+
+    _generateSymbols(index) {
+        const black = '◾';
+        const white = '◽';
+        return (
+            (index % 4 === 0 ? black : white) +
+            (index % 4 === 1 ? black : white) +
+            (index % 4 === 2 ? black : white)
+        );
     }
 }
 
