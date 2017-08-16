@@ -307,7 +307,6 @@ class Bot {
             console.error(`${err.name}: ${err.message}`);
             throw new BotError(1, 'Exhausted number of tries trying to connect to Discord');
         }
-        console.log('Connected to cache');
 
         c.setMaxListeners(0); // Set max listeners on client to prevent the warning
     }
