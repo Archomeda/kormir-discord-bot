@@ -303,7 +303,7 @@ class Bot {
 
         try {
             await this._retryConnect(10, 5000, () => c.login(this.getConfig().get('discord.token')));
-        } catch(err) {
+        } catch (err) {
             console.error(`${err.name}: ${err.message}`);
             throw new BotError(1, 'Exhausted number of tries trying to connect to Discord');
         }
@@ -320,7 +320,7 @@ class Bot {
 
         try {
             await this._retryConnect(10, 5000, () => this.getCache().connect());
-        } catch(err) {
+        } catch (err) {
             console.error(`${err.name}: ${err.message}`);
             throw new BotError(10, 'Exhausted number of tries trying to connect to the cache');
         }
@@ -335,7 +335,7 @@ class Bot {
 
         try {
             await this._retryConnect(10, 5000, () => this.getDatabase().connect());
-        } catch(err) {
+        } catch (err) {
             console.error(`${err.name}: ${err.message}`);
             throw new BotError(11, 'Exhausted number of tries trying to connect to the database');
         }
