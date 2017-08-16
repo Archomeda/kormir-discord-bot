@@ -172,7 +172,7 @@ class Bot {
      */
     useDatabase(name) {
         if (this._databaseName) {
-            throw new TypeError('Call .useCache(string) before calling .start() or .getDatabase().');
+            throw new TypeError('Call .useDatabase(string) before calling .start() or .getDatabase().');
         }
         this._databaseName = name;
     }
@@ -266,11 +266,7 @@ class Bot {
             }
         }));
 
-        try {
-            await this._connectDiscord();
-        } catch (err) {
-            throw new BotError(1, err.message, err);
-        }
+        await this._connectDiscord();
 
         // Enable modules
         await Promise.all(this._modules.map(async m => {
@@ -305,13 +301,14 @@ class Bot {
             console.warn(`Discord error: ${err.message}`);
         });
 
-        console.info('Connecting to Discord...');
-
         try {
-            await c.login(this.getConfig().get('discord.token'));
-        } catch (err) {
-            console.error(`Could not connect to Discord: ${err.message}`);
+            await this._retryConnect(10, 5000, () => c.login(this.getConfig().get('discord.token')));
+        } catch(err) {
+            console.error(`${err.name}: ${err.message}`);
+            throw new BotError(1, 'Exhausted number of tries trying to connect to Discord');
         }
+        console.log('Connected to cache');
+
         c.setMaxListeners(0); // Set max listeners on client to prevent the warning
     }
 
@@ -321,22 +318,12 @@ class Bot {
             return;
         }
 
-        let tries = 0;
-        const connect = async () => {
-            tries++;
-            console.log(`Connecting to cache, try ${tries}...`);
-            try {
-                await this.getCache().connect();
-            } catch (err) {
-                console.error(`${err.name}: ${err.message}`);
-                if (tries < 10) {
-                    await wait(5000);
-                    return connect();
-                }
-                throw new BotError(10, 'Exhausted number of tries trying to connect to the cache');
-            }
-        };
-        await connect();
+        try {
+            await this._retryConnect(10, 5000, () => this.getCache().connect());
+        } catch(err) {
+            console.error(`${err.name}: ${err.message}`);
+            throw new BotError(10, 'Exhausted number of tries trying to connect to the cache');
+        }
         console.log('Connected to cache');
     }
 
@@ -346,23 +333,32 @@ class Bot {
             return;
         }
 
+        try {
+            await this._retryConnect(10, 5000, () => this.getDatabase().connect());
+        } catch(err) {
+            console.error(`${err.name}: ${err.message}`);
+            throw new BotError(11, 'Exhausted number of tries trying to connect to the database');
+        }
+        console.log('Connected to database');
+    }
+
+    async _retryConnect(totalTries, timeout, connectFunc) {
         let tries = 0;
         const connect = async () => {
             tries++;
-            console.log(`Connecting to database, try ${tries}...`);
             try {
-                await this.getDatabase().connect();
+                await connectFunc();
+                return true;
             } catch (err) {
                 console.error(`${err.name}: ${err.message}`);
-                if (tries < 10) {
-                    await wait(5000);
+                if (tries < totalTries) {
+                    await wait(timeout);
                     return connect();
                 }
-                throw new BotError(11, 'Exhausted number of tries trying to connect to the database');
+                return false;
             }
         };
         await connect();
-        console.log('Connected to database');
     }
 }
 
