@@ -24,8 +24,10 @@ class WorkerGuildLogChecker extends Worker {
             const config = this.getModule().getConfig();
             const types = config.get(`${this.getId()}.types`);
 
+            let storage = this._checkStorage();
             const latestLogId = await this.getLatestLog();
             const log = await this._checkLog(latestLogId);
+            this.log(`Got ${log.length} new guild log entries`, 'log');
 
             // Process the stored/live logs
             if (log.length === 0 || !log[0].id || latestLogId === log[0].id) {
@@ -231,10 +233,15 @@ class WorkerGuildLogChecker extends Worker {
                     }
                 }
             }
+            storage = await storage;
             const apiUpgradesMap = new Map(apiUpgrades.map(upgrade => [upgrade.id, upgrade.name || `[${upgrade.id}]`]));
             for (let i = 0; i < parsedLog.upgrade.length; i++) {
                 if (parsedLog.upgrade[i].upgrade_id && apiUpgradesMap.has(parsedLog.upgrade[i].upgrade_id)) {
                     parsedLog.upgrade[i].upgrade = apiUpgradesMap.get(parsedLog.upgrade[i].upgrade_id);
+                    const storageItem = storage.find(e => e.id === parsedLog.upgrade[i].upgrade_id);
+                    if (storageItem) {
+                        parsedLog.upgrade[i].total = storageItem.count;
+                    }
                 }
             }
 
@@ -275,9 +282,15 @@ class WorkerGuildLogChecker extends Worker {
         const apiKey = config.get('guild-leader-api-key');
         const guildId = config.get('guild-id');
 
-        const log = await gw2Api.authenticate(apiKey).guild(guildId).log().since(sinceLogId);
-        this.log(`Got ${log.length} new guild log entries`, 'log');
-        return log;
+        return gw2Api.authenticate(apiKey).guild(guildId).log().since(sinceLogId);
+    }
+
+    async _checkStorage() {
+        const config = this.getModule().getConfig();
+        const apiKey = config.get('guild-leader-api-key');
+        const guildId = config.get('guild-id');
+
+        return gw2Api.authenticate(apiKey).guild(guildId).storage().get();
     }
 
 

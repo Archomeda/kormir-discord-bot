@@ -272,7 +272,7 @@
     "treasury-title": "Guild Treasury",
     "treasury-description": "● {{user}} has deposited {{count}}x {{item}}",
     "upgrade-title": "Guild Upgrades",
-    "upgrade-description": "● {{user}} has added {{count}}x {{upgrade}}",
+    "upgrade-description": "● {{user}} has added {{count}}x {{upgrade}} ({{total}} in storage)",
     "coins-gold": "g",
     "coins-silver": "s",
     "coins-copper": "c"
