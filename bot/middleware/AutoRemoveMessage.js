@@ -62,9 +62,9 @@ class AutoRemoveMessageMiddleware extends Middleware {
         if (message.deletable) {
             const error = response.getError();
             if (error && options.erroredResponse !== false) {
-                await deleteIgnoreErrors(message, options.erroredRequest * 1000);
+                await deleteIgnoreErrors(message, options.erroredResponse * 1000);
             } else if (options.defaultResponse !== false) {
-                await deleteIgnoreErrors(message, options.defaultRequest * 1000);
+                await deleteIgnoreErrors(message, options.defaultResponse * 1000);
             }
         }
 
