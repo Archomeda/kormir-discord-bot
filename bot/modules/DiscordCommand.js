@@ -59,9 +59,9 @@ async function globalOnMessage(message) {
 
     // Get all potential routes
     const matchedRoutes = registeredCommandsArray.map(command => {
-        const invocation = invocations.get(command.getBot());
+        const invocation = invocations.get(command.getBot()).toLowerCase();
         return command.getRoutes().filter(route => {
-            const routeInvocation = route.getStrippedInvocation();
+            const routeInvocation = route.getStrippedInvocation().toLowerCase();
             // Explicit space to prevent unwanted matches
             return `${invocation} `.startsWith(`${routeInvocation} `);
         });

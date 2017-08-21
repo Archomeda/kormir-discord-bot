@@ -27,7 +27,7 @@ class CommandHelp extends DiscordCommand {
                 const commands = module.getActivities().filter(a => a instanceof DiscordCommand && a.isEnabled());
                 const foundCommand = commands.find(command => {
                     const routes = command.getRoutes();
-                    return routes.length > 0 ? routes[0].getStrippedInvocation().toLowerCase() === parameters.command : false;
+                    return routes.length > 0 ? routes[0].getStrippedInvocation().toLowerCase() === parameters.command.toLowerCase() : false;
                 });
                 if (foundCommand) {
                     command = foundCommand;

@@ -109,8 +109,8 @@ class DiscordCommandRoute {
             return {};
         }
 
-        const routeInvocation = this.getStrippedInvocation();
-        if (!invocation.startsWith(routeInvocation)) {
+        const routeInvocation = this.getStrippedInvocation().toLowerCase();
+        if (!invocation.toLowerCase().startsWith(routeInvocation)) {
             return {};
         }
 
