@@ -189,6 +189,12 @@ modules:
       max-dice: 10
       max-faces: 100
 
+  # Fun stuff
+  fun:
+    # React with the hearts if a message contains hearts
+    heart:
+      enabled: false
+
 
 #####
 # The permissions are set up in a hierarchical way. If a person is a member of more than 1 group,
