@@ -40,37 +40,41 @@ async function globalOnMessage(message) {
 
     const registeredCommandsArray = Array.from(registeredCommands.values());
 
-    // Map all the bot instances and the respective stripped invocations
-    const invocations = new Map();
+    // Find the invoked command
+    const trimmedMessage = message.content.trim();
+    let invokedCommand;
+    let invocation;
     for (const command of registeredCommandsArray) {
-        if (!invocations.has(command.getBot())) {
-            let invocation = message.content.trim();
-            // Strip away the command prefix if it exists
-            const prefix = command.getBot().getConfig().get('/discord.commands.prefix'); // TODO: Maybe support multiple prefixes?
-            if (invocation.toLowerCase().startsWith(prefix)) {
-                invocation = invocation.substr(prefix.length);
-            }
-
-            if (invocation) {
-                invocations.set(command.getBot(), invocation);
-            }
+        // Check for the command prefix
+        const prefix = command.getBot().getConfig().get('/discord.commands.prefix').toLowerCase(); // TODO: Maybe support multiple prefixes?
+        if (trimmedMessage.toLowerCase().startsWith(prefix)) {
+            invokedCommand = command;
+            invocation = trimmedMessage.substr(prefix.length);
+            break;
         }
+    }
+
+    if (!invokedCommand) {
+        return;
     }
 
     // Get all potential routes
     const matchedRoutes = registeredCommandsArray.map(command => {
-        const invocation = invocations.get(command.getBot()).toLowerCase();
         return command.getRoutes().filter(route => {
-            const routeInvocation = route.getStrippedInvocation().toLowerCase();
+            const routeInvocation = route.getStrippedInvocation();
             // Explicit space to prevent unwanted matches
-            return `${invocation} `.startsWith(`${routeInvocation} `);
+            return `${invocation.toLowerCase()} `.startsWith(`${routeInvocation.toLowerCase()} `);
         });
     }).reduce((a, b) => a.concat(b));
+
+    if (matchedRoutes.length === 0) {
+        return;
+    }
 
     // Find the most logical route (aka the one that has the longest matched character amount)
     const route = matchedRoutes.length > 1 ? maxAll(matchedRoutes, (m, x) => x.getStrippedInvocation().length > m, true) : matchedRoutes[0];
     if (route) {
-        const parameters = route.parseParameters(message, invocations.get(route.getBot()));
+        const parameters = route.parseParameters(message, invocation);
         await route.getCommand().onCommandCall(message, route, parameters);
     }
 }
