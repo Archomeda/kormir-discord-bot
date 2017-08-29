@@ -47,7 +47,7 @@ class CommandRoll extends DiscordCommand {
             throw new DiscordCommandError(l.t('module.utilities:roll.response-faces-out-of-range', { max: maxFaces }));
         }
 
-        const reply = new DiscordReplyMessage(l.t('module.utilities:roll.response-rolling', {
+        return new DiscordReplyMessage(l.t('module.utilities:roll.response-rolling', {
             user: message.author.toString(),
             symbols: this._generateSymbols(0)
         }), {
@@ -56,10 +56,14 @@ class CommandRoll extends DiscordCommand {
                 transformation
             }
         });
-        return reply;
     }
 
     async onReplyPosted(response, message) {
+        if (!response.reply.data) {
+            // We have no valid data
+            return;
+        }
+
         const bot = this.getBot();
         const l = bot.getLocalizer();
 
