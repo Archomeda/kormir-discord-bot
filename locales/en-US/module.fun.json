@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "name": "Fun"
+  },
+  "quality": {
+    "regex-match": "(that is|that's|this is|those are|these are).*quality ([^ ]*)",
+    "responses": [
+      "Thanks!",
+      "Thank you so much!"
+    ]
+  }
+}

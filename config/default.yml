@@ -195,6 +195,10 @@ modules:
     heart:
       enabled: false
 
+    # Respond with a thank you whenever someone mentions that something is quality <insert_quote>
+    quality:
+      enabled: false
+
 
 #####
 # The permissions are set up in a hierarchical way. If a person is a member of more than 1 group,

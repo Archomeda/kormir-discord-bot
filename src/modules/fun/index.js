@@ -2,6 +2,7 @@
 
 const Module = require('../../../bot/modules/Module');
 const HookHeart = require('./hooks/Heart');
+const HookQuality = require('./hooks/Quality');
 
 
 class ModuleUtilities extends Module {
@@ -9,6 +10,7 @@ class ModuleUtilities extends Module {
         super(bot, 'fun');
 
         this.register(new HookHeart(bot));
+        this.register(new HookQuality(bot));
     }
 }
 
