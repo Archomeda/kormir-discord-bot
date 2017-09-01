@@ -1,10 +1,10 @@
 'use strict';
 
-const Schema = require('mongoose').Schema;
-const AutoIncrement = require('mongoose-sequence');
+const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 
-const Event = new Schema({
+const Event = new mongoose.Schema({
     owner: String,
     title: String,
     start: Date,
