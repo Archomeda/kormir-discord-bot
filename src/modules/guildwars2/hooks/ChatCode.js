@@ -14,6 +14,7 @@ class HookChatCode extends DiscordHook {
         this._hooks = {
             message: this.onMessage.bind(this)
         };
+        this._localizerNamespaces = 'module.guildwars2';
     }
 
     async onMessage(message) {
