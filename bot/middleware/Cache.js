@@ -2,6 +2,8 @@
 
 const hash = require('object-hash');
 
+const DiscordReplyMessage = require('../modules/DiscordReplyMessage');
+
 const Middleware = require('./Middleware');
 
 
@@ -54,7 +56,7 @@ class CacheMiddleware extends Middleware {
 
         const cachedObj = await bot.getCache().get(`${command}-exec`, id);
         if (cachedObj) {
-            response.reply = cachedObj;
+            response.reply = DiscordReplyMessage.deserialize(cachedObj);
         }
         return response;
     }
@@ -68,7 +70,7 @@ class CacheMiddleware extends Middleware {
 
         const cachedObj = await bot.getCache().get(`${command}-exec`, id);
         if (!cachedObj) {
-            await bot.getCache().set(`${command}-exec`, id, options.duration, response.reply);
+            await bot.getCache().set(`${command}-exec`, id, options.duration, response.reply.serialize());
         }
         return response;
     }

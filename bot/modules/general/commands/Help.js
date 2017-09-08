@@ -4,6 +4,10 @@ const AutoRemoveMessage = require('../../../middleware/AutoRemoveMessage');
 
 const DiscordCommandError = require('../../../modules/DiscordCommandError');
 const DiscordCommand = require('../../../modules/DiscordCommand');
+const DiscordReplyMessage = require('../../../modules/DiscordReplyMessage');
+const DiscordReplyPage = require('../../../modules/DiscordReplyPage');
+
+const { splitMax } = require('../../../utils/String');
 
 
 class CommandHelp extends DiscordCommand {
@@ -44,14 +48,18 @@ class CommandHelp extends DiscordCommand {
         }
 
         // Reply with general help
-        const help = [];
+        let help = [];
         modules.forEach(module => {
             const moduleHelp = this._formatModuleHelp(message, module);
             if (moduleHelp) {
                 help.push(moduleHelp);
             }
         });
-        return l.t('module.general:help.response-all-help', { list: help.join('\n\n'), help: helpInvocation });
+        const helpLength = l.t('module.general:help.response-all-help').length;
+        help = splitMax(help.join('\n\n'), '\n', 2000 - helpLength).map(h => {
+            return new DiscordReplyPage(l.t('module.general:help.response-all-help', { list: h, help: helpInvocation }));
+        });
+        return new DiscordReplyMessage(help);
     }
 
     /**
