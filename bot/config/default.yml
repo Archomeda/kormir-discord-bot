@@ -26,6 +26,14 @@ discord:
     # The command prefix (in case there is another bot running, you can change the prefix to prevent conflicts)
     prefix: "!"
 
+    paged_reply:
+      # Default reactions to browse through a paged reply, can be overridden separately by a command
+      reactions:
+        first: ⏮
+        last: ⏭
+        previous: ◀
+        next: ▶
+
 
 database:
   # The database provider (only mongodb is supported, use false to disable)

@@ -6,6 +6,7 @@ const random = require('random-js')();
 const Throttle = require('../middleware/Throttle');
 const MiddlewareError = require('../middleware/MiddlewareError');
 const CorrectNumberOfParameters = require('../middleware/internal/CorrectNumberOfParameters');
+const PagedReply = require('../middleware/internal/PagedReply');
 const ParameterError = require('../middleware/internal/ParameterError');
 const PermissionError = require('../middleware/internal/PermissionError');
 const ReplyWithMentions = require('../middleware/internal/ReplyWithMentions');
@@ -106,6 +107,7 @@ class DiscordCommand extends DiscordHook {
         this.setMiddleware(new RestrictPermissions(bot, this));
         this.setMiddleware(new Throttle(bot, this));
         this.setMiddleware(new CorrectNumberOfParameters(bot, this));
+        this.setMiddleware(new PagedReply(bot, this));
         this.setMiddleware(new ReplyWithMentions(bot, this));
     }
 
@@ -221,10 +223,7 @@ class DiscordCommand extends DiscordHook {
         // Send message
         let replyMessage;
         if (response.reply) {
-            replyMessage = await response.getTargetChannel().send(response.reply.text, {
-                embed: response.reply.embed,
-                file: response.reply.file
-            });
+            replyMessage = await response.getTargetChannel().send(...response.reply.constructDiscordMessage());
         }
 
         if (replyMessage) {

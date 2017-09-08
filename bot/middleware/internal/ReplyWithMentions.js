@@ -21,6 +21,25 @@ class ReplyWithMentionsMiddleware extends Middleware {
         };
     }
 
+    _addMentions(pages, channelType, mentions) {
+        for (let i = 0; i < pages.length; i++) {
+            if (!pages[i].text.includes(mentions)) {
+                // Only apply the mentions when it hasn't been added manually already
+                if (channelType === 'dm') {
+                    pages[i].text = this.getBot().getLocalizer().t('middleware.defaults:reply-with-mentions.response-dm', {
+                        mentions,
+                        message: pages[i].text
+                    });
+                } else {
+                    pages[i].text = this.getBot().getLocalizer().t('middleware.defaults:reply-with-mentions.response-public', {
+                        mentions,
+                        message: pages[i].text
+                    });
+                }
+            }
+        }
+    }
+
     async onReplyConstructed(response) {
         if (!response.reply) {
             return response;
@@ -31,21 +50,7 @@ class ReplyWithMentionsMiddleware extends Middleware {
             return response;
         }
 
-        if (!response.reply.text.includes(mentions)) {
-            // Only apply the mentions when it hasn't been added manually already
-            if (response.getTargetChannel().type === 'dm') {
-                response.reply.text = this.getBot().getLocalizer().t('middleware.defaults:reply-with-mentions.response-dm', {
-                    mentions,
-                    message: response.reply.text
-                });
-            } else {
-                response.reply.text = this.getBot().getLocalizer().t('middleware.defaults:reply-with-mentions.response-public', {
-                    mentions,
-                    message: response.reply.text
-                });
-            }
-        }
-
+        this._addMentions(response.reply.pages, response.getTargetChannel().type, mentions);
         return response;
     }
 }
