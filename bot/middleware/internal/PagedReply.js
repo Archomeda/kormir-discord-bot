@@ -88,15 +88,22 @@ class PagedReplyMiddleware extends Middleware {
             client.on('messageReactionRemove', this._onReaction);
         }
 
-        if (!response.reply.pageEmojis) {
-            response.reply.pageEmojis = bot.getConfig().get('/discord.commands.paged_reply.reactions').raw();
-        }
+        const emojis = response.reply.pages.map(p => p.emoji).filter(e => e);
+        if (!emojis) {
+            if (!response.reply.pageEmojis) {
+                response.reply.pageEmojis = bot.getConfig().get('/discord.commands.paged_reply.reactions').raw();
+            }
 
-        const pageEmojis = response.reply.pageEmojis;
-        await message.react(pageEmojis.first);
-        await message.react(pageEmojis.previous);
-        await message.react(pageEmojis.next);
-        await message.react(pageEmojis.last);
+            const pageEmojis = response.reply.pageEmojis;
+            await message.react(pageEmojis.first);
+            await message.react(pageEmojis.previous);
+            await message.react(pageEmojis.next);
+            await message.react(pageEmojis.last);
+        } else {
+            for (const emoji of emojis) {
+                await message.react(emoji); // eslint-disable-line no-await-in-loop
+            }
+        }
 
         const cache = bot.getCache();
         return cache.set(replyCacheTable, getCacheMessageId(message), replyReactionTtl, { message: response.reply.serialize(), author: response.getRequest().getMessage().author.id });

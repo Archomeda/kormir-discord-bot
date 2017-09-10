@@ -93,28 +93,30 @@ class DiscordReplyMessage {
 
         // Determine the correct page to construct
         if (typeof (page) === 'string') {
-            let id = this.pages.find(p => p.emoji === page);
-            if (!id) {
-                switch (page) {
-                    case this.pageEmojis.first:
-                        id = 0;
-                        break;
-                    case this.pageEmojis.last:
-                        id = this.pages.length - 1;
-                        break;
-                    case this.pageEmojis.previous:
-                        id = this.activePage - 1;
-                        break;
-                    case this.pageEmojis.next:
-                        id = this.activePage + 1;
-                        break;
-                    default:
-                        break; // Make linter happy
+            let id = this.pages.findIndex(p => p.emoji === page);
+            if (id < 0) {
+                if (this.pageEmojis) {
+                    switch (page) {
+                        case this.pageEmojis.first:
+                            id = 0;
+                            break;
+                        case this.pageEmojis.last:
+                            id = this.pages.length - 1;
+                            break;
+                        case this.pageEmojis.previous:
+                            id = this.activePage - 1;
+                            break;
+                        case this.pageEmojis.next:
+                            id = this.activePage + 1;
+                            break;
+                        default:
+                            break; // Make linter happy
+                    }
                 }
-            }
-            if (id < 0 || id >= this.pages.length) {
-                // Out of bounds
-                return undefined;
+                if (id >= this.pages.length) {
+                    // Out of bounds
+                    return undefined;
+                }
             }
             page = id;
         }
