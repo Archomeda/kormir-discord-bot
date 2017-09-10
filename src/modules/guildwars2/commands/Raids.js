@@ -5,8 +5,24 @@ const Discord = require('discord.js');
 const CacheMiddleware = require('../../../../bot/middleware/Cache');
 
 const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage');
+const DiscordReplyPage = require('../../../../bot/modules/DiscordReplyPage');
 
 const ApiBase = require('./ApiBase');
+
+
+// Whenever there are more than 10 raids, new emojis have to be added (or another way of representing this information)
+const raidPageEmojis = {
+    0: '1⃣',
+    1: '2⃣',
+    2: '3⃣',
+    3: '4⃣',
+    4: '5⃣',
+    5: '6⃣',
+    6: '7⃣',
+    7: '8⃣',
+    8: '9⃣',
+    9: '🔟'
+};
 
 
 class CommandRaids extends ApiBase {
@@ -27,33 +43,53 @@ class CommandRaids extends ApiBase {
         ]);
 
         const user = (message.member && message.member.nickname) || message.author.username;
-        const embed = new Discord.RichEmbed()
-            .setTitle(l.t('module.guildwars2:raids.response-title', { user }));
 
-        for (let r = 0; r < raids.length; r++) {
-            const raid = raids[r];
-            for (let w = 0; w < raid.wings.length; w++) {
-                const wing = raid.wings[w];
-                const raidTitle = l.t([`module.guildwars2:raids.raid-${raid.id}`, 'module.guildwars2:raids.raid-unknown'], { id: raid.id });
+        const summaryEmbed = new Discord.RichEmbed().setTitle(l.t('module.guildwars2:raids.response-summary-title', { user }));
+        const detailsPages = [];
+        const summaryText = [];
+        const pagesText = [l.t('module.guildwars2:raids.response-pages-description-summary')];
+
+        for (let i = 0; i < raids.length; i++) {
+            const raid = raids[i];
+            const raidTitle = l.t([`module.guildwars2:raids.raid-${raid.id}`, 'module.guildwars2:raids.raid-unknown'], { id: raid.id });
+            const raidEmbed = new Discord.RichEmbed()
+                .setTitle(l.t('module.guildwars2:raids.response-details-title', { user, raid: raidTitle }));
+
+            for (const wing of raid.wings) {
                 const wingTitle = l.t([`module.guildwars2:raids.wing-${wing.id}`, 'module.guildwars2:raids.wing-unknown'], { id: wing.id });
-                const fieldTitle = l.t(raidTitle !== wingTitle ? 'module.guildwars2:raids.response-raid-wing-field' : 'module.guildwars2:raids.response-wing-field', {
-                    raid: raidTitle,
-                    wing: wingTitle
-                });
-                const fieldText = [];
-                for (let e = 0; e < wing.events.length; e++) {
-                    const encounter = wing.events[e];
-                    const key = accountRaids.includes(encounter.id) ? 'module.guildwars2:raids.response-encounter-done' : 'module.guildwars2:raids.response-encounter-missing';
-                    fieldText.push(l.t(key, {
-                        encounter: l.t([`module.guildwars2:raids.encounter-${encounter.id}`, 'module.guildwars2:raids.encounter-unknown'])
-                    }));
+                const detailsTitle = l.t('module.guildwars2:raids.response-details-wing-field', { wing: wingTitle });
+                const detailsText = [];
+                const encountersMissing = [];
+
+                for (const encounter of wing.events) {
+                    let key = 'module.guildwars2:raids.response-details-encounter-done';
+                    const encounterName = l.t([`module.guildwars2:raids.encounter-${encounter.id}`, 'module.guildwars2:raids.encounter-unknown']);
+                    if (!accountRaids.includes(encounter.id)) {
+                        key = 'module.guildwars2:raids.response-details-encounter-missing';
+                        encountersMissing.push(encounterName);
+                    }
+                    detailsText.push(l.t(key, { encounter: encounterName }));
                 }
-                // TODO: This might overflow to more than 1024 characters, need to create an auto-wrapper
-                embed.addField(fieldTitle, fieldText.join('\n'), true);
+
+                raidEmbed.addField(detailsTitle, detailsText.join('\n'), true);
+                if (encountersMissing.length > 0) {
+                    summaryText.push(l.t('module.guildwars2:raids.response-summary-wing', { wing: wingTitle, encounters: encountersMissing.join(', ') }));
+                }
             }
+
+            detailsPages.push(new DiscordReplyPage('', { embed: raidEmbed, emoji: raidPageEmojis[i] }));
+            pagesText.push(l.t('module.guildwars2:raids.response-pages-description-raid', { emoji: raidPageEmojis[i], description: raidTitle }));
         }
 
-        return new DiscordReplyMessage('', { embed });
+        summaryEmbed.setDescription(summaryText.length > 0 ? summaryText.join('\n') : l.t('module.guildwars2:raids.response-summary-done'));
+        const summaryPage = new DiscordReplyPage('', { embed: summaryEmbed, emoji: '📖' });
+        const pages = [summaryPage, ...detailsPages];
+
+        for (const page of pages) {
+            page.embed.addField(l.t('module.guildwars2:raids.response-pages-title'), pagesText.join('\n'));
+        }
+
+        return new DiscordReplyMessage(pages);
     }
 }
 
