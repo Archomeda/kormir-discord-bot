@@ -130,7 +130,7 @@
       "short-description": "Shows your raid progress",
       "long-description": "Shows your raid progress of this week."
     },
-    "raid-forsaken_thicket": "Forsaken Ticket",
+    "raid-forsaken_thicket": "Forsaken Thicket",
     "wing-spirit_vale": "Spirit Vale",
     "encounter-vale_guardian": "Vale Guardian",
     "encounter-spirit_woods": "Spirit Woods",
@@ -154,11 +154,17 @@
     "raid-unknown": "Raid {{id}}",
     "wing-unknown": "Wing {{id}}",
     "encounter-unknown": "Encounter {{id}}",
-    "response-title": "{{user}}'s weekly raid progress",
-    "response-raid-wing-field": "{{raid}}: {{wing}}",
-    "response-wing-field": "{{wing}}",
-    "response-encounter-done": "☑ {{encounter}}",
-    "response-encounter-missing": "➖ {{encounter}}"
+    "response-summary-title": "{{user}}'s weekly raid progress – To do",
+    "response-summary-wing": "**{{wing}}:** {{encounters}}",
+    "response-summary-done": "You have nothing left to do.",
+    "response-details-title": "{{user}}'s weekly raid progress – {{raid}}",
+    "response-details-raid-wing-field": "{{raid}}: {{wing}}",
+    "response-details-wing-field": "{{wing}}",
+    "response-details-encounter-done": "☑ {{encounter}}",
+    "response-details-encounter-missing": "➖ {{encounter}}",
+    "response-pages-title": "Pages",
+    "response-pages-description-summary": "📖 Summary",
+    "response-pages-description-raid": "{{emoji}} Detailed: {{description}}"
   },
   "sab": {
     "_meta": {
