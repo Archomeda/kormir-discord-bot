@@ -22,7 +22,8 @@
     "response-command-not-recognized": "The command '{{command}}' is not recognized. Type `{{help}}` to see the list of commands.",
     "response-command-not-allowed": "Unfortunately, you are not allowed to access the command '{{command}}'. Type `{{help}}` to see the list of available commands.",
     "response-single-help": "{{help}}",
-    "response-all-help": "{{list}}\n\nType `{{help}} <command>` for information about a specific command."
+    "response-all-help": "{{list}}\n\nType `{{help}} <command>` for information about a specific command.",
+    "response-all-help-paged": "{{list}}\n\nType `{{help}} <command>` for information about a specific command.\n\n*Help page {{current_page}}/{{total_pages}}*"
   },
   "info": {
     "_meta": {

@@ -55,11 +55,23 @@ class CommandHelp extends DiscordCommand {
                 help.push(moduleHelp);
             }
         });
-        const helpLength = l.t('module.general:help.response-all-help').length;
-        help = splitMax(help.join('\n\n'), '\n', 2000 - helpLength).map(h => {
-            return new DiscordReplyPage(l.t('module.general:help.response-all-help', { list: h, help: helpInvocation }));
-        });
-        return new DiscordReplyMessage(help);
+        help = help.join('\n\n');
+
+        const helpLength = l.t('module.general:help.response-all-help-paged').length;
+        if (help.length > 2000 - helpLength) {
+            help = splitMax(help, '\n', 2000 - helpLength);
+            help = help.map((h, i) => {
+                return new DiscordReplyPage(l.t('module.general:help.response-all-help-paged', {
+                    list: h,
+                    help: helpInvocation,
+                    current_page: i + 1, // eslint-disable-line camelcase
+                    total_pages: help.length // eslint-disable-line camelcase
+                }));
+            });
+            return new DiscordReplyMessage(help);
+        }
+
+        return l.t('module.general:help.response-all-help', { list: help, help: helpInvocation });
     }
 
     /**
