@@ -10,8 +10,8 @@ const DiscordReplyMessage = require('../../../../bot/modules/DiscordReplyMessage
 const ApiBase = require('./ApiBase');
 
 
-// Hardcoded cats, lye pls
-const availableCats = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 32, 33, 34, 35, 36, 37];
+// Missing cats on the API, see arenanet/api-cdi#564
+const missingApiCats = [34, 36, 37];
 
 
 class CommandCats extends ApiBase {
@@ -27,9 +27,12 @@ class CommandCats extends ApiBase {
         const apiKey = await this.getApiKey(message);
 
         const toNames = cats => cats.map(cat => l.t([`module.guildwars2:cats.cat-${cat.id}`, 'module.guildwars2:cats.cat-unknown'], { id: cat.id, hint: cat.hint }));
-        const cats = await gw2Api.authenticate(apiKey).account().home().cats().get();
-        const ownedCats = toNames(cats);
-        const missingCats = toNames(_.differenceWith(availableCats, cats, (a, b) => a === b.id).map(cat => ({ id: cat, hint: 'no hint' })));
+        const [availableCats, accountCats] = await Promise.all([
+            gw2Api.cats().ids().then(ids => [...new Set([...ids, ...missingApiCats])]),
+            gw2Api.authenticate(apiKey).account().home().cats().get()
+        ]);
+        const ownedCats = toNames(accountCats);
+        const missingCats = toNames(_.differenceWith(availableCats, accountCats, (a, b) => a === b.id).map(cat => ({ id: cat, hint: 'no hint' })));
 
         if (ownedCats.length === 0) {
             return l.t('module.guildwars2:cats.response-no-cats');
