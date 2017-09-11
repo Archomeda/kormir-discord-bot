@@ -26,7 +26,6 @@
     "js-yaml": "^3.9.1",
     "lodash": "^4.17.4",
     "minimist": "Archomeda/minimist#extend-strings",
-    "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
     "mongoose": "^4.11.9",
     "mongoose-sequence": "^4.0.0",
