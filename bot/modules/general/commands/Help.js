@@ -1,5 +1,7 @@
 'use strict';
 
+const { EMBED_DESCRIPTION_CHARACTER_LENGTH } = require('../../../Constants');
+
 const AutoRemoveMessage = require('../../../middleware/AutoRemoveMessage');
 
 const DiscordCommandError = require('../../../modules/DiscordCommandError');
@@ -58,8 +60,8 @@ class CommandHelp extends DiscordCommand {
         help = help.join('\n\n');
 
         const helpLength = l.t('module.general:help.response-all-help-paged').length;
-        if (help.length > 2000 - helpLength) {
-            help = splitMax(help, '\n', 2000 - helpLength);
+        if (help.length > EMBED_DESCRIPTION_CHARACTER_LENGTH - helpLength) {
+            help = splitMax(help, '\n', EMBED_DESCRIPTION_CHARACTER_LENGTH - helpLength);
             help = help.map((h, i) => {
                 return new DiscordReplyPage(l.t('module.general:help.response-all-help-paged', {
                     list: h,
