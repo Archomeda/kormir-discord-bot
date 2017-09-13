@@ -112,7 +112,7 @@ class CommandWiki extends DiscordCommand {
 
         // Construct message
         const embed = new Discord.RichEmbed().setTitle(l.t('module.guildwars2:wiki.response-title', { title }));
-        const splittedText = convertHtmlToMarkdown(text, 'wiki-ext', { prefixUrl: 'https://wiki.guildwars2.com' }).split('\n');
+        const splittedText = convertHtmlToMarkdown(text, 'wiki', { prefixUrl: 'https://wiki.guildwars2.com' }).split('\n');
         if (splittedText[0].startsWith('> ')) {
             text = splittedText[0].trim().substr(2);
             for (let i = 1; i < splittedText.length; i++) {

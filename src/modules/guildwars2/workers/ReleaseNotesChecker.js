@@ -1,15 +1,16 @@
 'use strict';
 
 const Discord = require('discord.js');
+const request = require('request-promise');
 
-const { readRss } = require('../../../utils/rss');
-const { convertHtmlToMarkdown } = require('../../../utils/markdown');
+const { EMBED_DESCRIPTION_CHARACTER_LENGTH } = require('../../../../bot/Constants');
 
 const Worker = require('../../../../bot/modules/Worker');
 
 
-const thumbnailUrl = 'https://dviw3bl0enbyw.cloudfront.net/sprites/0000/0041/Frm_ICON_Announcements.jpg';
-const rssFeed = 'https://forum-en.guildwars2.com/forum/info/updates.rss';
+const thumbnailFolder = './resources/';
+const thumbnailFile = 'game-notes.png';
+const releaseNotesEndpoint = 'https://en-forum.guildwars2.com/categories/game-release-notes.json';
 
 
 class WorkerReleaseNotesChecker extends Worker {
@@ -20,39 +21,68 @@ class WorkerReleaseNotesChecker extends Worker {
 
     async check() {
         try {
-            const [oldNotesUrl, notes] = await Promise.all([
-                this.getLatestNotes(),
-                this._checkNotes()
-            ]);
+            const oldNotesId = await this.getLatestNotesId();
+            const liveNotes = await this._getLiveNotes(oldNotesId);
 
-            const allNotes = [];
-            for (let i = 0; i < notes.length; i++) {
-                if (notes[i].link === oldNotesUrl) {
-                    break;
-                }
-                allNotes.push(notes[i]);
+            if (!liveNotes) {
+                // No new notes
+                return;
             }
 
-            if (allNotes.length > 0) {
-                // Set the latest notes to the last thread post
-                await this.setLatestNotes(allNotes[0].link);
-                if (oldNotesUrl) {
-                    // Signal the first new thread post, because sometimes the release notes are very long
-                    // and span multiple posts
-                    await this.onNewNotes(allNotes[allNotes.length - 1]);
-                }
+            await this.setLatestNotesId({ discussionId: liveNotes.discussionId, commentId: liveNotes.commentId });
+            if (oldNotesId && liveNotes.content) {
+                await this.onNewNotes(liveNotes);
             }
         } catch (err) {
             this.log(`Error while checking for new release notes: ${err.message}`, 'error');
         }
     }
 
-    async _checkNotes() {
-        let feed = await readRss(rssFeed);
-        this.log(`Got latest release notes thread: ${feed.items[0].link}`, 'log');
-        feed = await readRss(`${feed.items[0].link}.rss`);
-        this.log(`Got latest release notes: ${feed.items[0].link}`, 'log');
-        return feed.items;
+    async _getLiveNotes(oldNotesId) {
+        const discussions = (await request({ uri: releaseNotesEndpoint, json: true })).Discussions;
+        if (discussions.length === 0) {
+            this.log('No release notes discussions found', 'warn');
+            return;
+        }
+        if (oldNotesId && discussions[0].DiscussionID === oldNotesId.discussionId && discussions[0].LastCommentID === oldNotesId.commentId) {
+            this.log('No new release notes found', 'log');
+            return;
+        }
+
+        // New notes
+        this.log(`Got latest release notes discussion: ${discussions[0].Url}`, 'log');
+        if (!discussions[0].LastCommentID) {
+            // Just the main post
+            return {
+                discussionId: discussions[0].DiscussionID,
+                date: new Date(`${discussions[0].FirstDate} +0`), // This date somehow isn't formatted in ISO-8601...
+                author: discussions[0].FirstName,
+                avatar: discussions[0].FirstPhoto,
+                title: discussions[0].Name,
+                content: [discussions[0].Body],
+                url: discussions[0].Url
+            };
+        }
+        const discussion = await request({ uri: `${discussions[0].Url}.json`, json: true });
+        const comments = discussion.Comments.filter(c => oldNotesId && c.CommentID > oldNotesId.commentId);
+        if (comments.length === 0) {
+            this.log('No new release notes comments found', 'warn');
+            return {
+                discussionId: discussions[0].DiscussionID,
+                commentId: discussions[0].LastCommentID
+            };
+        }
+        this.log(`Got ${comments.length} new release notes comments`, 'log');
+        return {
+            disussionId: comments[0].DiscussionID,
+            commentId: comments[comments.length - 1].CommentID,
+            date: new Date(`${comments[0].DateInserted} +0`), // This date somehow isn't formatted in ISO-8601...
+            author: comments[0].InsertName,
+            avatar: comments[0].InsertPhoto,
+            title: discussion.Discussion.Name,
+            content: comments.map(c => c.Body),
+            url: `${discussion.Discussion.Url}#Comment_${comments[0].CommentID}`
+        };
     }
 
     async onNewNotes(notes) {
@@ -61,37 +91,38 @@ class WorkerReleaseNotesChecker extends Worker {
         const client = bot.getClient();
         const l = bot.getLocalizer();
 
-        const notesId = notes.link ? parseInt(notes.link.match(/(\d+)$/)[1], 10) : 0;
-        const time = new Date(notes.pubDate);
-        this.log(`New release notes post: ${notesId}`);
-        this.emit('new-notes', { notes, time });
+        this.log(`New release notes post: ${notes.url}`);
+        this.emit('new-notes', notes);
 
         const channelId = config.get('channel-id');
         let channel;
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
-            const description = convertHtmlToMarkdown(notes.description, 'feed')
-                .replace(/^([a-zA-Z0-9 ]+\.\d{4})[^:]+: /, '');
-
+            let description = notes.content[0].substr(0, EMBED_DESCRIPTION_CHARACTER_LENGTH - 3);
+            if (description.length === EMBED_DESCRIPTION_CHARACTER_LENGTH - 3) {
+                description += '...';
+            }
             return channel.send('', {
                 embed: new Discord.RichEmbed()
                     .setColor(config.get('richcolor'))
-                    .setThumbnail(thumbnailUrl)
-                    .setURL(notes.link)
+                    .attachFile(`${thumbnailFolder}${thumbnailFile}`)
+                    .setThumbnail(`attachment://${thumbnailFile}`)
+                    .setAuthor(notes.author, notes.avatar)
+                    .setURL(notes.url)
                     .setTitle(l.t('module.guildwars2:release-notes-checker.notes-title', { title: notes.title }))
                     .setDescription(l.t('module.guildwars2:release-notes-checker.notes-description', { description }))
-                    .setTimestamp(time)
+                    .setTimestamp(notes.date)
             });
         }
 
         this.log(`Invalid channel ${channelId}`, 'error');
     }
 
-    async getLatestNotes() {
+    async getLatestNotesId() {
         return this.getBot().getCache().get(this.getId(), 'notes');
     }
 
-    async setLatestNotes(notes) {
-        return this.getBot().getCache().set(this.getId(), 'notes', undefined, notes);
+    async setLatestNotesId(id) {
+        return this.getBot().getCache().set(this.getId(), 'notes', undefined, id);
     }
 
 

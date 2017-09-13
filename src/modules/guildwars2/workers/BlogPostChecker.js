@@ -8,7 +8,8 @@ const { convertHtmlToMarkdown } = require('../../../utils/markdown');
 const Worker = require('../../../../bot/modules/Worker');
 
 
-const thumbnailUrl = 'https://wiki.guildwars2.com/images/d/df/GW2Logo_new.png';
+const thumbnailFolder = './resources/';
+const thumbnailFile = 'blog-post.png';
 const rssFeed = 'https://www.guildwars2.com/en/feed/';
 
 
@@ -73,7 +74,8 @@ class BlogPostChecker extends Worker {
             return channel.send('', {
                 embed: new Discord.RichEmbed()
                     .setColor(config.get('richcolor'))
-                    .setThumbnail(thumbnailUrl)
+                    .attachFile(`${thumbnailFolder}${thumbnailFile}`)
+                    .setThumbnail(`attachment://${thumbnailFile}`)
                     .setAuthor(blog.author)
                     .setURL(blog.link)
                     .setTitle(l.t('module.guildwars2:blog-post-checker.post-title', { title: blog.title }))

@@ -3,6 +3,8 @@
 ###
 config/local*
 storage/*/*
+resources/*.ai
+resources/*.psd
 
 ###
 ### Node.gitignore from https://github.com/github/gitignore #

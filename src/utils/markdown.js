@@ -41,7 +41,7 @@ function filterUnwantedTags(node) {
 }
 
 const converters = {
-    wiki: () => [
+    default: () => [
         {
             // Convert various stuff to plain-text
             filter: ['a', 'small', 'span'],
@@ -69,7 +69,7 @@ const converters = {
             replacement: () => ''
         }
     ],
-    'wiki-ext': options => [
+    wiki: options => [
         {
             filter: 'a',
             replacement: (innerHTML, node) => {
@@ -116,11 +116,11 @@ const converters = {
 /**
  * Converts HTML to Markdown.
  * @param {string} html - The html text.
- * @param {string} [converter=wiki] - The converter to use (wiki or feed).
+ * @param {string} [converter=default] - The converter to use (wiki or feed).
  * @param {Object} [options] - Extra options.
  * @return {string} The Markdownified text.
  */
-function convertHtmlToMarkdown(html, converter = 'wiki', options) {
+function convertHtmlToMarkdown(html, converter = 'default', options) {
     return toMarkdown(html, { converters: converters[converter](options || {}) }).trim();
 }
 

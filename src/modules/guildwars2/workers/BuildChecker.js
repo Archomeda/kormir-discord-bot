@@ -7,7 +7,8 @@ const gw2Api = require('../api');
 const Worker = require('../../../../bot/modules/Worker');
 
 
-const thumbnailUrl = 'https://dviw3bl0enbyw.cloudfront.net/sprites/0000/0041/Frm_ICON_Announcements.jpg';
+const thumbnailFolder = './resources/';
+const thumbnailFile = 'game-update.png';
 
 
 class WorkerBuildChecker extends Worker {
@@ -55,7 +56,8 @@ class WorkerBuildChecker extends Worker {
             return channel.send('', {
                 embed: new Discord.RichEmbed()
                     .setColor(config.get('richcolor'))
-                    .setThumbnail(thumbnailUrl)
+                    .attachFile(`${thumbnailFolder}${thumbnailFile}`)
+                    .setThumbnail(`attachment://${thumbnailFile}`)
                     .setTitle(l.t('module.guildwars2:build-checker.build-title'))
                     .setDescription(l.t('module.guildwars2:build-checker.build-description', { build: build.toLocaleString() }))
                     .setTimestamp(time)
