@@ -334,7 +334,10 @@
     "day-47": "Fourty-Seven",
     "day-48": "Fourty-Eight",
     "day-49": "Fourty-Nine",
-    "day-50": "Fifty"
+    "day-50": "Fifty",
+    "presence-waiting": "the waiting game",
+    "presence-final-countdown": "the final countdown",
+    "presence-pof": "Path of Fire"
   },
   "api": {
     "response-error": "The API responded with the following error: {{error}}.",

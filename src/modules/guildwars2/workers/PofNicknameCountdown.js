@@ -20,14 +20,19 @@ class WorkerPofNicknameCountdown extends Worker {
 
         const oldNickname = this._nickname;
         let nickname = this.getConfig().get('nickname');
+        let presence = l.t('module.guildwars2:pof-nickname-countdown.presence-waiting');
 
         let diff = pofReleaseDate.diff(moment(), 'days') + 1;
-        if (diff < 7) {
+        if (diff < -7) {
             // Reset the nickname
             nickname = '';
+            presence = '';
         } else if (diff < 0) {
             // Force the diff to set on 0
             diff = 0;
+            presence = l.t('module.guildwars2:pof-nickname-countdown.presence-pof');
+        } else if (diff < 1) {
+            presence = l.t('module.guildwars2:pof-nickname-countdown.presence-final-countdown');
         }
 
         if (diff >= 0) {
@@ -41,7 +46,7 @@ class WorkerPofNicknameCountdown extends Worker {
         }
 
         this._nickname = nickname;
-        this.log(`Setting own nickname to '${nickname}'`);
+        this.log(`Setting own nickname to '${nickname}' and game to '${presence}'`);
 
         for (const guild of client.guilds.values()) {
             const member = await guild.fetchMember(client.user); // eslint-disable-line no-await-in-loop
@@ -49,6 +54,7 @@ class WorkerPofNicknameCountdown extends Worker {
                 await member.setNickname(nickname); // eslint-disable-line no-await-in-loop
             }
         }
+        await client.user.setGame(presence);
     }
 
     async enableWorker() {
