@@ -335,8 +335,8 @@
     "day-48": "Fourty-Eight",
     "day-49": "Fourty-Nine",
     "day-50": "Fifty",
-    "presence-waiting": "the waiting game",
-    "presence-final-countdown": "the final countdown",
+    "presence-countdown-days": "waiting game: {{days_left}}d{{hours_left}}h",
+    "presence-countdown-hours": "final countdown: {{hours_left}}h",
     "presence-pof": "Path of Fire"
   },
   "api": {

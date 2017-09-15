@@ -5,47 +5,51 @@ const moment = require('moment-timezone');
 const Worker = require('../../../../bot/modules/Worker');
 
 
-const pofReleaseDate = moment([2017, 8, 22]); // 22 September
+const pofReleaseDate = moment.utc([2017, 8, 22, 16]); // 22 September, 16:00 UTC
 
 class WorkerPofNicknameCountdown extends Worker {
     constructor(bot) {
         super(bot, 'pof-nickname-countdown');
         this._localizerNamespaces = 'module.guildwars2';
+        this._done = false;
     }
 
     async checkNickname() {
+        if (this._done) {
+            return;
+        }
+
         const bot = this.getBot();
         const client = bot.getClient();
         const l = bot.getLocalizer();
 
-        const oldNickname = this._nickname;
-        let nickname = this.getConfig().get('nickname');
-        let presence = l.t('module.guildwars2:pof-nickname-countdown.presence-waiting');
+        const dayDiff = pofReleaseDate.diff(moment(), 'days', true);
+        let nickname = '';
+        let presence = '';
 
-        let diff = pofReleaseDate.diff(moment(), 'days') + 1;
-        if (diff < -7) {
-            // Reset the nickname
-            nickname = '';
-            presence = '';
-        } else if (diff < 0) {
-            // Force the diff to set on 0
-            diff = 0;
-            presence = l.t('module.guildwars2:pof-nickname-countdown.presence-pof');
-        } else if (diff < 1) {
-            presence = l.t('module.guildwars2:pof-nickname-countdown.presence-final-countdown');
+        if (dayDiff >= -7) {
+            if (dayDiff < 0) {
+                presence = l.t('module.guildwars2:pof-nickname-countdown.presence-pof'); // eslint-disable-line camelcase
+            } else if (dayDiff < 1) {
+                const hourDiff = Math.floor(dayDiff * 24);
+                presence = l.t('module.guildwars2:pof-nickname-countdown.presence-countdown-hours', {
+                    hours_left: hourDiff === 0 ? '<1' : hourDiff // eslint-disable-line camelcase
+                });
+            } else {
+                const hourDiff = (dayDiff - Math.floor(dayDiff)) * 24;
+                presence = l.t('module.guildwars2:pof-nickname-countdown.presence-countdown-days', {
+                    days_left: Math.floor(dayDiff), // eslint-disable-line camelcase
+                    hours_left: Math.floor(hourDiff) // eslint-disable-line camelcase
+                });
+            }
         }
 
-        if (diff >= 0) {
+        if (dayDiff >= 0) {
+            const diff = pofReleaseDate.clone().startOf('day').diff(moment(), 'days') + 1;
             const word = l.t(`module.guildwars2:pof-nickname-countdown.day-${diff}`);
-            nickname = nickname.replace('{{number}}', word);
+            nickname = this.getConfig().get('nickname').replace('{{number}}', word);
         }
 
-        if (oldNickname === nickname) {
-            // Nothing to change
-            return;
-        }
-
-        this._nickname = nickname;
         this.log(`Setting own nickname to '${nickname}' and game to '${presence}'`);
 
         for (const guild of client.guilds.values()) {
@@ -55,6 +59,10 @@ class WorkerPofNicknameCountdown extends Worker {
             }
         }
         await client.user.setGame(presence);
+
+        if (!nickname && !presence) {
+            this._done = true;
+        }
     }
 
     async enableWorker() {
