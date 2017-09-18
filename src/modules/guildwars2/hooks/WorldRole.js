@@ -42,7 +42,7 @@ class HookWorldRole extends DiscordHook {
             const accountInfo = await gw2Api.authenticate(gw2Account.apiKey).account().get();
             return await this._applyWorldRoles(user, accountInfo.world);
         } catch (err) {
-            if (err.response && err.response.status === 403 && err.content && err.content.text === 'invalid key') {
+            if (err.response && err.response.status >= 400 && err.response.status <= 499 && err.content && err.content.text === 'invalid key') {
                 // Handle missing API keys
                 return this._applyWorldRoles(user, 0);
             }
