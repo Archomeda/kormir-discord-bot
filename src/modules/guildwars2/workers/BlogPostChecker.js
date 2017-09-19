@@ -13,7 +13,7 @@ const thumbnailFile = 'blog-post.png';
 const rssFeed = 'https://www.guildwars2.com/en/feed/';
 
 
-class BlogPostChecker extends Worker {
+class WorkerBlogPostChecker extends Worker {
     constructor(bot) {
         super(bot, 'blog-post-checker');
         this._localizerNamespaces = 'module.guildwars2';
@@ -108,4 +108,4 @@ class BlogPostChecker extends Worker {
     }
 }
 
-module.exports = BlogPostChecker;
+module.exports = WorkerBlogPostChecker;
