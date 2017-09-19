@@ -283,6 +283,12 @@
     "coins-silver": "s",
     "coins-copper": "c"
   },
+  "soundcloud-checker": {
+    "track-title": "{{title}}",
+    "track-description": "A new Guild Wars 2 music track has been uploaded to SoundCloud.\n\n{{description}}\n\n[Open web player]({{url}})",
+    "track-description-downloadable": "A new Guild Wars 2 music track has been uploaded to SoundCloud.\n\n{{description}}\n\n[Open web player]({{url}}) | [Download directly]({{download}})",
+    "track-player": "Embedded player for **{{title}}**: {{url}}"
+  },
   "pof-nickname-countdown": {
     "day-0": "Zero",
     "day-1": "One",

@@ -22,6 +22,11 @@ discord:
     copper: copper
 
 
+soundcloud:
+  # Your SoundCloud client id token
+  token: your-soundcloud-token
+
+
 database:
   mongodb:
     uri: mongodb://127.0.0.1/kormir-discord-bot
@@ -122,6 +127,14 @@ modules:
       channel-id: channel-id
       # The rich embed message accent color
       richcolor: '#C86400'
+
+    # Periodically checks for a new SoundCloud uploads
+    soundcloud-checker:
+      enabled: false
+      # The target channel id to where new release notes should be posted
+      channel-id: channel-id
+      # The rich embed message accent color
+      richcolor: '#00C8C8'
 
     # Periodically checks for new guild logs
     guild-log-checker:
