@@ -34,9 +34,9 @@ This message will get removed automatically after 5 minutes to prevent clutterin
 You can also type `!help <command>` - where `<command>` is the name of an available command - in order to receive more detailed information about a specific command.
 
 ## Usage
-This bot is currently not available for invites. Instead, you have to run the bot for yourself.
+This bot is currently not available for invites. Instead, you have to run the bot yourself.
 There are two options: use Docker or set it up manually.
-Do note that at this moment, this bot is not made to be ran on more than one Discord server simultaneously, and therefore hasn't been tested for that.
+Do note that at this moment, this bot is not made to be run on more than one Discord server simultaneously, and therefore it hasn't been tested for that.
 After installation, don't forget to edit the settings in the *config* folder (check *config/default.yml* for instructions).
 The bot requires a reboot after every configuration change.
 
