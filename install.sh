@@ -4,7 +4,7 @@ wget https://raw.githubusercontent.com/Archomeda/kormir-discord-bot/master/.dock
 wget https://raw.githubusercontent.com/Archomeda/kormir-discord-bot/master/.docker/.env -O .env
 
 mkdir config
-wget https://raw.githubusercontent.com/Archomeda/kormir-discord-bot/master/config/default.yml -O config/local.yml
+wget https://raw.githubusercontent.com/Archomeda/kormir-discord-bot/master/config/default.yml -O config/default.yml
 
 mkdir storage
 
