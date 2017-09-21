@@ -1,18 +1,18 @@
-version: '2.1'
+version: "3"
 services:
   db:
-    image: mongo:3.4
+    image: "mongo:${MONGO_VER}"
     restart: unless-stopped
     volumes:
       - ./storage/configdb:/data/configdb
       - ./storage/db:/data/db
   redis:
-    image: redis:3.2-alpine
+    image: "redis:${REDIS_VER}-alpine"
     restart: unless-stopped
     volumes:
       - ./storage/cache:/data
   bot:
-    build: .
+    image: "archomeda/kormir-discord-bot:${BOT_VER}"
     command: node server.js
     restart: unless-stopped
     volumes:
