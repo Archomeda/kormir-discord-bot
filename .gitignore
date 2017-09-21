@@ -3,6 +3,7 @@
 ###
 config/local*
 storage/*/*
+
 resources/*.ai
 resources/*.psd
 

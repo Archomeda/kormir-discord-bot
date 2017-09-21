@@ -4,6 +4,10 @@
 config/local*
 storage/*/*
 
+.docker
+.travis.yml
+install.sh
+
 # Ignore tests
 test/
 
