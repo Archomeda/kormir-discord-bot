@@ -55,6 +55,7 @@ class WorkerReleaseNotesChecker extends Worker {
             // Just the main post
             return {
                 discussionId: discussions[0].DiscussionID,
+                commentId: null,
                 date: new Date(`${discussions[0].FirstDate} +0`), // This date somehow isn't formatted in ISO-8601...
                 author: discussions[0].FirstName,
                 avatar: discussions[0].FirstPhoto,
