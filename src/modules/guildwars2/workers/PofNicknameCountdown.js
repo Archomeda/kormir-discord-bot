@@ -45,7 +45,7 @@ class WorkerPofNicknameCountdown extends Worker {
         }
 
         if (dayDiff >= 0) {
-            const diff = pofReleaseDate.clone().startOf('day').diff(moment(), 'days') + 1;
+            const diff = pofReleaseDate.clone().endOf('day').diff(moment(), 'days');
             const word = l.t(`module.guildwars2:pof-nickname-countdown.day-${diff}`);
             nickname = this.getConfig().get('nickname').replace('{{number}}', word);
         }
