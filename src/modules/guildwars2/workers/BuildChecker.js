@@ -26,7 +26,7 @@ class WorkerBuildChecker extends Worker {
             if (build !== oldBuild) {
                 await this.setLatestBuild(build);
                 if (oldBuild) {
-                    return this.onNewBuild(build);
+                    await this.onNewBuild(build);
                 }
             }
         } catch (err) {

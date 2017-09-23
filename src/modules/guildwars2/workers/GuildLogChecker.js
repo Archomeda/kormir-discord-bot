@@ -24,8 +24,7 @@ class WorkerGuildLogChecker extends Worker {
             const config = this.getModule().getConfig();
             const types = config.get(`${this.getId()}.types`);
 
-            let storage = this._checkStorage();
-            const latestLogId = await this.getLatestLog();
+            const [latestLogId, storage] = await Promise.all([this.getLatestLog(), this._checkStorage()]);
             const log = await this._checkLog(latestLogId);
             this.log(`Got ${log.length} new guild log entries`, 'log');
 
@@ -233,7 +232,7 @@ class WorkerGuildLogChecker extends Worker {
                     }
                 }
             }
-            storage = await storage;
+
             const apiUpgradesMap = new Map(apiUpgrades.map(upgrade => [upgrade.id, upgrade.name || `[${upgrade.id}]`]));
             for (let i = 0; i < parsedLog.upgrade.length; i++) {
                 if (parsedLog.upgrade[i].upgrade_id && apiUpgradesMap.has(parsedLog.upgrade[i].upgrade_id)) {
