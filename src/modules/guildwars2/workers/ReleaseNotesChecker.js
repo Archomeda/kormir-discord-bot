@@ -2,6 +2,7 @@
 
 const Discord = require('discord.js');
 const request = require('request-promise');
+const entities = new require('html-entities').AllHtmlEntities;
 
 const { EMBED_DESCRIPTION_CHARACTER_LENGTH } = require('../../../../bot/Constants');
 
@@ -59,8 +60,8 @@ class WorkerReleaseNotesChecker extends Worker {
                 date: new Date(`${discussions[0].FirstDate} +0`), // This date somehow isn't formatted in ISO-8601...
                 author: discussions[0].FirstName,
                 avatar: discussions[0].FirstPhoto,
-                title: discussions[0].Name,
-                content: [discussions[0].Body],
+                title: entities.decode(discussions[0].Name),
+                content: [entities.decode(discussions[0].Body)],
                 url: discussions[0].Url
             };
         }
@@ -80,8 +81,8 @@ class WorkerReleaseNotesChecker extends Worker {
             date: new Date(`${comments[0].DateInserted} +0`), // This date somehow isn't formatted in ISO-8601...
             author: comments[0].InsertName,
             avatar: comments[0].InsertPhoto,
-            title: discussion.Discussion.Name,
-            content: comments.map(c => c.Body),
+            title: entities.decode(discussion.Discussion.Name),
+            content: comments.map(c => entities.decode(c.Body)),
             url: `${discussion.Discussion.Url}#Comment_${comments[0].CommentID}`
         };
     }

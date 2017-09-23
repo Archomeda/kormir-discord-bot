@@ -21,6 +21,7 @@
     "filesize": "^3.5.10",
     "gw2api-client": "^5.6.5",
     "gw2e-chat-codes": "^1.2.0",
+    "html-entities": "^1.2.1",
     "i18next": "^9.0.0",
     "i18next-node-fs-backend": "^1.0.0",
     "js-yaml": "^3.10.0",
