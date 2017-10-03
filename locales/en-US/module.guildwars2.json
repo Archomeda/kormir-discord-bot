@@ -260,6 +260,10 @@
     "post-title": "{{title}}",
     "post-description": "{{description}}"
   },
+  "announcement-checker": {
+    "announcement-title": "{{title}}",
+    "announcement-description": "{{description}}"
+  },
   "guild-log-checker": {
     "motd-title": "Message of the Day",
     "motd-description": "{{motd}}",

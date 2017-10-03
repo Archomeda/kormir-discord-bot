@@ -107,31 +107,39 @@ modules:
     # Periodically checks for a new build
     build-checker:
       enabled: false
-      # The target channel id to where new builds should be posted
+      # The target channel id where new builds should be posted
       channel-id: channel-id
       # The rich embed message accent color
       richcolor: '#00C800'
 
-    # Periodically checks for a new release notes
+    # Periodically checks for new release notes
     release-notes-checker:
       enabled: false
-      # The target channel id to where new release notes should be posted
+      # The target channel id where new release notes should be posted
       channel-id: channel-id
       # The rich embed message accent color
       richcolor: '#C8C800'
 
-    # Periodically checks for a new blog posts
+    # Periodically checks for new blog posts
     blog-post-checker:
       enabled: false
-      # The target channel id to where new release notes should be posted
+      # The target channel id where new blog posts should be posted
       channel-id: channel-id
       # The rich embed message accent color
       richcolor: '#C86400'
 
-    # Periodically checks for a new SoundCloud uploads
+    # Periodically checks for new announcements
+    announcement-checker:
+      enabled: false
+      # The target channel id where new announcements should be posted
+      channel-id: channel-id
+      # The rich embed message accent color
+      richcolor: '#C80000'
+
+    # Periodically checks for new SoundCloud uploads
     soundcloud-checker:
       enabled: false
-      # The target channel id to where new release notes should be posted
+      # The target channel id where new SoundCloud uploads should be posted
       channel-id: channel-id
       # The rich embed message accent color
       richcolor: '#00C8C8'
