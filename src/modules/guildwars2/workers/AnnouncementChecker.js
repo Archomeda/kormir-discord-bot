@@ -2,7 +2,8 @@
 
 const Discord = require('discord.js');
 const request = require('request-promise');
-const entities = new require('html-entities').AllHtmlEntities;
+
+const entities = new (require('html-entities').AllHtmlEntities)();
 
 const { EMBED_DESCRIPTION_CHARACTER_LENGTH } = require('../../../../bot/Constants');
 
@@ -74,7 +75,7 @@ class AnnouncementChecker extends Worker {
                 });
             }
 
-            if (!oldAnnouncementId || discussion.LastCommentID > oldAnnouncementId.commentId) {
+            if (!oldAnnouncementId || d.LastCommentID > oldAnnouncementId.commentId) {
                 // New comment on an announcement
                 const discussion = await request({ uri: `${d.Url}.json`, json: true });
                 const comments = discussion.Comments

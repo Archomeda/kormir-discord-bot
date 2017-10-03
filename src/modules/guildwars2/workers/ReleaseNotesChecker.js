@@ -2,7 +2,8 @@
 
 const Discord = require('discord.js');
 const request = require('request-promise');
-const entities = new require('html-entities').AllHtmlEntities;
+
+const entities = new (require('html-entities').AllHtmlEntities)();
 
 const { EMBED_DESCRIPTION_CHARACTER_LENGTH } = require('../../../../bot/Constants');
 
