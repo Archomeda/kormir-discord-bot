@@ -109,7 +109,7 @@ class AnnouncementChecker extends Worker {
         const channelId = config.get('channel-id');
         let channel;
         if (channelId && (channel = client.channels.get(channelId)) && channel.type === 'text') {
-            let description = announcement.content[0].substr(0, EMBED_DESCRIPTION_CHARACTER_LENGTH - 3);
+            let description = announcement.content.substr(0, EMBED_DESCRIPTION_CHARACTER_LENGTH - 3);
             if (description.length === EMBED_DESCRIPTION_CHARACTER_LENGTH - 3) {
                 description += '...';
             }
