@@ -2,9 +2,16 @@
   "_meta": {
     "name": "Fun"
   },
-  "quality": {
-    "regex-match": "(that is|that's|this is|those are|these are).*quality ([^ ]*)",
-    "responses": [
+  "respond": {
+    "joko-regex-match": "praise.*joko",
+    "joko-responses": [
+      "Praise Joko!",
+      "Praise King Joko!",
+      "All praise Joko!",
+      "You buy?"
+    ],
+    "quality-regex-match": "(that is|that's|this is|those are|these are).*quality ([^ ]*)",
+    "quality-responses": [
       "Thanks!",
       "Thank you so much!"
     ]

@@ -208,13 +208,19 @@ modules:
 
   # Fun stuff
   fun:
-    # React with the hearts if a message contains hearts
-    heart:
+    # React with various emojis
+    react:
       enabled: false
+      # React with the hearts if a message contains hearts
+      heart: true
 
-    # Respond with a thank you whenever someone mentions that something is quality <insert_quote>
-    quality:
+    # Respond with various lines
+    respond:
       enabled: false
+      # Respond with a thank you whenever someone mentions that something is quality <insert_quote>
+      quality: true
+      # Respond with "Praise Joko!" whenever someone praises Joko
+      joko: true
 
 
 #####

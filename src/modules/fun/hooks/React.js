@@ -6,9 +6,9 @@ const DiscordHook = require('../../../../bot/modules/DiscordHook');
 const hearts = ['❤', '🧡', '💚', '💛', '💙', '💜', '🖤', '♥', '💓', '💗'];
 
 
-class HookHeart extends DiscordHook {
+class HookReact extends DiscordHook {
     constructor(bot) {
-        super(bot, 'heart');
+        super(bot, 'react');
         this._hooks = {
             message: this.onMessage.bind(this)
         };
@@ -20,13 +20,17 @@ class HookHeart extends DiscordHook {
             return;
         }
 
-        // Find all hearts
-        for (const heart of hearts) {
-            if (message.content.includes(heart)) {
-                return message.react(heart);
+        const config = this.getConfig();
+
+        if (config.get('heart')) {
+            // Find all hearts
+            for (const heart of hearts) {
+                if (message.content.includes(heart)) {
+                    return message.react(heart);
+                }
             }
         }
     }
 }
 
-module.exports = HookHeart;
+module.exports = HookReact;
