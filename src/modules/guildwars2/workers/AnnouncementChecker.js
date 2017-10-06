@@ -31,8 +31,10 @@ class AnnouncementChecker extends Worker {
                 return;
             }
 
-            const lastDiscussionId = liveAnnouncements.reduce((id, a) => id < a.discussionId ? a.discussionId : id, 0);
-            const lastCommentId = liveAnnouncements.reduce((id, a) => id < a.commentId ? a.commentId : id, 0);
+            const lastDiscussionId = liveAnnouncements.reduce((id, a) =>
+                id < a.discussionId ? a.discussionId : id, (oldAnnouncementId && oldAnnouncementId.discussionId) || 0);
+            const lastCommentId = liveAnnouncements.reduce((id, a) =>
+                id < a.commentId ? a.commentId : id, (oldAnnouncementId && oldAnnouncementId.commentId) || 0);
             this.log(`Set latest announcement ids to D=${lastDiscussionId} and C=${lastCommentId}`, 'log');
             await this.setLatestAnnouncementId({ discussionId: lastDiscussionId, commentId: lastCommentId });
 
