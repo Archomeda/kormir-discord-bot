@@ -279,6 +279,19 @@ class Bot {
         }));
     }
 
+
+    /**
+     * Logout the bot on stop
+     */
+    async stop() {
+        await this._disconnectDiscord();
+    }
+
+    async _disconnectDiscord() {
+        const c = this.getClient();
+        c.destroy();
+    }
+
     async _connectDiscord() {
         const c = this.getClient();
         c.on('ready', () => {
