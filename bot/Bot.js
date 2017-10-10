@@ -279,11 +279,25 @@ class Bot {
         }));
     }
 
+
+    /**
+     * Logout the bot on stop
+     */
+    async stop() {
+        await this._disconnectDiscord();
+    }
+
+    async _disconnectDiscord() {
+        const c = this.getClient();
+        c.destroy();
+    }
+
     async _connectDiscord() {
         const c = this.getClient();
         c.on('ready', () => {
             const guilds = c.guilds.array().map(g => g.name);
             const clientId = c.user.id;
+            c.user.setGame(this.getConfig().get('discord.game'));
             console.info('Connected to Discord');
             console.log(`Registered Discord guilds: ${guilds.join(', ')}`);
             console.info(`The following URL can be used to register the bot to a Discord guild: https://discordapp.com/oauth2/authorize?client_id=${clientId}&scope=bot&permissions=8`);

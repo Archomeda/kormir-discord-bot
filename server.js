@@ -18,6 +18,10 @@ process.on('warning', e => {
     console.warn(e.stack);
 });
 
+process.on('SIGTERM', function () {
+	bot.stop();
+});
+
 (async function () {
     try {
         await bot.start();
