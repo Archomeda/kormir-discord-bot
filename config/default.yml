@@ -14,8 +14,6 @@
 #####
 
 discord:
-  game:
-    - "Guild Wars 2"
   # You can assign emojis here; if an emoji has not been assigned (or the assigned one cannot be found), the default will be used
   # In order to use an emoji, change it to emoji name
   emojis:

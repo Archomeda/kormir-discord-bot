@@ -17,6 +17,8 @@ timezone: Europe/Amsterdam
 
 
 discord:
+  # This sets the bot's currently playing status; if empty, it will be ignored
+  game: Guild Wars 2
   # The bot's token can found on the bot's application page on discordapp.com/developers/applications/me
   token: your-token-should-be-here
   # Throttles the responses of the bot for every user separately to prevent spam (duration in seconds)
