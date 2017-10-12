@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 wget https://raw.githubusercontent.com/Archomeda/kormir-discord-bot/master/.docker/docker-compose.yml -O docker-compose.yml
 wget https://raw.githubusercontent.com/Archomeda/kormir-discord-bot/master/.docker/.env -O .env

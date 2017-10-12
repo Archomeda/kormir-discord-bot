@@ -47,7 +47,7 @@ The bot requires a reboot after every configuration change.
    `wget -O - https://raw.githubusercontent.com/Archomeda/kormir-discord-bot/master/install.sh | bash`
  - This will run [a script](install.sh) that sets up the environment for the bot to run in
  - Create and edit *config/local.yml*
- - Start the bot: `docker compose up -d`
+ - Start the bot: `docker-compose up -d`
 
 You can manipulate the state of the bot by running various `docker-compose` commands.
 These commands have to be executed from within the your chosen bot folder:
@@ -77,6 +77,7 @@ If you are running the bot 24/7, it is recommended to have a process manager tha
 Run the following from within the bot folder:
 ```bash
 docker-compose pull
+wget https://raw.githubusercontent.com/Archomeda/kormir-discord-bot/master/config/default.yml -O config/default.yml
 docker-compose down
 docker-compose up -d
 ```
