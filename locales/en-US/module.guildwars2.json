@@ -107,6 +107,7 @@
     },
     "response-title": "Daily achievements",
     "response-description": "Time remaining: {{timeleft}}.",
+    "response-tomorrow": "Time until tomorrow's dailies: {{timeleft}}.",
     "response-achievement": "{{name}} ({{access}})",
     "achievement-unknown": "(({{id}}))",
     "category-pve": "PvE",

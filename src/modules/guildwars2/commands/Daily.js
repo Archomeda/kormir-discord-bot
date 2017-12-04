@@ -19,6 +19,7 @@ class CommandDaily extends ApiBase {
     async onApiCommand(message, gw2Api, parameters) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
+        const tomorrow = parameters.tomorrow === 'tomorrow';
 
         const nextReset = moment().utc().hour(0).minute(0).seconds(0);
         if (nextReset.isBefore(moment())) {
@@ -27,14 +28,14 @@ class CommandDaily extends ApiBase {
         const timeRemaining = moment.duration(nextReset.unix() - moment().unix(), 's');
         const embed = new Discord.RichEmbed()
             .setTitle(l.t('module.guildwars2:daily.response-title'))
-            .setDescription(l.t('module.guildwars2:daily.response-description', { timeleft: timeRemaining.humanize() }))
+            .setDescription(l.t(`module.guildwars2:daily.response-${!tomorrow ? 'description' : 'tomorrow'}`, { timeleft: timeRemaining.humanize() }))
             .setThumbnail(dailyThumbnail);
 
         let daily;
-        if (parameters.tomorrow === 'tomorrow') {
-            daily = await gw2Api.achievements().dailyTomorrow().get();
-        } else {
+        if (!tomorrow) {
             daily = await gw2Api.achievements().daily().get();
+        } else {
+            daily = await gw2Api.achievements().dailyTomorrow().get();
         }
         const filterLvl80 = d => d.level.max === 80;
         let allIds = [];
@@ -62,7 +63,7 @@ class CommandDaily extends ApiBase {
         const title = l.t([`module.guildwars2:daily.category-${categoryId}`, 'module.guildwars2:daily.category-unknown'], { category: categoryId });
         const result = [
             ...new Set(this._filterLevel80(daily[categoryId])
-                .sort((a, b)=> achievements.has(a.id) && achievements.has(b.id) ? achievements.get(a.id).name.localeCompare(achievements.get(b.id).name) : -1)
+                .sort((a, b) => achievements.has(a.id) && achievements.has(b.id) ? achievements.get(a.id).name.localeCompare(achievements.get(b.id).name) : -1)
                 .map(a => this._formatAchievement(categoryId, a, achievements))).values()
         ];
         if (result.length > 0) {
