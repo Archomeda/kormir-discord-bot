@@ -13,10 +13,10 @@ const dailyThumbnail = 'https://render.guildwars2.com/file/483E3939D1A7010BDEA29
 
 class CommandDaily extends ApiBase {
     constructor(bot) {
-        super(bot, 'daily', ['daily']);
+        super(bot, 'daily', ['daily :tomorrow']);
     }
 
-    async onApiCommand(message, gw2Api) {
+    async onApiCommand(message, gw2Api, parameters) {
         const bot = this.getBot();
         const l = bot.getLocalizer();
 
@@ -30,7 +30,12 @@ class CommandDaily extends ApiBase {
             .setDescription(l.t('module.guildwars2:daily.response-description', { timeleft: timeRemaining.humanize() }))
             .setThumbnail(dailyThumbnail);
 
-        const daily = await gw2Api.achievements().daily().get();
+        let daily;
+        if (parameters.tomorrow === 'tomorrow') {
+            daily = await gw2Api.achievements().dailyTomorrow().get();
+        } else {
+            daily = await gw2Api.achievements().daily().get();
+        }
         const filterLvl80 = d => d.level.max === 80;
         let allIds = [];
         for (const category of Object.keys(daily)) {
@@ -55,7 +60,11 @@ class CommandDaily extends ApiBase {
     _formatCategory(categoryId, daily, achievements) {
         const l = this.getBot().getLocalizer();
         const title = l.t([`module.guildwars2:daily.category-${categoryId}`, 'module.guildwars2:daily.category-unknown'], { category: categoryId });
-        const result = [...new Set(this._filterLevel80(daily[categoryId]).map(a => this._formatAchievement(categoryId, a, achievements))).values()];
+        const result = [
+            ...new Set(this._filterLevel80(daily[categoryId])
+                .sort((a, b)=> achievements.has(a.id) && achievements.has(b.id) ? achievements.get(a.id).name.localeCompare(achievements.get(b.id).name) : -1)
+                .map(a => this._formatAchievement(categoryId, a, achievements))).values()
+        ];
         if (result.length > 0) {
             return { title, description: result.join('\n') };
         }

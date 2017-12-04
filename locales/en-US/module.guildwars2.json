@@ -102,7 +102,8 @@
     "_meta": {
       "name": "Daily achievements",
       "short-description": "Shows today's daily achievements",
-      "long-description": "Shows today's daily achievements"
+      "long-description": "Shows today's daily achievements",
+      "param-tomorrow": "Get tomorrow's dailies instead by using the subcommand *tomorrow*"
     },
     "response-title": "Daily achievements",
     "response-description": "Time remaining: {{timeleft}}.",
@@ -120,7 +121,7 @@
     "access-unknown": "Unknown ({{access}})",
     "pve-regex": "Daily (.+)",
     "pvp-regex": "Daily PvP (.+)",
-    "wvw-regex": "Daily WvW (.+)",
+    "wvw-regex": "Daily (?:WvW )?(.+)",
     "fractals-regex": "(?:Daily Recommended Fractal—(Scale \\d+)|Daily Tier \\d (.+))",
     "daily-regex": "(.+)"
   },
