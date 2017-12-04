@@ -13,7 +13,7 @@ const dailyThumbnail = 'https://render.guildwars2.com/file/483E3939D1A7010BDEA29
 
 class CommandDaily extends ApiBase {
     constructor(bot) {
-        super(bot, 'daily', ['daily :tomorrow']);
+        super(bot, 'daily', ['daily :tomorrow?']);
     }
 
     async onApiCommand(message, gw2Api, parameters) {
