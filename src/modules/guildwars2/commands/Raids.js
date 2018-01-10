@@ -63,7 +63,7 @@ class CommandRaids extends ApiBase {
 
                 for (const encounter of wing.events) {
                     let key = 'module.guildwars2:raids.response-details-encounter-done';
-                    const encounterName = l.t([`module.guildwars2:raids.encounter-${encounter.id}`, 'module.guildwars2:raids.encounter-unknown']);
+                    const encounterName = l.t([`module.guildwars2:raids.encounter-${encounter.id}`, 'module.guildwars2:raids.encounter-unknown'], { id: encounter.id });
                     if (!accountRaids.includes(encounter.id)) {
                         key = 'module.guildwars2:raids.response-details-encounter-missing';
                         encountersMissing.push(encounterName);
