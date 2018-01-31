@@ -40,7 +40,9 @@ class AnnouncementChecker extends Worker {
 
             if (oldAnnouncementId) {
                 for (const announcement of liveAnnouncements) {
-                    await this.onNewAnnouncement(announcement); // eslint-disable-line no-await-in-loop
+                    if (announcement.isAnet) {
+                        await this.onNewAnnouncement(announcement); // eslint-disable-line no-await-in-loop
+                    }
                 }
             }
         } catch (err) {
@@ -73,7 +75,8 @@ class AnnouncementChecker extends Worker {
                     avatar: d.FirstPhoto,
                     title: entities.decode(d.Name).trim(),
                     content: entities.decode(d.Body).trim(),
-                    url: d.Url
+                    url: d.Url,
+                    isAnet: Object.values(d.Roles).includes('ArenaNet')
                 });
             }
 
@@ -90,7 +93,8 @@ class AnnouncementChecker extends Worker {
                         avatar: c.InsertPhoto,
                         title: entities.decode(discussion.Discussion.Name).trim(),
                         content: entities.decode(c.Body).trim(),
-                        url: `${discussion.Discussion.Url}#Comment_${c.CommentID}`
+                        url: `${discussion.Discussion.Url}#Comment_${c.CommentID}`,
+                        isAnet: Object.values(c.Roles).includes('ArenaNet')
                     }));
                 posts = posts.concat(comments);
             }

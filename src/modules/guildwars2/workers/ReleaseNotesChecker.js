@@ -32,7 +32,7 @@ class WorkerReleaseNotesChecker extends Worker {
             }
 
             await this.setLatestNotesId({ discussionId: liveNotes.discussionId, commentId: liveNotes.commentId });
-            if (oldNotesId && liveNotes.content) {
+            if (oldNotesId && liveNotes.content && liveNotes.isAnet) {
                 await this.onNewNotes(liveNotes);
             }
         } catch (err) {
@@ -63,7 +63,8 @@ class WorkerReleaseNotesChecker extends Worker {
                 avatar: discussions[0].FirstPhoto,
                 title: entities.decode(discussions[0].Name),
                 content: [entities.decode(discussions[0].Body)],
-                url: discussions[0].Url
+                url: discussions[0].Url,
+                isAnet: Object.values(d.Roles).includes('ArenaNet')
             };
         }
         const discussion = await request({ uri: `${discussions[0].Url}.json`, json: true });
@@ -84,7 +85,8 @@ class WorkerReleaseNotesChecker extends Worker {
             avatar: comments[0].InsertPhoto,
             title: entities.decode(discussion.Discussion.Name),
             content: comments.map(c => entities.decode(c.Body)),
-            url: `${discussion.Discussion.Url}#Comment_${comments[0].CommentID}`
+            url: `${discussion.Discussion.Url}#Comment_${comments[0].CommentID}`,
+            isAnet: Object.values(c.Roles).includes('ArenaNet')
         };
     }
 
