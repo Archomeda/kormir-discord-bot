@@ -64,7 +64,7 @@ class WorkerReleaseNotesChecker extends Worker {
                 title: entities.decode(discussions[0].Name),
                 content: [entities.decode(discussions[0].Body)],
                 url: discussions[0].Url,
-                isAnet: Object.values(d.Roles).includes('ArenaNet')
+                isAnet: Object.values(discussions[0].Roles).includes('ArenaNet')
             };
         }
         const discussion = await request({ uri: `${discussions[0].Url}.json`, json: true });
@@ -86,7 +86,7 @@ class WorkerReleaseNotesChecker extends Worker {
             title: entities.decode(discussion.Discussion.Name),
             content: comments.map(c => entities.decode(c.Body)),
             url: `${discussion.Discussion.Url}#Comment_${comments[0].CommentID}`,
-            isAnet: Object.values(c.Roles).includes('ArenaNet')
+            isAnet: Object.values(comments[0].Roles).includes('ArenaNet')
         };
     }
 
