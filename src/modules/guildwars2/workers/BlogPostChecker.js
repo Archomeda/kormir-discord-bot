@@ -21,26 +21,20 @@ class WorkerBlogPostChecker extends Worker {
 
     async check() {
         try {
-            const [oldBlogUrl, blog] = await Promise.all([
-                this.getLatestBlog(),
+            const [oldBlogDate, blog] = await Promise.all([
+                this.getLatestBlog().then(d => new Date(d)),
                 this._checkBlog()
             ]);
 
-            const allBlogs = [];
-            for (let i = 0; i < blog.length; i++) {
-                if (blog[i].link === oldBlogUrl) {
-                    break;
-                }
-                allBlogs.push(blog[i]);
-            }
-
-            if (allBlogs.length > 0) {
+            const posts = blog.filter(b => new Date(b.pubDate) > oldBlogDate);
+            if (posts.length > 0) {
                 // Set the latest blog to the newest blog
-                await this.setLatestBlog(allBlogs[0].link);
-                if (oldBlogUrl) {
+                const latestDate = Math.max(...posts.map(p => new Date(p.pubDate).getTime()));
+                await this.setLatestBlog(latestDate);
+                if (oldBlogDate) {
                     // Signal all new blog posts, in reversed order
-                    for (let i = allBlogs.length - 1; i >= 0; i--) {
-                        await this.onNewBlog(allBlogs[i]); // eslint-disable-line no-await-in-loop
+                    for (let i = posts.length - 1; i >= 0; i--) {
+                        await this.onNewBlog(posts[i]); // eslint-disable-line no-await-in-loop
                     }
                 }
             }
@@ -87,8 +81,8 @@ class WorkerBlogPostChecker extends Worker {
         this.log(`Invalid channel ${channelId}`, 'error');
     }
 
-    getLatestBlog() {
-        return this.getBot().getCache().get(this.getId(), 'blog');
+    async getLatestBlog() {
+        return parseInt(await this.getBot().getCache().get(this.getId(), 'blog'), 10);
     }
 
     setLatestBlog(blog) {
