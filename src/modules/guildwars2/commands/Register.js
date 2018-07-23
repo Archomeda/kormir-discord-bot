@@ -82,10 +82,10 @@ class CommandRegister extends ApiBase {
             await cache.remove(codeCacheTable, discordId);
 
             if (!account) {
-                account = new models.Gw2Account({ discordId, accountName: accountInfo.name, apiKey: parameters.key });
-            } else {
-                account.apiKey = parameters.key;
+                account = new models.Gw2Account({ discordId });
             }
+            account.apiKey = parameters.key;
+            account.accountName = accountInfo.name;
 
             await account.save();
             this.emit('new-registration', message.author, account);
