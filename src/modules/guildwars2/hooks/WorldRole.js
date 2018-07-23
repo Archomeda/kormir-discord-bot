@@ -73,7 +73,7 @@ class HookWorldRole extends DiscordHook {
     }
 
     async onNewRegistration(user, gw2Account) {
-        return this.ensureGuildMembership(user, gw2Account);
+        return this.ensureWorldMembership(user, gw2Account);
     }
 
 
