@@ -39,7 +39,7 @@ class CommandForceRegister extends ApiBase {
 
         // This doesn't check optional permissions since we don't need to, change this once it's required
         if (!account) {
-            account = new models.Gw2Account({ discordId });
+            account = new models.Gw2Account({ discordId: parameters.id });
         }
         account.apiKey = parameters.key;
         account.accountName = accountInfo.name;
