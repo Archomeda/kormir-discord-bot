@@ -82,7 +82,7 @@ class WorkerBlogPostChecker extends Worker {
     }
 
     async getLatestBlog() {
-        return parseInt(await this.getBot().getCache().get(this.getId(), 'blog'), 10);
+        return parseInt(await this.getBot().getCache().get(this.getId(), 'blog') || 0, 10);
     }
 
     setLatestBlog(blog) {
