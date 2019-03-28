@@ -10,7 +10,7 @@ const ApiBase = require('./ApiBase');
 
 
 // Hardcoded zones, upgrades and songs
-const availableUpgrades = [1, 3, 6, 9, 10, 12, 13, 15, 18, 19, 21, 24, 25, 27, 28, 31, 32, 34];
+const availableUpgrades = [1, 3, 6, 7, 9, 10, 12, 13, 15, 18, 19, 21, 24, 25, 27, 28, 31, 32, 34];
 const availableSongs = [1, 2, 3];
 
 
