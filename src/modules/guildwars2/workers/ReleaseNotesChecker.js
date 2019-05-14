@@ -41,7 +41,8 @@ class WorkerReleaseNotesChecker extends Worker {
     }
 
     async _getLiveNotes(oldNotesId) {
-        const discussions = (await request({ uri: releaseNotesEndpoint, json: true })).Discussions;
+        const req = await request({ uri: releaseNotesEndpoint, json: true });
+        const discussions = [...req.Announcements, ...req.Discussions];
         if (discussions.length === 0) {
             this.log('No release notes discussions found', 'warn');
             return;
