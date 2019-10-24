@@ -28,7 +28,7 @@
     "lodash": "^4.17.13",
     "minimist": "Archomeda/minimist#extend-strings",
     "moment-timezone": "^0.5.13",
-    "mongoose": "^4.11.11",
+    "mongoose": "^5.7.5",
     "mongoose-sequence": "^4.0.0",
     "mwbot": "^1.0.9",
     "node-cache": "^4.1.1",
