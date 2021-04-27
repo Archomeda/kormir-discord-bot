@@ -36,7 +36,7 @@
     "object-hash": "^1.1.8",
     "object-path": "^0.11.4",
     "random-js": "^1.0.8",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
     "soundcloud-node-api": "^0.0.9",
